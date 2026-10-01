@@ -22,6 +22,14 @@ rankable by calculated DPS.
 - Solver runs in a Web Worker.
 - Angular 22, Node 24 (`frontend/.nvmrc`). Tests: `npm test` (Vitest).
 - Pure logic lives in `frontend/src/app/core/` (no Angular imports).
+- Hosted on GitHub Pages (https://rjpajaro.github.io/mh-wilds-engineering-tool/),
+  deployed by `.github/workflows/deploy-pages.yml` on push to `dev`.
+  Hash routing (`#/builder`) and `<base href="./">` so one build works
+  locally and under the Pages sub-path. Keep both.
+- Loadouts (named builds) and share links: `core/loadouts/` (pure) +
+  `data/loadouts.service.ts`. Share codes are versioned binary over game ids;
+  never change version 1 decoding, add a new version instead, so old links
+  keep working. Exports: JSON with `format`/`version`.
 
 ## Build order
 1. Inspect the data and document its structure

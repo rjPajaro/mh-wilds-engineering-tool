@@ -1,5 +1,5 @@
 @if (loadError()) {
-  <p class="error">Could not load game data. Run <code>npm run import-data</code> and reload.</p>
+  <p class="error">Could not load the game data. Check your connection and reload the page.</p>
 } @else if (loading() || !index()) {
   <p class="muted">Loading game data…</p>
 } @else {

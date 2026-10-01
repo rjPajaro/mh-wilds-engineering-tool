@@ -1,0 +1,26 @@
+@if (content(); as c) {
+  <section class="banner" aria-label="Shared build">
+    <div class="text">
+      <strong>Shared build{{ c.name ? ': ' + c.name : '' }}</strong>
+      <span class="muted">{{ summary() }}</span>
+      @if (unsaved()) {
+        <span class="warn">Loading replaces your current unsaved build. Save it first, or use "Save as loadout".</span>
+      }
+    </div>
+    <div class="actions">
+      <button type="button" class="primary" (click)="load()">Load into Builder</button>
+      <button type="button" (click)="save()">Save as loadout</button>
+      <button type="button" (click)="clear()">Dismiss</button>
+    </div>
+  </section>
+} @else if (error(); as e) {
+  <section class="banner error" role="alert">
+    <div class="text">
+      <strong>Couldn't open this shared build</strong>
+      <span>{{ e }}</span>
+    </div>
+    <div class="actions">
+      <button type="button" (click)="clear()">Dismiss</button>
+    </div>
+  </section>
+}

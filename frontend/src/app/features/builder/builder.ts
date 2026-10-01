@@ -1,15 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import {
-  EQUIP_SLOTS,
-  EquipSlot,
-  emptySavedBuild,
-  equippedItem,
-  isSavedBuild,
-  resolveBuild,
-  SavedBuild,
-  slotsOf,
-  validateDecorations,
-} from '../../core/build/build';
+import { EQUIP_SLOTS, EquipSlot, emptySavedBuild, equippedItem, slotsOf, validateDecorations } from '../../core/build/build';
 import {
   ARMOR_KINDS,
   ArmorKind,
@@ -19,18 +9,19 @@ import {
   SkillLevel,
   SlotTarget,
   Weapon,
-  WEAPON_KINDS,
   WeaponKind,
 } from '../../core/models/game-data';
 import { resolveBuildSkills } from '../../core/skills/skill-resolver';
 import { infusionLabel, isCustomWeapon } from '../../core/artian/artian';
+import { CurrentBuildService } from '../../data/current-build.service';
 import { CustomWeaponsService } from '../../data/custom-weapons.service';
 import { GameDataService } from '../../data/game-data.service';
 import { WEAPON_KIND_OPTIONS } from '../../shared/labels';
-import { persistedSignal } from '../../shared/persisted-signal';
 import { SearchSelect, SelectOption } from '../../shared/search-select/search-select';
 import { DamagePanel } from './damage-panel/damage-panel';
+import { LoadoutBar } from './loadout-bar/loadout-bar';
 import { MovesPanel } from './moves-panel/moves-panel';
+import { SharedBuildBanner } from './shared-build-banner/shared-build-banner';
 
 const SLOT_LABELS: Record<EquipSlot, string> = {
   weapon: 'Weapon',
@@ -50,7 +41,7 @@ const DEVICE_LABELS: Record<GogmaDevice, string> = {
 
 @Component({
   selector: 'app-builder',
-  imports: [SearchSelect, DamagePanel, MovesPanel],
+  imports: [SearchSelect, DamagePanel, MovesPanel, LoadoutBar, SharedBuildBanner],
   templateUrl: './builder.html',
   styleUrl: './builder.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +49,7 @@ const DEVICE_LABELS: Record<GogmaDevice, string> = {
 export class Builder {
   private readonly data = inject(GameDataService);
   private readonly customWeapons = inject(CustomWeaponsService);
+  private readonly current = inject(CurrentBuildService);
 
   protected readonly index = this.data.index;
   protected readonly loading = this.data.isLoading;
@@ -67,23 +59,10 @@ export class Builder {
   protected readonly slotLabels = SLOT_LABELS;
   protected readonly weaponKindOptions = WEAPON_KIND_OPTIONS;
 
-  // Persisted across reloads. The build is stored as ids and resolved against
-  // current data, so it restores once the data loads and follows Artian edits.
-  protected readonly weaponKind = persistedSignal<WeaponKind>('builder.weaponKind.v1', 'long-sword', (v) =>
-    WEAPON_KINDS.includes(v as WeaponKind),
-  );
-  private readonly saved = persistedSignal<SavedBuild>('builder.build.v1', emptySavedBuild(), isSavedBuild);
-  protected readonly build = computed(() => {
-    const index = this.index();
-    const custom = this.customWeapons.weapons();
-    if (!index) return resolveBuild(emptySavedBuild(), NO_LOOKUP);
-    return resolveBuild(this.saved(), {
-      weapon: (id) => custom.get(id) ?? index.weapons.get(id),
-      armor: (id) => index.armorPieces.get(id),
-      talisman: (id) => index.talismans.get(id),
-      decoration: (id) => index.decorations.get(id),
-    });
-  });
+  // Shared with loadouts and persisted across reloads (CurrentBuildService).
+  protected readonly weaponKind = this.current.weaponKind;
+  private readonly saved = this.current.saved;
+  protected readonly build = this.current.build;
 
   /**
    * Weapons of the chosen type: the user's saved Artians first, then game data.
@@ -277,7 +256,6 @@ export class Builder {
 
 }
 
-const NO_LOOKUP = { weapon: () => undefined, armor: () => undefined, talisman: () => undefined, decoration: () => undefined };
 
 function statText(w: Weapon): string {
   return `${w.attack} atk${w.affinity ? ` ${w.affinity > 0 ? '+' : ''}${w.affinity}%` : ''}`;

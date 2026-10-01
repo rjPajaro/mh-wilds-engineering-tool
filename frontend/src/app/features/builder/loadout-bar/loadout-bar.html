@@ -1,0 +1,82 @@
+<div class="bar">
+  <span class="label" id="loadout-label">Loadout</span>
+  <app-search-select
+    class="picker"
+    ariaLabel="Saved loadouts"
+    [placeholder]="loadouts.loadouts().length ? 'Unsaved build' : 'No saved loadouts yet'"
+    [clearable]="false"
+    [options]="options()"
+    [value]="loadouts.activeId()"
+    (valueChange)="select($event)"
+  />
+  @if (unsaved()) {
+    <span class="status" title="The current build differs from the selected loadout">● Unsaved changes</span>
+  }
+  <div class="actions">
+    <button type="button" [disabled]="!loadouts.active() || !loadouts.dirty()" (click)="save()">Save</button>
+    <button type="button" [class.primary]="!loadouts.active()" (click)="startSaveAs()">Save as…</button>
+    <button type="button" class="primary" (click)="share()">Share</button>
+    <button type="button" aria-label="More loadout actions" [attr.aria-expanded]="mode() === 'menu'" (click)="setMode('menu')">⋯</button>
+  </div>
+</div>
+
+@switch (mode()) {
+  @case ('menu') {
+    <div class="panel menu">
+      <button type="button" [disabled]="!loadouts.active()" (click)="startRename()">Rename</button>
+      <button type="button" [disabled]="!loadouts.active()" (click)="setMode('delete')">Delete</button>
+      <span class="sep"></span>
+      <button type="button" [disabled]="!loadouts.loadouts().length" (click)="exportAll()">Export all…</button>
+      <button type="button" (click)="chooseImport()">Import…</button>
+      <span class="hint">Export saves every loadout and Artian to a file, for backups or moving to another browser.</span>
+    </div>
+  }
+  @case ('save-as') {
+    <form class="panel" (submit)="$event.preventDefault(); submitName()">
+      <label for="loadout-name">Save as</label>
+      <input #nameInput id="loadout-name" type="text" maxlength="80" placeholder="Loadout name" [value]="nameDraft()" (input)="nameDraft.set($any($event.target).value)" />
+      <button type="submit" class="primary" [disabled]="!nameDraft().trim()">Save</button>
+      <button type="button" (click)="setMode('idle')">Cancel</button>
+    </form>
+  }
+  @case ('rename') {
+    <form class="panel" (submit)="$event.preventDefault(); submitName()">
+      <label for="loadout-rename">Rename</label>
+      <input #nameInput id="loadout-rename" type="text" maxlength="80" [value]="nameDraft()" (input)="nameDraft.set($any($event.target).value)" />
+      <button type="submit" class="primary" [disabled]="!nameDraft().trim()">Rename</button>
+      <button type="button" (click)="setMode('idle')">Cancel</button>
+    </form>
+  }
+  @case ('delete') {
+    <div class="panel warn">
+      <span>Delete "{{ loadouts.active()?.name }}"? This can't be undone.</span>
+      <button type="button" class="danger" (click)="remove()">Delete</button>
+      <button type="button" (click)="setMode('idle')">Cancel</button>
+    </div>
+  }
+  @case ('confirm-load') {
+    <div class="panel warn">
+      <span>Your current build has unsaved changes. Loading another loadout replaces it.</span>
+      <button type="button" class="danger" (click)="loadNow()">Load anyway</button>
+      <button type="button" (click)="startSaveAs()">Save current first</button>
+      <button type="button" (click)="setMode('idle')">Cancel</button>
+    </div>
+  }
+  @case ('share') {
+    <div class="panel share">
+      <label for="share-url">Share link</label>
+      <input #shareInput id="share-url" type="text" readonly [value]="shareUrl()" (focus)="$any($event.target).select()" />
+      <button type="button" (click)="setMode('idle')">Done</button>
+      <span class="hint">Anyone with the link can open this build. It includes your custom Artian and damage setup.</span>
+    </div>
+  }
+}
+
+@if (notice(); as n) {
+  <p class="notice" [class.error]="n.kind === 'error'" role="status">
+    {{ n.text }}
+    <button type="button" class="dismiss" aria-label="Dismiss" (click)="notice.set(null)">×</button>
+  </p>
+}
+
+<input #fileInput type="file" accept="application/json,.json" hidden (change)="importFile($any($event.target))" />
