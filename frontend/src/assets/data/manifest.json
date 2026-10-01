@@ -1,0 +1,15 @@
+{
+  "source": "mhdb-wilds-data/merged",
+  "language": "en",
+  "files": [
+    "skills.json",
+    "armor.json",
+    "decorations.json",
+    "talismans.json",
+    "weapons.json",
+    "hunting-horn.json",
+    "monsters.json",
+    "artian.json",
+    "moves.json"
+  ]
+}

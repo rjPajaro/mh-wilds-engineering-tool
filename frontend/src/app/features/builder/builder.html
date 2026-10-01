@@ -1,0 +1,120 @@
+@if (loadError()) {
+  <p class="error">Could not load game data. Run <code>npm run import-data</code> and reload.</p>
+} @else if (loading() || !index()) {
+  <p class="muted">Loading game data…</p>
+} @else {
+  <div class="layout">
+    <section class="gear">
+      <header class="section-head">
+        <h2>Equipment</h2>
+        <button type="button" (click)="reset()">Clear</button>
+      </header>
+
+      <div class="row">
+        <label for="weapon-kind">Weapon type</label>
+        <app-search-select
+          inputId="weapon-kind"
+          [options]="weaponKindOptions"
+          [clearable]="false"
+          [value]="weaponKind()"
+          (valueChange)="setWeaponKind($event)"
+        />
+      </div>
+
+      @for (slot of equipSlots; track slot) {
+        <div class="equip">
+          <div class="row">
+            <label [for]="'equip-' + slot">{{ slotLabels[slot] }}</label>
+            <app-search-select
+              [inputId]="'equip-' + slot"
+              [options]="equipOptions(slot)"
+              [value]="equippedId(slot)"
+              (valueChange)="equip(slot, $event)"
+            />
+          </div>
+
+          @if (slot === 'weapon' && gogmaGroup(); as group) {
+            <div class="devices" role="radiogroup" aria-label="Production device">
+              @for (d of gogmaDevices; track d) {
+                <button
+                  type="button"
+                  role="radio"
+                  [attr.aria-checked]="gogmaDevice() === d"
+                  [class.on]="gogmaDevice() === d"
+                  (click)="setGogmaDevice(d)"
+                >
+                  <span class="device-name">{{ deviceLabels[d] }} device</span>
+                  <span class="device-stats">{{ group[d].attack }} atk · {{ group[d].affinity > 0 ? '+' : '' }}{{ group[d].affinity }}%</span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (itemName(slot)) {
+            <div class="decos">
+              @for (s of slots(slot); track $index; let i = $index) {
+                <app-search-select
+                  class="deco"
+                  [ariaLabel]="slotLabels[slot] + ' slot ' + (i + 1)"
+                  [placeholder]="'[' + s.level + '] ' + s.accepts + ' slot'"
+                  [options]="decorationOptions(s.accepts, s.level)"
+                  [value]="decorationId(slot, i)"
+                  (valueChange)="setDecoration(slot, i, $event)"
+                />
+              } @empty {
+                <span class="muted">No slots</span>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <app-moves-panel [weapon]="build().weapon" [skills]="activeSkills()" />
+    </section>
+
+    <section class="skills">
+      <app-damage-panel [weapon]="build().weapon" [skills]="activeSkills()" />
+
+      <header class="section-head">
+        <h2>Skills</h2>
+        <span class="muted">Defense {{ totalDefense() }}</span>
+      </header>
+
+      @for (issue of issues(); track $index) {
+        <p class="error">{{ issue.decoration.name }} does not fit {{ slotLabels[issue.slot] }} slot {{ issue.index + 1 }}.</p>
+      }
+
+      <ul>
+        @for (s of activeSkills(); track s.skill.id) {
+          <li [class.inactive]="s.level === 0" [title]="s.skill.description">
+            <div class="skill-head">
+              <span class="name">{{ s.skill.name }}</span>
+              <span class="kind">{{ s.skill.kind }}</span>
+            </div>
+            @if (s.skill.kind === 'set' || s.skill.kind === 'group') {
+              <div class="detail">
+                {{ s.rankName ?? 'Inactive' }} · {{ s.points }} piece(s)
+                @if (s.nextThreshold) { — next at {{ s.nextThreshold }} }
+              </div>
+            } @else {
+              <div class="pips" [attr.aria-label]="'Level ' + s.level + ' of ' + s.skill.maxLevel">
+                @for (on of pips(s.level, s.skill.maxLevel); track $index) {
+                  <span class="pip" [class.on]="on"></span>
+                }
+                <span class="lvl">{{ s.level }}/{{ s.skill.maxLevel }}</span>
+                @if (s.wasted) { <span class="warn">+{{ s.wasted }} over</span> }
+              </div>
+            }
+            <div class="sources">
+              @for (src of s.sources; track $index) {
+                <span>{{ src.label }} +{{ src.points }}</span>
+              }
+            </div>
+          </li>
+        } @empty {
+          <li class="muted">Equip gear to see skills.</li>
+        }
+      </ul>
+    </section>
+  </div>
+}

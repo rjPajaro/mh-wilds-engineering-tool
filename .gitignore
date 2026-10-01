@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output and caches
+dist/
+out-tsc/
+.angular/
+.sass-cache/
+coverage/
+# Raw wiki pages cached by frontend/scripts/extract-wiki-moves.mjs
+frontend/.cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Editors and IDEs (shared VS Code settings stay tracked)
+.idea/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+# Claude Code: personal settings (shared .claude/settings.json stays tracked)
+.claude/settings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

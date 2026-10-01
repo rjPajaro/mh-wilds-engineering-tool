@@ -1,0 +1,135 @@
+:host {
+  display: block;
+  margin-top: 1.5rem;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+  }
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+
+  input[type='search'] {
+    flex: 1 1 12rem;
+    min-width: 0;
+    padding: 0.3rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+  }
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.table-wrap {
+  max-height: 32rem;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.35rem 0.5rem;
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 0.25rem 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+tr.section th {
+  padding: 0.45rem 0.5rem 0.2rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// `table` prefix: must beat `thead th { text-align: left }` once Angular adds
+// its scoping attributes to both selectors.
+table .num {
+  // Shrink number columns to their content; the Move column takes the rest.
+  width: 1%;
+  padding-left: 1rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.neg {
+  color: var(--error);
+}
+
+.hitzone {
+  white-space: nowrap;
+  .part {
+    display: block;
+  }
+  .hz {
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+}
+
+tbody tr:not(.section):hover td {
+  background: var(--hover);
+}
+
+.name {
+  font-weight: 600;
+  margin-right: 0.35rem;
+}
+
+.label {
+  color: var(--muted);
+}
+
+.tag {
+  margin-right: 0.3rem;
+  padding: 0 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.footnote {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+}

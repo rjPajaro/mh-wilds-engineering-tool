@@ -1,0 +1,142 @@
+<header class="section-head">
+  <h2>Damage</h2>
+  <span class="muted" title="Expected damage of one hit with motion value 100, with crit chance averaged in. Not damage per second: move timings are not in the data.">
+    average per hit, 100 MV
+  </span>
+</header>
+
+@if (result(); as r) {
+  @let s = stats()!;
+  <dl class="stats">
+    <div>
+      <dt>Attack</dt>
+      <dd>{{ s.attack | number: '1.0-1' }}</dd>
+    </div>
+    <div>
+      <dt>Affinity</dt>
+      <dd [class.neg]="s.affinity < 0">{{ s.affinity }}%</dd>
+    </div>
+    <div>
+      <dt>Crit</dt>
+      <dd>×{{ s.critMultiplier | number: '1.2-2' }}</dd>
+    </div>
+    @if (r.elementKind && s.element !== null) {
+      <div>
+        <dt class="cap">{{ r.elementKind }}</dt>
+        <dd>{{ s.element * displayScale | number: '1.0-0' }}</dd>
+      </div>
+    } @else if (r.status) {
+      <div>
+        <dt class="cap">{{ r.status.kind }}</dt>
+        <dd>{{ r.status.value * displayScale }}</dd>
+      </div>
+    }
+  </dl>
+
+  @if (s.attackParts.length || s.affinityParts.length || s.elementParts.length) {
+    <p class="breakdown">
+      @for (p of s.attackParts; track p.label) {
+        <span>+{{ p.value | number: '1.0-1' }} atk {{ p.label }}</span>
+      }
+      @for (p of s.affinityParts; track p.label) {
+        <span>+{{ p.value }}% {{ p.label }}</span>
+      }
+      @for (p of s.elementParts; track p.label) {
+        <span>+{{ p.value * displayScale | number: '1.0-0' }} {{ r.elementKind }} {{ p.label }}</span>
+      }
+    </p>
+  }
+
+  @if (r.sharpness; as sh) {
+    <div class="sharpness" [attr.aria-label]="'Sharpness ' + sh.color">
+      <div class="bar">
+        @for (hits of sh.bar; track $index) {
+          @if (hits > 0) {
+            <span [class]="'seg ' + sharpnessColors[$index]" [style.width.%]="barWidth(hits, sh.bar)"></span>
+          }
+        }
+      </div>
+      <span class="cap">{{ sh.color }}</span>
+      <span class="muted">raw ×{{ sh.raw }} · elem ×{{ sh.element }}</span>
+    </div>
+  }
+
+  <div class="effective">
+    <div>
+      <span class="muted">Effective raw</span>
+      <strong>{{ s.efr | number: '1.1-1' }}</strong>
+    </div>
+    @if (r.elementKind) {
+      <div>
+        <span class="muted">Effective element</span>
+        <strong>{{ s.efe | number: '1.1-1' }}</strong>
+      </div>
+    }
+  </div>
+
+  <div class="target">
+    <app-search-select
+      ariaLabel="Target monster"
+      placeholder="Target monster…"
+      [options]="monsterOptions()"
+      [value]="monsterId()"
+      (valueChange)="selectMonster($event)"
+    />
+    @if (monster()) {
+      <app-search-select
+        ariaLabel="Target part"
+        [clearable]="false"
+        [options]="partOptions()"
+        [value]="partIndex()"
+        (valueChange)="partIndex.set($event)"
+      />
+      <label class="check">
+        <input type="checkbox" [checked]="wounded()" (change)="wounded.set($any($event.target).checked)" />
+        Wounded
+      </label>
+    }
+  </div>
+
+  @if (r.vsTarget; as t) {
+    <div class="hit">
+      <div class="hit-label">Average damage per hit · 100 MV, crits averaged in</div>
+      <div class="hit-main">
+        <strong>{{ t.hit.total | number: '1.1-1' }}</strong>
+        <span class="muted">
+          = {{ t.hit.raw | number: '1.1-1' }} raw
+          @if (r.elementKind) { + {{ t.hit.element | number: '1.1-1' }} {{ r.elementKind }} }
+        </span>
+      </div>
+      <div class="muted">
+        {{ t.hit.hitzoneKind === 'pierce' ? 'shot' : t.hit.hitzoneKind }} hitzone {{ pct(t.hit.rawHitzone) }}
+        @if (r.elementKind) { · {{ r.elementKind }} {{ pct(t.hit.elementHitzone) }} }
+        @if (t.hit.weakPoint) { · <span class="weak">weak point</span> }
+      </div>
+    </div>
+  }
+
+  @if (r.conditions.length) {
+    <fieldset class="conditions">
+      <legend>Conditions</legend>
+      @for (c of r.conditions; track c.skill) {
+        <label class="check">
+          <input type="checkbox" [checked]="c.on" (change)="setToggle(c.skill, $any($event.target).checked)" />
+          {{ c.skill }} <span class="muted">— {{ c.label }}</span>
+        </label>
+      }
+    </fieldset>
+  }
+
+  @if (r.notModeled.length || r.assumed.length) {
+    <p class="notes">
+      @if (r.assumed.length) {
+        <span>Assumed values: {{ r.assumed.join(', ') }}.</span>
+      }
+      @if (r.notModeled.length) {
+        <span>Not modeled: {{ r.notModeled.join(', ') }}.</span>
+      }
+    </p>
+  }
+} @else {
+  <p class="muted">Equip a weapon to see damage.</p>
+}

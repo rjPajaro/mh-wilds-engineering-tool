@@ -1,0 +1,86 @@
+{
+  "$comment": "Artian and Gogma Artian crafting values that are not in mhdb-wilds-data. Element/status values are in IN-GAME DISPLAY units (true value x 10), exactly as the sources show them; scripts/import-data.mjs converts them to true units. Attack and affinity values are true (unbloated) values. Researched 2026-10-01; see docs/ARTIAN.md for the cross-check.",
+  "sources": {
+    "wiki": "https://monsterhunterwiki.org/wiki/Artian_Weapons_(MHWilds)",
+    "wikiGogma": "https://monsterhunterwiki.org/wiki/Gogma_Artian_Weapons_(MHWilds)",
+    "game8": "https://game8.co/games/Monster-Hunter-Wilds/archives/503103",
+    "game8Gogma": "https://game8.co/games/Monster-Hunter-Wilds/archives/571311",
+    "phantombrawlers": "https://www.phantombrawlers.com/mhwilds/Artian",
+    "wycademie": "https://lescarnetsdelawycademie.fr/gogmazios-weapons/"
+  },
+
+  "parts": {
+    "$source": "wiki, game8",
+    "count": 3,
+    "attackBonus": 5,
+    "affinityBonus": 5
+  },
+
+  "$elementsComment": "Base element/status from the parts: [rarity 6/7, rarity 8]. Two matching parts give the base value; three matching parts add infusionBonus (applies to element and status). null = not available (status bows use coatings; bowguns change ammo instead). Source: wiki, matches phantombrawlers.",
+  "elements": {
+    "great-sword":   { "element": [300, 450], "poison-blast": [150, 300], "paralysis-sleep": [100, 250], "infusionBonus": 30 },
+    "long-sword":    { "element": [230, 270], "poison-blast": [80, 120],  "paralysis-sleep": [30, 70],   "infusionBonus": 30 },
+    "sword-shield":  { "element": [230, 260], "poison-blast": [80, 110],  "paralysis-sleep": [30, 60],   "infusionBonus": 20 },
+    "dual-blades":   { "element": [220, 250], "poison-blast": [70, 100],  "paralysis-sleep": [20, 50],   "infusionBonus": 20 },
+    "hammer":        { "element": [270, 320], "poison-blast": [120, 170], "paralysis-sleep": [70, 120],  "infusionBonus": 30 },
+    "hunting-horn":  { "element": [270, 320], "poison-blast": [120, 170], "paralysis-sleep": [70, 120],  "infusionBonus": 30 },
+    "lance":         { "element": [230, 270], "poison-blast": [80, 120],  "paralysis-sleep": [30, 70],   "infusionBonus": 30 },
+    "gunlance":      { "element": [270, 320], "poison-blast": [120, 170], "paralysis-sleep": [70, 120],  "infusionBonus": 30 },
+    "switch-axe":    { "element": [220, 260], "poison-blast": [70, 110],  "paralysis-sleep": [20, 60],   "infusionBonus": 20 },
+    "charge-blade":  { "element": [230, 270], "poison-blast": [80, 120],  "paralysis-sleep": [30, 70],   "infusionBonus": 30 },
+    "insect-glaive": { "element": [220, 260], "poison-blast": [70, 110],  "paralysis-sleep": [20, 60],   "infusionBonus": 20 },
+    "bow":           { "element": [180, 210], "blast": [30, 60], "poison-paralysis-sleep": null,         "infusionBonus": 20 },
+    "light-bowgun":  null,
+    "heavy-bowgun":  null
+  },
+
+  "$reinforcementComment": "Five reinforcements per weapon. Regular Artians only roll level I; Gogma Artians roll I/II/III/EX (no more than 2 EX of the same type). Element boosts cannot roll on non-elemental weapons, poison/paralysis/sleep bows, or bowguns. Sharpness only on melee, ammo only on bowguns.",
+  "reinforcement": {
+    "slots": 5,
+    "maxSameEx": 2,
+    "attack":   { "$source": "wiki, game8", "I": 5, "II": 6, "III": 9, "EX": 12 },
+    "affinity": { "$source": "wiki, game8", "I": 5, "II": 6, "III": 8, "EX": 10 },
+    "sharpness": { "$source": "wiki, game8", "I": 30, "EX": 50, "insectGlaiveI": 20 },
+    "ammo":     { "$source": "wiki, game8", "I": 1, "EX": 2 },
+    "element": {
+      "$source": "I: wiki + game8 (Artian page). II/EX: wikiGogma + game8Gogma.",
+      "great-sword":   { "I": 80, "II": 90, "EX": 110 },
+      "long-sword":    { "I": 50, "II": 60, "EX": 90 },
+      "sword-shield":  { "I": 30, "II": 50, "EX": 80 },
+      "dual-blades":   { "I": 20, "II": 30, "EX": 50 },
+      "hammer":        { "I": 50, "II": 60, "EX": 90 },
+      "hunting-horn":  { "I": 50, "II": 60, "EX": 90 },
+      "lance":         { "I": 50, "II": 60, "EX": 90 },
+      "gunlance":      { "I": 50, "II": 60, "EX": 90 },
+      "switch-axe":    { "I": 30, "II": 50, "EX": 80 },
+      "charge-blade":  { "I": 50, "II": 60, "EX": 80 },
+      "insect-glaive": { "I": 30, "II": 50, "EX": 80 },
+      "bow":           { "I": 30, "II": 40, "EX": 60 },
+      "light-bowgun":  null,
+      "heavy-bowgun":  null
+    },
+    "$artianLimitsComment": "Max count per type observed on regular Artians (game8). Shown as warnings, not enforced.",
+    "artianLimits": { "attack": 5, "affinity": 3, "element": 4, "sharpness": 2, "ammo": 2 }
+  },
+
+  "$gogmaDevicesComment": "Element change per production device (display units). Attack/affinity/sharpness changes come from the game data (the three Gogma entries per weapon type). Source: wikiGogma; affinity and element focus also match game8Gogma. Attack-focus element changes for Hunting Horn (+30) and Gunlance (+40) are only in wikiGogma.",
+  "gogmaDeviceElement": {
+    "great-sword":   { "attack": 0,  "affinity": -10, "element": 50 },
+    "long-sword":    { "attack": 0,  "affinity": -20, "element": 50 },
+    "sword-shield":  { "attack": 0,  "affinity": -20, "element": 40 },
+    "dual-blades":   { "attack": 0,  "affinity": -20, "element": 30 },
+    "hammer":        { "attack": 0,  "affinity": -10, "element": 40 },
+    "hunting-horn":  { "attack": 30, "affinity": 20,  "element": 80 },
+    "lance":         { "attack": 0,  "affinity": -20, "element": 50 },
+    "gunlance":      { "attack": 40, "affinity": 30,  "element": 80 },
+    "switch-axe":    { "attack": 0,  "affinity": -20, "element": 40 },
+    "charge-blade":  { "attack": 0,  "affinity": -20, "element": 50 },
+    "insect-glaive": { "attack": 0,  "affinity": -20, "element": 40 },
+    "bow":           { "attack": 0,  "affinity": -20, "element": 30 },
+    "light-bowgun":  { "attack": 0,  "affinity": 0,   "element": 0 },
+    "heavy-bowgun":  { "attack": 0,  "affinity": 0,   "element": 0 }
+  },
+
+  "$gogmaSkillsComment": "Gogma Artians get one random set skill and one random group skill from the full pools (wikiGogma). Each counts as one armor piece toward that bonus (assumption: 'just like armor equipment').",
+  "gogmaSkills": { "setSkill": true, "groupSkill": true }
+}

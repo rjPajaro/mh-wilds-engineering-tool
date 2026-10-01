@@ -1,0 +1,208 @@
+@if (loadError()) {
+  <p class="error">Could not load game data. Run <code>npm run import-data</code> and reload.</p>
+} @else if (loading() || !index()) {
+  <p class="muted">Loading game data…</p>
+} @else {
+  <div class="layout">
+    <aside class="saved">
+      <header class="section-head">
+        <h2>My Artians</h2>
+      </header>
+      <div class="new">
+        <button type="button" (click)="newWeapon('artian')">+ Artian</button>
+        <button type="button" (click)="newWeapon('gogma')">+ Gogma Artian</button>
+      </div>
+      <ul>
+        @for (c of configs(); track c.id) {
+          <li>
+            <button type="button" class="saved-item" [class.on]="draft()?.id === c.id" (click)="edit(c)">
+              <span class="name">{{ savedWeapons().get(c.id)?.name ?? (c.name || 'Invalid weapon') }}</span>
+              <span class="hint">
+                {{ c.tier === 'gogma' ? 'Gogma · ' + capitalize(c.device) + ' device' : 'Artian R' + c.rarity }} ·
+                {{ kindLabel(c.kind) }}
+              </span>
+              <span class="hint">{{ infusionLabel(c) }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="muted">No saved weapons yet.</li>
+        }
+      </ul>
+    </aside>
+
+    @if (draft(); as d) {
+      <section class="editor">
+        <header class="section-head">
+          <h2>{{ saved() ? 'Edit' : 'New' }} {{ d.tier === 'gogma' ? 'Gogma Artian' : 'Artian' }}</h2>
+          <div class="actions">
+            @if (saved() && dirty()) {
+              <button type="button" (click)="revert()">Revert</button>
+            }
+            <button type="button" class="primary" [disabled]="!result()?.weapon || !dirty()" (click)="save()">
+              {{ saved() ? (dirty() ? 'Save changes' : 'Saved') : 'Save weapon' }}
+            </button>
+          </div>
+        </header>
+
+        <div class="field">
+          <label for="artian-name">Name</label>
+          <input id="artian-name" type="text" [placeholder]="result()?.weapon?.name ?? 'Weapon name'" [value]="d.name"
+            (input)="patch({ name: $any($event.target).value })" />
+        </div>
+
+        <div class="field">
+          <span class="label">Type</span>
+          <div class="segmented" role="radiogroup" aria-label="Artian type">
+            <button type="button" role="radio" [attr.aria-checked]="d.tier === 'artian'" [class.on]="d.tier === 'artian'" (click)="setTier('artian')">Artian</button>
+            <button type="button" role="radio" [attr.aria-checked]="d.tier === 'gogma'" [class.on]="d.tier === 'gogma'" (click)="setTier('gogma')">Gogma Artian</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="artian-kind">Weapon</label>
+          <app-search-select inputId="artian-kind" [options]="kindOptions" [clearable]="false" [value]="d.kind" (valueChange)="setKind($event)" />
+        </div>
+
+        @if (d.tier === 'artian') {
+          <div class="field">
+            <span class="label">Rarity</span>
+            <div class="segmented" role="radiogroup" aria-label="Rarity">
+              @for (r of [6, 7, 8]; track r) {
+                <button type="button" role="radio" [attr.aria-checked]="d.rarity === r" [class.on]="d.rarity === r" (click)="patch({ rarity: $any(r) })">R{{ r }}</button>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="field">
+            <span class="label">Device</span>
+            <div class="segmented" role="radiogroup" aria-label="Production device">
+              @for (dev of devices; track dev) {
+                <button type="button" role="radio" [attr.aria-checked]="d.device === dev" [class.on]="d.device === dev" (click)="setDevice(dev)">
+                  {{ capitalize(dev) }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <h3>Parts</h3>
+        <div class="field">
+          <label for="artian-element">Element</label>
+          <app-search-select inputId="artian-element" [options]="elementOptions" [clearable]="false" [value]="d.element ?? ''" (valueChange)="setElement($event)" />
+        </div>
+        @if (d.element) {
+          <div class="field">
+            <span class="label">Matching</span>
+            <div class="segmented" role="radiogroup" aria-label="Matching parts">
+              <button type="button" role="radio" [attr.aria-checked]="d.matchingParts === 3" [class.on]="d.matchingParts === 3" (click)="patch({ matchingParts: 3 })">3 parts (Infusion)</button>
+              <button type="button" role="radio" [attr.aria-checked]="d.matchingParts === 2" [class.on]="d.matchingParts === 2" (click)="patch({ matchingParts: 2 })">2 parts</button>
+            </div>
+          </div>
+        }
+        <div class="field">
+          <span class="label">Bonuses</span>
+          <div class="parts">
+            @for (i of partIndexes; track i) {
+              <div class="segmented small" role="radiogroup" [attr.aria-label]="'Part ' + (i + 1) + ' bonus'">
+                <button type="button" role="radio" [attr.aria-checked]="d.partBonuses[i] === 'attack'" [class.on]="d.partBonuses[i] === 'attack'" (click)="setPartBonus(i, 'attack')">Atk</button>
+                <button type="button" role="radio" [attr.aria-checked]="d.partBonuses[i] === 'affinity'" [class.on]="d.partBonuses[i] === 'affinity'" (click)="setPartBonus(i, 'affinity')">Aff</button>
+              </div>
+            }
+          </div>
+        </div>
+        <p class="muted summary">{{ infusionLabel(d) }}</p>
+
+        <h3>Reinforcements</h3>
+        @for (row of reinforcementRows(); track $index; let i = $index) {
+          <div class="field">
+            <span class="label">{{ i + 1 }}</span>
+            <div class="reinforcement">
+              <app-search-select
+                [ariaLabel]="'Reinforcement ' + (i + 1)"
+                [options]="reinforcementTypeOptions()"
+                [clearable]="false"
+                [value]="row?.type ?? ''"
+                (valueChange)="setReinforcementType(i, $event)"
+              />
+              @if (row) {
+                <div class="segmented small" role="radiogroup" [attr.aria-label]="'Reinforcement ' + (i + 1) + ' level'">
+                  @for (lvl of levelsFor(row.type); track lvl) {
+                    <button type="button" role="radio" [attr.aria-checked]="row.level === lvl" [class.on]="row.level === lvl" (click)="setReinforcementLevel(i, lvl)">{{ lvl }}</button>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (d.tier === 'gogma') {
+          <h3>Gogma skills</h3>
+          <div class="field">
+            <label for="gogma-set">Set skill</label>
+            <app-search-select inputId="gogma-set" [options]="setSkillOptions()" [clearable]="false" [value]="d.setSkillId === null ? '' : '' + d.setSkillId" (valueChange)="setSkill('setSkillId', $event)" />
+          </div>
+          <div class="field">
+            <label for="gogma-group">Group skill</label>
+            <app-search-select inputId="gogma-group" [options]="groupSkillOptions()" [clearable]="false" [value]="d.groupSkillId === null ? '' : '' + d.groupSkillId" (valueChange)="setSkill('groupSkillId', $event)" />
+          </div>
+        }
+
+        @if (saved()) {
+          <div class="danger">
+            @if (confirmDelete()) {
+              <span>Delete this weapon?</span>
+              <button type="button" class="primary" (click)="remove()">Delete</button>
+              <button type="button" (click)="confirmDelete.set(false)">Cancel</button>
+            } @else {
+              <button type="button" (click)="confirmDelete.set(true)">Delete weapon</button>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="preview">
+        <header class="section-head">
+          <h2>Result</h2>
+        </header>
+        @if (result(); as r) {
+          @for (issue of r.issues; track $index) {
+            <p [class]="'issue ' + issue.severity">{{ issue.message }}</p>
+          }
+          @if (r.weapon; as w) {
+            <p class="weapon-name">{{ w.name }}</p>
+            <dl class="stats">
+              <div><dt>Attack</dt><dd>{{ w.attack }}</dd></div>
+              <div><dt>Affinity</dt><dd [class.neg]="w.affinity < 0">{{ w.affinity }}%</dd></div>
+              @for (s of w.specials; track $index) {
+                <div>
+                  <dt>{{ capitalize(s.kind === 'element' ? s.element : s.status) }}</dt>
+                  <dd>{{ s.value * displayScale }}</dd>
+                </div>
+              } @empty {
+                <div><dt>Element</dt><dd class="muted">—</dd></div>
+              }
+              <div><dt>Slots</dt><dd>{{ w.slots.join(' ') }}</dd></div>
+            </dl>
+            @if (w.sharpness; as bar) {
+              <div class="sharpness" aria-label="Sharpness">
+                @for (hits of bar; track $index) {
+                  @if (hits > 0) {
+                    <span [class]="'seg ' + sharpnessColors[$index]" [style.width.%]="barWidth(hits, bar)"></span>
+                  }
+                }
+              </div>
+            }
+            @if (w.skills.length) {
+              <p class="muted">Skills: {{ skillName(d.setSkillId) }}{{ d.setSkillId && d.groupSkillId ? ', ' : '' }}{{ skillName(d.groupSkillId) }} (1 piece each)</p>
+            }
+            <p class="muted note">Attack is the true value; in game it is shown multiplied by a weapon-class factor. Element is shown in game units.</p>
+          }
+        }
+      </section>
+    } @else {
+      <section class="editor empty">
+        <p class="muted">Create an Artian or Gogma Artian, or pick a saved one to edit. Saved weapons appear in the Builder's weapon list.</p>
+      </section>
+    }
+  </div>
+}

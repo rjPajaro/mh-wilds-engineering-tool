@@ -1,0 +1,2148 @@
+{
+ "$comment": "Motion values per weapon type, extracted by scripts/extract-wiki-moves.mjs from the Monster Hunter Wiki. hits = MV of each hit; elementModifier/statusModifier default to 1. Do not edit by hand; re-run the script.",
+ "extracted": "2026-10-01",
+ "weapons": {
+  "great-sword": {
+   "source": "https://monsterhunterwiki.org/wiki/MHWilds/Great_Sword_Mechanics",
+   "moves": [
+    {
+     "section": "Charged Slash Combo",
+     "name": "Overhead Slash",
+     "variants": [
+      {
+       "hits": [
+        81
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Charged Slash Combo",
+     "name": "Charged Slash",
+     "variants": [
+      {
+       "label": "LV 1",
+       "hits": [
+        106
+       ],
+       "elementModifier": 1.1,
+       "statusModifier": 1.1
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        135
+       ],
+       "elementModifier": 1.3,
+       "statusModifier": 1.2
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        176
+       ],
+       "elementModifier": 1.5,
+       "statusModifier": 1.3
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Charged Slash Combo",
+     "name": "Strong Charged Slash",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        83
+       ],
+       "elementModifier": 1.3,
+       "statusModifier": 1.3
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        111
+       ],
+       "elementModifier": 1.4,
+       "statusModifier": 1.3
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        144
+       ],
+       "elementModifier": 1.6,
+       "statusModifier": 1.4
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        187
+       ],
+       "elementModifier": 1.8,
+       "statusModifier": 1.5
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Charged Slash Combo",
+     "name": "Strong Wide Slash",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        74
+       ],
+       "elementModifier": 1.7,
+       "statusModifier": 1.7
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        90
+       ],
+       "elementModifier": 1.7,
+       "statusModifier": 1.7
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        106
+       ],
+       "elementModifier": 2,
+       "statusModifier": 2
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        124
+       ],
+       "elementModifier": 2.2,
+       "statusModifier": 2.2
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Charged Slash Combo",
+     "name": "True Charged Slash",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        10,
+        91
+       ],
+       "elementModifiers": [
+        1,
+        1.5
+       ],
+       "statusModifiers": [
+        1,
+        1.5
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        12,
+        112
+       ],
+       "elementModifiers": [
+        1,
+        2
+       ],
+       "statusModifiers": [
+        1,
+        1.5
+       ]
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        14,
+        164
+       ],
+       "elementModifiers": [
+        1,
+        2.2
+       ],
+       "statusModifiers": [
+        1,
+        1.8
+       ]
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        16,
+        209
+       ],
+       "elementModifiers": [
+        1,
+        2.5
+       ],
+       "statusModifiers": [
+        1,
+        2
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Charged Slash Combo",
+     "name": "True Charged Slash (Power)",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        100
+       ],
+       "elementModifier": 1.5,
+       "statusModifier": 1.5
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        134
+       ],
+       "elementModifier": 2,
+       "statusModifier": 1.5
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        199
+       ],
+       "elementModifier": 2.2,
+       "statusModifier": 1.8
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        267
+       ],
+       "elementModifier": 2.5,
+       "statusModifier": 2
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Charged Slash Combo",
+     "name": "Tackle",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        23
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        26
+       ]
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        35
+       ]
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        48
+       ],
+       "elementModifier": 1.2
+      }
+     ],
+     "damageType": "blunt"
+    },
+    {
+     "section": "Forward Lunging Combo",
+     "name": "Wide Slash",
+     "variants": [
+      {
+       "hits": [
+        42
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Forward Lunging Combo",
+     "name": "Leaping Wide Slash",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        93
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        111
+       ],
+       "elementModifier": 2,
+       "statusModifier": 2
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        135
+       ],
+       "elementModifier": 2.5,
+       "statusModifier": 2.5
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        167
+       ],
+       "elementModifier": 3.1,
+       "statusModifier": 3.1
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Forward Lunging Combo",
+     "name": "Side Blow",
+     "variants": [
+      {
+       "hits": [
+        16
+       ]
+      }
+     ],
+     "damageType": "blunt"
+    },
+    {
+     "section": "Rising Slashes",
+     "name": "Rising Slash",
+     "variants": [
+      {
+       "hits": [
+        38
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Rising Slashes",
+     "name": "Offset Rising Slash",
+     "variants": [
+      {
+       "label": "LV 1",
+       "hits": [
+        96
+       ],
+       "elementModifier": 1.1,
+       "statusModifier": 1.1
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        123
+       ],
+       "elementModifier": 1.2,
+       "statusModifier": 1.2
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        154
+       ],
+       "elementModifier": 1.3,
+       "statusModifier": 1.3
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Rising Slashes",
+     "name": "Followup Cross Slash",
+     "variants": [
+      {
+       "label": "LV 1",
+       "hits": [
+        44,
+        180
+       ],
+       "elementModifiers": [
+        1,
+        1
+       ],
+       "statusModifiers": [
+        1,
+        1
+       ]
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        49,
+        200
+       ],
+       "elementModifiers": [
+        1,
+        1
+       ],
+       "statusModifiers": [
+        1,
+        1
+       ]
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        58,
+        230
+       ],
+       "elementModifiers": [
+        1,
+        1
+       ],
+       "statusModifiers": [
+        1,
+        1
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Rising Slashes",
+     "name": "Charged Rising Slash",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        48
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        48
+       ]
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        72
+       ]
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        98
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Aerial Moves",
+     "name": "Jumping Charged Slash",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        50
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        60
+       ],
+       "elementModifier": 1.1,
+       "statusModifier": 1.1
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        71
+       ],
+       "elementModifier": 1.2,
+       "statusModifier": 1.2
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        90
+       ],
+       "elementModifier": 1.3,
+       "statusModifier": 1.3
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Aerial Moves",
+     "name": "Plunging Thrust",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        36
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        42
+       ]
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        50
+       ]
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        58
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 0.4,
+     "statusModifier": 0.4
+    },
+    {
+     "section": "Aerial Moves",
+     "name": "Scaling Drop Slash",
+     "variants": [
+      {
+       "hits": [
+        20,
+        45
+       ],
+       "elementModifiers": [
+        1,
+        1
+       ],
+       "statusModifiers": [
+        1,
+        1
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Riding Attacks",
+     "name": "Riding Attack (1)",
+     "variants": [
+      {
+       "hits": [
+        15
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Riding Attacks",
+     "name": "Riding Attack (2)",
+     "variants": [
+      {
+       "hits": [
+        10
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Riding Attacks",
+     "name": "Dismount Attack",
+     "variants": [
+      {
+       "hits": [
+        20,
+        50
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Mount",
+     "name": "Mounting Attack",
+     "variants": [
+      {
+       "hits": [
+        90
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Mount",
+     "name": "Mounting Finisher",
+     "variants": [
+      {
+       "hits": [
+        120,
+        60,
+        10,
+        10,
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Sneaking",
+     "name": "Sneak Attack",
+     "variants": [
+      {
+       "hits": [
+        106
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Sneaking",
+     "name": "Aerial Sneak Attack",
+     "variants": [
+      {
+       "hits": [
+        106
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Underwater",
+     "name": "Underwater Attack (1)",
+     "variants": [
+      {
+       "hits": [
+        65
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Underwater",
+     "name": "Underwater Attack (2)",
+     "variants": [
+      {
+       "hits": [
+        85
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Equipment Skills: Soul of the Dark Knight",
+     "name": "Flood of Shadow",
+     "variants": [
+      {
+       "hits": [
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Focus Mode",
+     "name": "Focus Strike: Perforate",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        15,
+        14,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "elementModifiers": [
+        0.4,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+       ],
+       "statusModifiers": [
+        0.4,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        20,
+        16,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11
+       ],
+       "elementModifiers": [
+        0.4,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+       ],
+       "statusModifiers": [
+        0.4,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        26,
+        18,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+       ],
+       "elementModifiers": [
+        0.4,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+       ],
+       "statusModifiers": [
+        0.4,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        33,
+        24,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13,
+        13
+       ],
+       "elementModifiers": [
+        0.4,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+       ],
+       "statusModifiers": [
+        0.4,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "notes": [
+      "This multihit doesn't actually hit for the full value during all 11 hits, but rather follows an interpolated curve that diminishes its damage slightly for the first 3 hits, and then heavily for the remaining 7."
+     ]
+    },
+    {
+     "section": "Focus Mode",
+     "name": "Focus Strike: Resolve",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        16,
+        6,
+        2
+       ],
+       "elementModifiers": [
+        0.1,
+        0.1,
+        0.1
+       ],
+       "statusModifiers": [
+        0.1,
+        0.1,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        20,
+        6,
+        2
+       ],
+       "elementModifiers": [
+        0.1,
+        0.1,
+        0.1
+       ],
+       "statusModifiers": [
+        0.1,
+        0.1,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        22,
+        6,
+        2
+       ],
+       "elementModifiers": [
+        0.1,
+        0.1,
+        0.1
+       ],
+       "statusModifiers": [
+        0.1,
+        0.1,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        24,
+        6,
+        2
+       ],
+       "elementModifiers": [
+        0.1,
+        0.1,
+        0.1
+       ],
+       "statusModifiers": [
+        0.1,
+        0.1,
+        0.1
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Focus Mode",
+     "name": "Aerial Focus Strike: Perforate",
+     "variants": [
+      {
+       "label": "LV 0",
+       "hits": [
+        15,
+        14
+       ],
+       "elementModifiers": [
+        0.4,
+        0.1
+       ],
+       "statusModifiers": [
+        0.4,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 1",
+       "hits": [
+        20,
+        16
+       ],
+       "elementModifiers": [
+        0.4,
+        0.1
+       ],
+       "statusModifiers": [
+        0.4,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 2",
+       "hits": [
+        26,
+        18
+       ],
+       "elementModifiers": [
+        0.4,
+        0.1
+       ],
+       "statusModifiers": [
+        0.4,
+        0.1
+       ]
+      },
+      {
+       "label": "LV 3",
+       "hits": [
+        33,
+        24
+       ],
+       "elementModifiers": [
+        0.4,
+        0.1
+       ],
+       "statusModifiers": [
+        0.4,
+        0.1
+       ]
+      }
+     ],
+     "damageType": "slash"
+    }
+   ]
+  },
+  "sword-shield": {
+   "source": "https://monsterhunterwiki.org/wiki/MHWilds/Sword_and_Shield_Mechanics",
+   "moves": [
+    {
+     "section": "Basic Combo",
+     "name": "Chop",
+     "variants": [
+      {
+       "hits": [
+        18
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Basic Combo",
+     "name": "Side Slash",
+     "variants": [
+      {
+       "hits": [
+        17
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Basic Combo",
+     "name": "Diagonal Rising Slash",
+     "variants": [
+      {
+       "hits": [
+        24
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Basic Combo",
+     "name": "Diagonal Chop",
+     "variants": [
+      {
+       "hits": [
+        27
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Powerful Combo",
+     "name": "Lateral Slash",
+     "variants": [
+      {
+       "hits": [
+        27
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.2
+    },
+    {
+     "section": "Powerful Combo",
+     "name": "Return Stroke",
+     "variants": [
+      {
+       "hits": [
+        28
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.2
+    },
+    {
+     "section": "Powerful Combo",
+     "name": "Spinning Rising Slash",
+     "variants": [
+      {
+       "hits": [
+        39
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.2
+    },
+    {
+     "section": "Advancing Slash Combo",
+     "name": "Advancing Slash",
+     "variants": [
+      {
+       "hits": [
+        28
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Advancing Slash Combo",
+     "name": "Roundslash",
+     "variants": [
+      {
+       "hits": [
+        41
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Advancing Slash Combo",
+     "name": "Spinning Reaper",
+     "variants": [
+      {
+       "hits": [
+        65
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Advancing Slash Combo",
+     "name": "Charged Chop",
+     "variants": [
+      {
+       "label": "Normal",
+       "hits": [
+        18,
+        28,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+       ],
+       "elementModifiers": [
+        1,
+        1.2,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3
+       ]
+      },
+      {
+       "label": "Boosted",
+       "hits": [
+        18,
+        28,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+       ],
+       "elementModifiers": [
+        1,
+        1.2,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25,
+        1.25
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Monster Stunning Combo",
+     "name": "Shield Attack",
+     "variants": [
+      {
+       "hits": [
+        16
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 0,
+     "statusModifier": 0
+    },
+    {
+     "section": "Monster Stunning Combo",
+     "name": "Shield Bash",
+     "variants": [
+      {
+       "hits": [
+        27
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 0,
+     "statusModifier": 0
+    },
+    {
+     "section": "Monster Stunning Combo",
+     "name": "Hard Bash",
+     "variants": [
+      {
+       "hits": [
+        40
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 0,
+     "statusModifier": 0
+    },
+    {
+     "section": "Backstep and Perfect Rush Combo",
+     "name": "Charged Slash",
+     "variants": [
+      {
+       "hits": [
+        25
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Backstep and Perfect Rush Combo",
+     "name": "Scaling Slash",
+     "variants": [
+      {
+       "hits": [
+        25
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Backstep and Perfect Rush Combo",
+     "name": "Leaping Slash",
+     "variants": [
+      {
+       "hits": [
+        30
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Backstep and Perfect Rush Combo",
+     "name": "Perfect Rush (1)",
+     "variants": [
+      {
+       "label": "Normal",
+       "hits": [
+        10,
+        15,
+        15
+       ],
+       "elementModifiers": [
+        0,
+        1,
+        1
+       ]
+      },
+      {
+       "label": "Boosted",
+       "hits": [
+        40,
+        40,
+        45
+       ],
+       "elementModifiers": [
+        0,
+        1.5,
+        1.5
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Backstep and Perfect Rush Combo",
+     "name": "Perfect Rush (2)",
+     "variants": [
+      {
+       "label": "Normal",
+       "hits": [
+        20
+       ]
+      },
+      {
+       "label": "Boosted",
+       "hits": [
+        60
+       ]
+      }
+     ],
+     "damageType": "blunt"
+    },
+    {
+     "section": "Backstep and Perfect Rush Combo",
+     "name": "Perfect Rush (3)",
+     "variants": [
+      {
+       "label": "Normal",
+       "hits": [
+        30,
+        18,
+        18,
+        18
+       ],
+       "elementModifiers": [
+        1,
+        1,
+        1,
+        1
+       ]
+      },
+      {
+       "label": "Boosted",
+       "hits": [
+        80,
+        34,
+        34,
+        34
+       ],
+       "elementModifiers": [
+        1.5,
+        1,
+        1,
+        1
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Backstep and Perfect Rush Combo",
+     "name": "Rising Slash",
+     "variants": [
+      {
+       "hits": [
+        18
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Aerial Moves",
+     "name": "Jumping Slash",
+     "variants": [
+      {
+       "hits": [
+        20
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Aerial Moves",
+     "name": "Plunging Thrust",
+     "variants": [
+      {
+       "hits": [
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "notes": [
+      "The number of times this move can hit is actually variable, depending on the angle, size of the target, and other factors. The number shown is the highest observed number of hits."
+     ],
+     "elementModifier": 0.3,
+     "statusModifier": 0.3
+    },
+    {
+     "section": "Aerial Moves",
+     "name": "Falling Bash",
+     "variants": [
+      {
+       "hits": [
+        52,
+        47
+       ]
+      }
+     ],
+     "damageType": "blunt",
+     "elementModifier": 0,
+     "statusModifier": 0
+    },
+    {
+     "section": "Aerial Moves",
+     "name": "Jumping Advancing Slash",
+     "variants": [
+      {
+       "hits": [
+        18
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Aerial Moves",
+     "name": "Jumping Rising Slash",
+     "variants": [
+      {
+       "hits": [
+        18
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Riding Attacks",
+     "name": "Riding Attack",
+     "variants": [
+      {
+       "hits": [
+        10,
+        10
+       ],
+       "elementModifiers": [
+        1,
+        1
+       ],
+       "statusModifiers": [
+        1,
+        1
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Riding Attacks",
+     "name": "Riding Sprint Attack",
+     "variants": [
+      {
+       "hits": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Riding Attacks",
+     "name": "Dismount Attack",
+     "variants": [
+      {
+       "hits": [
+        20
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Mount",
+     "name": "Mount Attack",
+     "variants": [
+      {
+       "hits": [
+        15,
+        17
+       ],
+       "elementModifiers": [
+        1,
+        1
+       ],
+       "statusModifiers": [
+        1,
+        1
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Mount",
+     "name": "Mount Finisher",
+     "variants": [
+      {
+       "hits": [
+        13,
+        13,
+        25,
+        70,
+        100
+       ],
+       "elementModifiers": [
+        0,
+        0,
+        0,
+        1,
+        1
+       ],
+       "statusModifiers": [
+        0,
+        0,
+        0,
+        1,
+        1
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Sneaking",
+     "name": "Sneak Attack",
+     "variants": [
+      {
+       "hits": [
+        106
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Sneaking",
+     "name": "Aerial Sneak Attack",
+     "variants": [
+      {
+       "hits": [
+        33,
+        33,
+        40
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Focus Mode",
+     "name": "Focus Strike: Vital Stab",
+     "variants": [
+      {
+       "label": "Normal",
+       "hits": [
+        15
+       ]
+      },
+      {
+       "label": "Wound",
+       "hits": [
+        15,
+        15
+       ]
+      },
+      {
+       "label": "Tear",
+       "hits": [
+        15,
+        15,
+        19,
+        19,
+        19
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Focus Mode",
+     "name": "Aerial Focus Strike: Vital Stab",
+     "variants": [
+      {
+       "label": "Normal",
+       "hits": [
+        15
+       ]
+      },
+      {
+       "label": "Wound",
+       "hits": [
+        15,
+        15
+       ]
+      },
+      {
+       "label": "Tear",
+       "hits": [
+        15,
+        15,
+        19,
+        19,
+        19
+       ]
+      }
+     ],
+     "damageType": "slash"
+    },
+    {
+     "section": "Focus Mode",
+     "name": "Falling Slash",
+     "variants": [
+      {
+       "hits": [
+        20,
+        20,
+        7,
+        7,
+        7,
+        7
+       ]
+      }
+     ],
+     "damageType": "slash",
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Focus Mode",
+     "name": "Falling Bash",
+     "variants": [
+      {
+       "hits": [
+        20,
+        20,
+        20,
+        20,
+        20
+       ]
+      }
+     ],
+     "damageType": "blunt",
+     "elementModifier": 0,
+     "statusModifier": 0
+    }
+   ]
+  },
+  "hammer": {
+   "source": "https://monsterhunterwiki.org/wiki/MHWilds/Hammer_Mechanics",
+   "moves": [
+    {
+     "section": "Basic Combo",
+     "name": "Swing",
+     "variants": [
+      {
+       "hits": [
+        22
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Basic Combo",
+     "name": "Follow-up",
+     "variants": [
+      {
+       "hits": [
+        18
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Basic Combo",
+     "name": "Overhead Smash",
+     "variants": [
+      {
+       "hits": [
+        41
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Basic Combo",
+     "name": "Overhead Smash II",
+     "variants": [
+      {
+       "hits": [
+        45
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Basic Combo",
+     "name": "Upswing",
+     "variants": [
+      {
+       "hits": [
+        96
+       ]
+      }
+     ],
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Basic Combo",
+     "name": "Side Smash",
+     "variants": [
+      {
+       "hits": [
+        23
+       ]
+      }
+     ],
+     "elementModifier": 1.3
+    },
+    {
+     "section": "Big Bang Combo",
+     "name": "Big Bang I",
+     "variants": [
+      {
+       "hits": [
+        43
+       ]
+      }
+     ],
+     "elementModifier": 1.1
+    },
+    {
+     "section": "Big Bang Combo",
+     "name": "Big Bang II",
+     "variants": [
+      {
+       "hits": [
+        48
+       ]
+      }
+     ],
+     "elementModifier": 1.1
+    },
+    {
+     "section": "Big Bang Combo",
+     "name": "Big Bang III",
+     "variants": [
+      {
+       "hits": [
+        70
+       ]
+      }
+     ],
+     "elementModifier": 1.1
+    },
+    {
+     "section": "Big Bang Combo",
+     "name": "Big Bang IV",
+     "variants": [
+      {
+       "hits": [
+        90
+       ]
+      }
+     ],
+     "elementModifier": 1.1
+    },
+    {
+     "section": "Big Bang Combo",
+     "name": "Big Bang Finisher",
+     "variants": [
+      {
+       "hits": [
+        28,
+        28,
+        130
+       ],
+       "elementModifiers": [
+        1.1,
+        1.1,
+        1.5
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Spinning Attacks",
+     "name": "Spinning Bludgeon",
+     "variants": [
+      {
+       "hits": [
+        23,
+        18,
+        18,
+        18,
+        18,
+        25
+       ],
+       "elementModifiers": [
+        2.5,
+        2.5,
+        2.5,
+        2.5,
+        2.5,
+        1.5
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Spinning Attacks",
+     "name": "Spinning Side Smash",
+     "variants": [
+      {
+       "hits": [
+        30
+       ]
+      }
+     ],
+     "elementModifier": 1.5
+    },
+    {
+     "section": "Spinning Attacks",
+     "name": "Spinning Follow-up",
+     "variants": [
+      {
+       "hits": [
+        55
+       ]
+      }
+     ],
+     "elementModifier": 1.5
+    },
+    {
+     "section": "Spinning Attacks",
+     "name": "Spinning Strong Upswing",
+     "variants": [
+      {
+       "hits": [
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Charged Attacks",
+     "name": "Charged Side Blow",
+     "variants": [
+      {
+       "hits": [
+        25
+       ]
+      }
+     ],
+     "elementModifier": 1.1
+    },
+    {
+     "section": "Charged Attacks",
+     "name": "Charged Upswing",
+     "variants": [
+      {
+       "hits": [
+        70
+       ]
+      }
+     ],
+     "elementModifier": 1.2
+    },
+    {
+     "section": "Charged Attacks",
+     "name": "Charged Big Bang",
+     "variants": [
+      {
+       "hits": [
+        20,
+        130
+       ],
+       "elementModifiers": [
+        1,
+        1.5
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Mighty Charged Attacks",
+     "name": "Mighty Charged Upswing",
+     "variants": [
+      {
+       "hits": [
+        130
+       ]
+      }
+     ],
+     "elementModifier": 1.2
+    },
+    {
+     "section": "Mighty Charged Attacks",
+     "name": "Mighty Charged Slam",
+     "variants": [
+      {
+       "hits": [
+        20,
+        20,
+        200
+       ],
+       "elementModifiers": [
+        1,
+        1,
+        1.5
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Aerial Attacks",
+     "name": "Jumping Charged Attack",
+     "variants": [
+      {
+       "label": "I",
+       "hits": [
+        72
+       ],
+       "elementModifier": 1.1
+      },
+      {
+       "label": "II",
+       "hits": [
+        77
+       ],
+       "elementModifier": 1.2
+      },
+      {
+       "label": "III",
+       "hits": [
+        88
+       ],
+       "elementModifier": 1.5
+      }
+     ]
+    },
+    {
+     "section": "Riding Attacks",
+     "name": "Riding Attack",
+     "variants": [
+      {
+       "hits": [
+        10
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Riding Attacks",
+     "name": "Dismount Attack",
+     "variants": [
+      {
+       "hits": [
+        10,
+        37
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Mount",
+     "name": "Mount Attack",
+     "variants": [
+      {
+       "hits": [
+        37
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Mount",
+     "name": "Mount Finisher",
+     "variants": [
+      {
+       "hits": [
+        140,
+        100
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Sneaking",
+     "name": "Sneak Attack",
+     "variants": [
+      {
+       "hits": [
+        106
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Sneaking",
+     "name": "Aerial Sneak Attack",
+     "variants": [
+      {
+       "hits": [
+        5,
+        95
+       ]
+      }
+     ],
+     "notes": [
+      "Depending on monster's height and other contextual factors, this part of the move can hit multiple times"
+     ]
+    },
+    {
+     "section": "Underwater",
+     "name": "Underwater Attack I",
+     "variants": [
+      {
+       "hits": [
+        70
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Underwater",
+     "name": "Underwater Attack II",
+     "variants": [
+      {
+       "hits": [
+        80
+       ]
+      }
+     ]
+    },
+    {
+     "section": "Focus Mode",
+     "name": "Focus Blow: Earthquake",
+     "variants": [
+      {
+       "hits": [
+        15,
+        30,
+        45
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

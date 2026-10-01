@@ -1,0 +1,41 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --hover: #efece4;
+  --text: #1d1d1b;
+  --muted: #6b6b66;
+  --border: #dddcd6;
+  --accent: #b5651d;
+  --warn: #b8860b;
+  --error: #b3261e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #18181a;
+    --surface: #222226;
+    --hover: #2f2f35;
+    --text: #e8e6e1;
+    --muted: #9a9890;
+    --border: #34343a;
+    --accent: #e0913f;
+    --warn: #e0b84f;
+    --error: #ef6b62;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.4 system-ui, sans-serif;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: var(--error);
+}

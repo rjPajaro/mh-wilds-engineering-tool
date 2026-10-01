@@ -1,0 +1,47 @@
+<div class="field" [class.open]="open()">
+  <input
+    #input
+    type="text"
+    role="combobox"
+    autocomplete="off"
+    spellcheck="false"
+    [id]="inputId()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="listId()"
+    aria-autocomplete="list"
+    [attr.aria-activedescendant]="open() && filtered().length ? optionId(activeIndex()) : null"
+    [value]="displayText()"
+    [placeholder]="open() ? (selected()?.label ?? 'Search…') : placeholder()"
+    (click)="openList()"
+    (input)="onInput($any($event.target).value)"
+    (keydown)="onKeydown($event)"
+  />
+  @if (clearable() && value()) {
+    <button type="button" class="icon" aria-label="Clear selection" (mousedown)="$event.preventDefault()" (click)="clear()">×</button>
+  }
+  <button type="button" class="icon caret" tabindex="-1" aria-hidden="true" (mousedown)="$event.preventDefault()" (click)="toggle()">▾</button>
+</div>
+
+@if (open()) {
+  <ul #list class="list" role="listbox" [id]="listId()" (mousedown)="$event.preventDefault()">
+    @for (o of filtered(); track o.value; let i = $index) {
+      <li
+        role="option"
+        [id]="optionId(i)"
+        [class.active]="i === activeIndex()"
+        [class.selected]="o.value === value()"
+        [attr.aria-selected]="o.value === value()"
+        (mousemove)="activeIndex.set(i)"
+        (click)="choose(o.value)"
+      >
+        <span class="label">{{ o.label }}</span>
+        @if (o.hint) {
+          <span class="hint">{{ o.hint }}</span>
+        }
+      </li>
+    } @empty {
+      <li class="empty">No matches</li>
+    }
+  </ul>
+}

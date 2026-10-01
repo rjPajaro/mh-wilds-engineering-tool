@@ -1,0 +1,147 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.5rem;
+  align-items: start;
+
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+  }
+}
+
+.equip {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.devices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.35rem 0 0 7.5rem;
+
+  button {
+    display: flex;
+    flex: 1 1 7rem;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--hover);
+    }
+
+    &.on {
+      border-color: var(--accent);
+      outline: 1px solid var(--accent);
+      .device-name {
+        color: var(--accent);
+      }
+    }
+  }
+
+  .device-name {
+    font-weight: 600;
+  }
+
+  .device-stats {
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+}
+
+.decos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.35rem 0 0 7.5rem;
+  .deco {
+    flex: 1 1 10rem;
+    font-size: 0.85rem;
+  }
+}
+
+.skills ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.skills li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  &.inactive {
+    opacity: 0.55;
+  }
+}
+
+.skill-head {
+  display: flex;
+  justify-content: space-between;
+  .name {
+    font-weight: 600;
+  }
+}
+
+.kind,
+.sources,
+.detail {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.75rem;
+}
+
+.pips {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 0.2rem 0;
+}
+
+.pip {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  background: var(--border);
+  &.on {
+    background: var(--accent);
+  }
+}
+
+.lvl {
+  margin-left: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.warn {
+  color: var(--warn);
+  font-size: 0.8rem;
+}

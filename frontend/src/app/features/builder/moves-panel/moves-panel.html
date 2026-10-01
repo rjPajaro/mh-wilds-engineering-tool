@@ -1,0 +1,83 @@
+<header class="section-head">
+  <h2>Moves</h2>
+  @if (weapon() && source()) {
+    <span class="muted">{{ targetLabel() ? 'vs ' + targetLabel() : 'no target: hitzone 100' }}</span>
+  }
+</header>
+
+@if (!weapon()) {
+  <p class="muted">Equip a weapon to see damage per move.</p>
+} @else if (!source()) {
+  <p class="muted">
+    No motion values for {{ kindLabel() }} yet. The source wiki only has complete move tables for
+    Great Sword, Sword &amp; Shield and Hammer so far.
+  </p>
+} @else {
+  <div class="controls">
+    <input type="search" placeholder="Filter moves or parts…" aria-label="Filter moves or parts" [value]="filter()" (input)="filter.set($any($event.target).value)" />
+    @if (settings.monster()) {
+      <label class="check">
+        <input type="checkbox" [checked]="allParts()" (change)="allParts.set($any($event.target).checked)" />
+        All parts
+      </label>
+    }
+    <label class="check">
+      <input type="checkbox" [checked]="sortByDamage()" (change)="sortByDamage.set($any($event.target).checked)" />
+      Sort by damage
+    </label>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Hitzone</th>
+          <th scope="col">Move</th>
+          <th scope="col" class="num">Attack</th>
+          <th scope="col" class="num">Affinity</th>
+          <th scope="col" class="num">Element</th>
+        </tr>
+      </thead>
+      @for (group of groups(); track group.section) {
+        <tbody>
+          <tr class="section">
+            <th colspan="5" scope="rowgroup">{{ group.section }}</th>
+          </tr>
+          @for (row of group.rows; track $index) {
+            <tr [title]="detail(row)">
+              <td class="hitzone">
+                <span class="part">{{ row.part ?? '—' }}</span>
+                <span class="hz">
+                  {{ row.move.damageType === 'pierce' ? 'shot' : row.move.damageType }} {{ pct(row.move.rawHitzone) }}
+                  · elem {{ pct(row.move.elementHitzone) }}
+                </span>
+              </td>
+              <td>
+                <span class="name">{{ row.move.name }}</span>
+                @if (row.variant.label) {
+                  <span class="label">{{ row.variant.label }}</span>
+                }
+                @if (row.move.notes.length) {
+                  <span class="tag">note</span>
+                }
+              </td>
+              <td class="num">{{ row.variant.raw | number: '1.0-0' }}</td>
+              <td class="num" [class.neg]="row.move.affinity < 0">{{ row.move.affinity }}%</td>
+              <td class="num">{{ row.variant.element | number: '1.0-0' }}</td>
+            </tr>
+          }
+        </tbody>
+      } @empty {
+        <tbody>
+          <tr><td colspan="5" class="muted">No moves match.</td></tr>
+        </tbody>
+      }
+    </table>
+  </div>
+
+  <p class="muted footnote">
+    Attack and Element are average damage per use (all hits, crits averaged in). Hover a row for motion
+    values, total and per-hit damage. Motion values from the
+    <a [href]="source()!.source" target="_blank" rel="noopener">Monster Hunter Wiki</a>.
+  </p>
+}
