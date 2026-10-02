@@ -29,8 +29,12 @@ only `en` and flattens the in-game hard line breaks (`\r\n`) into spaces. This c
 - `Charm.json`: cosmetic weapon pendants (Hope Scarf, plushies). Not talismans.
 - `Item.json`, `ArmorUpgrade.json`, `Stage.json`: crafting materials, armor upgrade costs, maps. Not
   needed for builds or damage. Crafting inputs, rewards and locations are dropped too.
+- Armor Transcending (TU4) is not in the data. Its slot and defense rules live in
+  `core/armor/transcend.ts` (source in the file); the game index adds a transcended
+  version of every rarity 5+ piece under `<piece id>:transcended`.
 - Random talismans (`Amulet.json` entries with `is_random: true`: Unknown, Secret, Historical,
-  Golden Age Charm). They have no fixed skills; the app needs a custom-talisman editor for them.
+  Golden Age Charm). They have no fixed skills; players enter the ones they rolled on the
+  Talismans tab (`core/talismans/custom-talisman.ts`, stored like custom Artians).
   `Talisman.slots` exists for that, and each slot says whether it takes weapon or armor jewels.
 
 ## Skill mechanics in the data

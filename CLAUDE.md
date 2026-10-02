@@ -15,6 +15,10 @@ rankable by calculated DPS.
 - Values missing from the game data (Artian crafting) are researched and
   kept in `frontend/scripts/supplements/` with sources. See `docs/ARTIAN.md`
   and `docs/CALC.md` (motion values: `frontend/scripts/extract-wiki-moves.mjs`).
+- Weapon/armor thumbnails are hotlinked, never bundled: Kiranico first, then
+  Fextralife, monsterhunterwiki.org and gamertw for gaps. URLs come from
+  `frontend/scripts/extract-thumbnails.mjs` -> `supplements/thumbnails.json`
+  (equipment type/rarity icons end up in `assets/data/icons.json`).
 - `mhdb-wilds-data/` is reference only. Do not edit it.
 - Saved builds: localStorage or IndexedDB, with JSON export/import.
 - Calculator and skill logic live in plain TypeScript (no Angular

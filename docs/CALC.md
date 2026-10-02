@@ -48,6 +48,22 @@ Conditions:
 Active skills that look damage-related (attack/offense/affinity/element icons, and all set/group
 bonuses) but aren't in the table are listed as "Not modeled" in the UI rather than silently ignored.
 
+## Item and meal buffs
+
+`buffs.ts` lists Powercharm (+6 attack), Armorcharm (+12 defense), Demon Powder (+10 attack),
+Hardshell Powder (+20 defense), meals (Meat ration +2 attack, Fish +4 defense, Veggie +2 defense,
+settlement meals such as Kunafa, Azuz, Sild and Suja cuisine and the Grand Hub festival and
+collaboration meals, all +5 attack / +10 defense; their food skills are listed but not modeled), Demondrug / Mega Demondrug (+5 / +7), Might Seed / Pill
+(+10 / +25), Armorskin / Mega Armorskin (+15 / +25 defense) and Adamant Seed / Pill (+20 / ×1.3
+defense). Options in one group don't stack, so the UI allows one per group. Sources are in the file
+(game8 and the Monster Hunter Wiki).
+
+- Attack buffs are flat attack, added after skill percentages (`DamageInput.buffs`).
+- Powercharm and Armorcharm are on by default (they work from the item pouch); everything else starts off.
+- Defense buffs only change the "buffed" defense in the Skills header: flat bonuses first, then the
+  Adamant Pill multiplier. That order is **assumed**.
+- Food skills (e.g. Caprice Meal) and Hunting Horn songs are not modeled.
+
 ## Assumptions to verify in game
 
 | Value | Used | Source |
@@ -80,6 +96,18 @@ move damage = sum over all hits (one row per charge level / state)
 - Without a target, both hitzones count as 100.
 - Values are expected averages. The game rounds each hit down, so in-game numbers can be slightly lower.
 
+The Damage panel's default headline is the **light combo** (`combos.ts`): the combo from pressing
+only light attack without charging (GS Overhead Slash → Strong Charged Slash → True Charged Slash at
+charge level 0; SnS Chop → Side Slash → Diagonal Rising Slash → Diagonal Chop; Hammer Overhead Smash
+I → II → Upswing; sources in the file). It shows the combo total and its average per hit. A test
+checks every step against `moves.json`. Weapon types are added as their motion values arrive.
+
+"All moves" is the **average hit** (`averageHit` in `moves.ts`): the mean damage of
+every hit of every move and charge level/state in the weapon's move list, leaving out riding,
+mounting and sneak attacks. Every hit counts once, so it is a typical hit, not a combo or DPS
+figure. "Per 100 MV" switches back to the reference hit above. Weapon types without motion values
+only have the 100 MV view.
+
 ## Motion values
 
 Source: the Monster Hunter Wiki's `MHWilds/<Weapon> Mechanics` pages. Only **Great Sword, Sword &
@@ -99,4 +127,4 @@ curve), so its total is an upper bound.
 
 Motion values for the other 11 weapon types, element caps, Burst, Coalescence, Convert Element, Elemental Absorption, Mind's
 Eye, Partbreaker, Flayer, ranged ammo/shot skills, set and group bonuses,
-food/item buffs (Might Seed, Demondrug, Powercharm), and wound hitzone changes.
+food skills, Hunting Horn songs, and wound hitzone changes.
