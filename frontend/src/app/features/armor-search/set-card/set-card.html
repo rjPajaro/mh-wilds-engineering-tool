@@ -1,0 +1,53 @@
+<header class="set-head">
+  <span class="rank">#{{ rank() }}</span>
+  <span class="stat">Defense <strong>{{ view().result.defense }}</strong></span>
+  <span class="stat free">
+    Free
+    @for (s of view().freeSlots; track $index) {
+      <img class="slot-icon" [src]="emptySlotIcons[s.target][s.level]" [alt]="'Level ' + s.level" referrerpolicy="no-referrer" />
+    } @empty {
+      <span class="muted">none</span>
+    }
+  </span>
+  <button type="button" class="primary equip" (click)="equip.emit()">Equip in Builder</button>
+</header>
+
+<table class="items">
+  <tbody>
+    @for (r of view().rows; track r.slot) {
+      <tr>
+        <th scope="row">{{ slotLabels[r.slot] }}</th>
+        <td class="item">
+          @if (r.icon) {
+            <img class="item-icon" [src]="r.icon" alt="" loading="lazy" referrerpolicy="no-referrer" />
+          }
+          <span>
+            {{ r.name }}
+            @if (r.alternatives.length) {
+              <span class="hint" [title]="'Same skills and slots: ' + r.alternatives.join(', ')">or {{ r.alternatives.length }} more</span>
+            }
+          </span>
+        </td>
+        <td class="jewels">
+          @for (j of r.jewels; track $index) {
+            <span class="jewel">
+              @if (j.thumbnail) {
+                <img class="slot-icon" [src]="j.thumbnail" alt="" referrerpolicy="no-referrer" />
+              }
+              {{ j.name }}
+            </span>
+          }
+          @for (s of r.free; track $index) {
+            <img class="slot-icon" [src]="emptySlotIcons[s.target][s.level]" [alt]="'Free level ' + s.level + ' slot'" referrerpolicy="no-referrer" />
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<ul class="set-skills">
+  @for (s of view().skills; track s.name) {
+    <li [class.requested]="s.requested" [title]="s.description">{{ s.name }} <span class="lvl">{{ s.level }}</span></li>
+  }
+</ul>

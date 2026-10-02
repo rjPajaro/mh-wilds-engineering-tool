@@ -1,0 +1,112 @@
+:host {
+  display: block;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.equip {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  &:hover {
+    background: var(--hover);
+  }
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.set-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  margin-bottom: 0.4rem;
+  .rank {
+    font-weight: 700;
+  }
+  .free {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+  }
+  .equip {
+    margin-left: auto;
+  }
+}
+
+// Not full width: jewels sit next to the piece names on wide screens.
+.items {
+  border-collapse: collapse;
+  th {
+    width: 4.5rem;
+    color: var(--muted);
+    font-weight: 500;
+    text-align: left;
+  }
+  th,
+  td {
+    padding: 0.15rem 0.4rem 0.15rem 0;
+    vertical-align: middle;
+  }
+  .item {
+    min-width: 16rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+}
+
+.jewels {
+  font-size: 0.85rem;
+  .jewel {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.5rem;
+  }
+}
+
+.item-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+  object-fit: contain;
+}
+
+.slot-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.set-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  li {
+    padding: 0.05rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    &.requested {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+  }
+  .lvl {
+    font-weight: 600;
+  }
+}

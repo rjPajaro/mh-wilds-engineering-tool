@@ -1,0 +1,264 @@
+// Wide: skills | browser | results. Medium: browser under skills. Narrow: one column.
+.layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(16rem, 24rem) minmax(0, 1fr);
+  grid-template-areas: 'query browser results';
+  gap: 1.5rem;
+  align-items: start;
+
+  @media (max-width: 1300px) {
+    grid-template-columns: minmax(16rem, 1fr) minmax(0, 2.4fr);
+    // Results span both rows; the extra height goes to the second so the browser sits under the query.
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'query results'
+      'browser results';
+  }
+
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-template-areas: 'query' 'browser' 'results';
+  }
+}
+
+.query {
+  grid-area: query;
+}
+.browser {
+  grid-area: browser;
+}
+.results {
+  grid-area: results;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+}
+
+h3 {
+  margin: 1.1rem 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+button,
+select {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  &:hover:not(:disabled) {
+    background: var(--hover);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  &.primary:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.skills {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.35rem;
+  }
+  .text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .name {
+    font-weight: 600;
+  }
+  select {
+    max-width: 11rem;
+  }
+  .remove {
+    padding: 0.2rem 0.5rem;
+    color: var(--muted);
+  }
+}
+
+.check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+  > span {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.field {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  label {
+    color: var(--muted);
+  }
+  &.inline {
+    margin: 0;
+  }
+}
+
+.search-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  .primary {
+    flex: 1;
+  }
+}
+
+.status {
+  margin: 0 0 0.6rem;
+}
+
+.issue {
+  margin: 0 0 0.6rem;
+  padding: 0.35rem 0.55rem;
+  border-left: 3px solid var(--muted);
+  background: var(--surface);
+  font-size: 0.85rem;
+  &.error {
+    border-color: var(--error);
+    color: var(--error);
+  }
+  &.warning {
+    border-color: var(--warn);
+  }
+}
+
+.sets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.more {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.weapon-pick {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0.4rem;
+}
+
+.weapon-summary {
+  margin: 0.4rem 0 1.25rem;
+}
+
+.segmented {
+  display: flex;
+  margin-top: 0.4rem;
+  button {
+    flex: 1;
+    border-radius: 0;
+    font-size: 0.85rem;
+    &:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    & + button {
+      margin-left: -1px;
+    }
+  }
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  button {
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+  }
+}
+
+button.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.categories .count {
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--surface);
+  font-size: 0.72rem;
+}
+
+// One row per skill: name, then what it does. Scrolls inside the column.
+.browse {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: 70vh;
+  margin-top: 0.6rem;
+  padding: 0.4rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  button {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  .name {
+    font-weight: 600;
+  }
+  .desc {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 400;
+  }
+  .tag {
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+}

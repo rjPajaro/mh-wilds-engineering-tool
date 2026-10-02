@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   { path: 'builder', loadComponent: () => import('./features/builder/builder').then((m) => m.Builder) },
+  { path: 'search', loadComponent: () => import('./features/armor-search/armor-search').then((m) => m.ArmorSearch) },
   { path: 'artian', loadComponent: () => import('./features/artian-forge/artian-forge').then((m) => m.ArtianForge) },
   { path: 'talismans', loadComponent: () => import('./features/talismans/talismans').then((m) => m.Talismans) },
   { path: '', pathMatch: 'full', redirectTo: 'builder' },

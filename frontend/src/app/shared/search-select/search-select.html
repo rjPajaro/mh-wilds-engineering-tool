@@ -47,6 +47,9 @@
             @if (o.hint) {
               <span class="hint">{{ o.hint }}</span>
             }
+            @if (o.description) {
+              <span class="desc">{{ o.description }}</span>
+            }
           </span>
         </li>
       } @empty {

@@ -1,0 +1,196 @@
+@if (loadError()) {
+  <p class="error">Could not load the game data. Check your connection and reload the page.</p>
+} @else if (loading() || !index()) {
+  <p class="muted">Loading game data…</p>
+} @else {
+  <div class="layout">
+    <aside class="query">
+      <header class="section-head">
+        <h2>Weapon</h2>
+        @if (canCopyBuilderWeapon()) {
+          <button type="button" (click)="copyBuilderWeapon()" [title]="'Use ' + builderWeapon()!.name">Use Builder's</button>
+        }
+      </header>
+      <div class="weapon-pick">
+        <app-search-select
+          inputId="search-weapon-kind"
+          ariaLabel="Weapon type"
+          [options]="weaponKindOptions"
+          [clearable]="false"
+          [value]="settings().weapon.kind"
+          (valueChange)="setWeaponKind($event)"
+        />
+        <app-search-select
+          inputId="search-weapon"
+          ariaLabel="Weapon"
+          placeholder="No weapon"
+          [options]="weaponOptions()"
+          [value]="weaponValue()"
+          (valueChange)="setWeapon($event)"
+        />
+      </div>
+      @if (gogmaGroup(); as group) {
+        <div class="segmented small" role="radiogroup" aria-label="Production device">
+          @for (d of gogmaDevices; track d) {
+            <button type="button" role="radio" [attr.aria-checked]="weapon()?.id === group[d].id" [class.on]="weapon()?.id === group[d].id" (click)="setGogmaDevice(d)">
+              {{ deviceLabels[d] }} <span class="hint">{{ group[d].attack }} · {{ group[d].affinity > 0 ? '+' : '' }}{{ group[d].affinity }}%</span>
+            </button>
+          }
+        </div>
+      }
+      <p class="hint weapon-summary">
+        @if (weapon()) {
+          {{ weaponSummary() }}
+        } @else {
+          Without a weapon, weapon skills can only come from talismans.
+        }
+      </p>
+
+      <header class="section-head">
+        <h2>Skills</h2>
+        @if (groups().length) {
+          <button type="button" (click)="clearSkills()">Clear</button>
+        }
+      </header>
+
+      @for (k of [addKey()]; track k) {
+        <app-search-select
+          inputId="search-add-skill"
+          ariaLabel="Add a skill"
+          placeholder="+ Search all skills…"
+          [clearable]="false"
+          [options]="skillOptions()"
+          (valueChange)="pickSkill($event)"
+        />
+      }
+
+      @for (g of groups(); track g.id) {
+        <h3>{{ g.label }}</h3>
+        <ul class="skills">
+          @for (r of g.rows; track r.req.skillId) {
+            <li>
+              <span class="text" [title]="r.description">
+                <span class="name">{{ r.skill.name }}</span>
+                <span class="hint">{{ r.hint }}</span>
+              </span>
+              <select [attr.aria-label]="r.skill.name + ' level'" (change)="setLevel(r.i, $any($event.target).value)">
+                @for (l of r.levels; track l.level) {
+                  <option [value]="'' + l.level" [selected]="l.level === r.req.level">{{ l.label }}</option>
+                }
+              </select>
+              <button type="button" class="remove" [attr.aria-label]="'Remove ' + r.skill.name" (click)="removeSkill(r.i)">×</button>
+            </li>
+          }
+        </ul>
+      } @empty {
+        <p class="muted">Pick the skills your set needs from a category or the search box. The search finds armor, a talisman and jewels that reach every level.</p>
+      }
+
+      <h3>Options</h3>
+      <label class="check">
+        <input type="checkbox" [checked]="settings().transcended" (change)="setTranscended($any($event.target).checked)" />
+        <span>
+          Transcended armor
+          <span class="hint">Rarity 5+ pieces with transcended slots (HR 100+)</span>
+        </span>
+      </label>
+      <div class="field">
+        <label for="search-talismans">Talismans</label>
+        <select id="search-talismans" (change)="setTalismans($any($event.target).value)">
+          <option value="all" [selected]="settings().talismans === 'all'">Mine and craftable</option>
+          <option value="mine" [selected]="settings().talismans === 'mine'">Only mine (Talismans tab)</option>
+          <option value="none" [selected]="settings().talismans === 'none'">None</option>
+        </select>
+      </div>
+
+      @if (weaponSkillsWithoutWeapon()) {
+        <p class="issue warning">Weapon skills come from the weapon, its jewels and talismans. Pick a weapon above to use its slots.</p>
+      }
+
+      <div class="search-actions">
+        @if (running()) {
+          <button type="button" class="primary" disabled>Searching…</button>
+          <button type="button" (click)="cancel()">Cancel</button>
+        } @else {
+          <button type="button" class="primary" [disabled]="!groups().length" (click)="search()">Search</button>
+        }
+      </div>
+    </aside>
+
+    <section class="browser">
+      <header class="section-head">
+        <h2>Browse skills</h2>
+      </header>
+      <div class="categories" role="tablist" aria-label="Skill categories">
+        @for (c of categoryChips(); track c.id) {
+          <button type="button" role="tab" [attr.aria-selected]="browsing() === c.id" [class.on]="browsing() === c.id" (click)="browse(c.id)">
+            {{ c.label }}@if (c.picked) {{{ ' ' }}<span class="count">{{ c.picked }}</span>}
+          </button>
+        }
+      </div>
+      @if (browsing()) {
+        <div class="browse" role="tabpanel">
+          @for (b of browseSkills(); track b.skill.id) {
+            <button type="button" [class.on]="b.on" [attr.aria-pressed]="b.on" (click)="toggleSkill(b.skill)">
+              <span class="name">
+                {{ b.skill.name }}@if (b.weapon) {{{ ' ' }}<span class="tag" title="Weapon skill">W</span>}
+              </span>
+              @for (line of b.description; track $index) {
+                <span class="desc">{{ line }}</span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="results">
+      <header class="section-head">
+        <h2>Sets</h2>
+        <div class="field inline">
+          <label for="search-rank">Rank by</label>
+          <select id="search-rank" (change)="setRankBy($any($event.target).value)">
+            <option value="slots" [selected]="settings().rankBy === 'slots'">Free slots</option>
+            <option value="defense" [selected]="settings().rankBy === 'defense'">Defense</option>
+          </select>
+        </div>
+      </header>
+
+      @if (error(); as e) {
+        <p class="issue error">{{ e }}</p>
+      }
+
+      @if (output(); as out) {
+        <p class="status">
+          @if (out.found) {
+            Found {{ out.found.toLocaleString() }} {{ out.found === 1 ? 'set' : 'sets' }} in {{ seconds(out.elapsedMs) }} s.
+            @if (out.found > maxResults) {
+              Showing the best {{ maxResults }}.
+            }
+          } @else {
+            No set reaches these skills. Try lower levels, more talismans or transcended armor.
+          }
+        </p>
+        @if (out.timedOut) {
+          <p class="issue warning">The search stopped at its time limit, so these are the best of the sets found so far. Add skills or raise levels to narrow it.</p>
+        }
+        @if (stale()) {
+          <p class="issue">The skills or options changed since this search. Search again to update.</p>
+        }
+
+        <ol class="sets">
+          @for (v of views(); track $index; let n = $index) {
+            <li>
+              <app-set-card [view]="v" [rank]="n + 1" (equip)="equip(v.result)" />
+            </li>
+          }
+        </ol>
+        @if (views().length < out.results.length) {
+          <button type="button" class="more" (click)="showMore()">Show more ({{ out.results.length - views().length }} left)</button>
+        }
+      } @else if (!running()) {
+        <p class="muted">Pick skills on the left and press Search.</p>
+      }
+    </section>
+  </div>
+}

@@ -12,7 +12,7 @@ import {
   WeaponKind,
 } from '../../core/models/game-data';
 import { resolveBuildSkills } from '../../core/skills/skill-resolver';
-import { infusionLabel, isCustomWeapon } from '../../core/artian/artian';
+import { isCustomWeapon } from '../../core/artian/artian';
 import { baseArmorId, canTranscend, isTranscendedId, transcendedId } from '../../core/armor/transcend';
 import { BUFF_GROUPS, BuffGroup, buffedDefense, BuffOption } from '../../core/calc/buffs';
 import { CurrentBuildService } from '../../data/current-build.service';
@@ -22,6 +22,7 @@ import { CustomWeaponsService } from '../../data/custom-weapons.service';
 import { GameDataService } from '../../data/game-data.service';
 import { WEAPON_KIND_OPTIONS } from '../../shared/labels';
 import { SearchSelect, SelectOption } from '../../shared/search-select/search-select';
+import { DEVICE_LABELS, equipmentIcon, gogmaGroupOf, skillsText, weaponIdForOption, weaponOptions, weaponOptionValue } from '../../shared/weapon-options';
 import { DamagePanel } from './damage-panel/damage-panel';
 import { LoadoutBar } from './loadout-bar/loadout-bar';
 import { MovesPanel } from './moves-panel/moves-panel';
@@ -36,12 +37,6 @@ const SLOT_LABELS: Record<EquipSlot, string> = {
   waist: 'Waist',
   legs: 'Legs',
   talisman: 'Talisman',
-};
-
-const DEVICE_LABELS: Record<GogmaDevice, string> = {
-  attack: 'Attack',
-  affinity: 'Affinity',
-  element: 'Element',
 };
 
 @Component({
@@ -82,54 +77,14 @@ export class Builder {
    * Weapons of the chosen type: the user's saved Artians first, then game data.
    * Each game-data Gogma Artian appears once, keyed by its group id.
    */
-  protected readonly weaponOptions = computed<SelectOption[]>(() => {
-    const index = this.index();
-    const configs = new Map(this.customWeapons.configs().map((c) => [c.id, c]));
-    const options: SelectOption[] = this.customWeapons.weaponsOfKind(this.weaponKind()).map((w) => {
-      const config = configs.get(w.id)!;
-      const tier = config.tier === 'gogma' ? `Gogma · ${DEVICE_LABELS[config.device]} device` : `Artian R${config.rarity}`;
-      return {
-        value: w.id,
-        label: w.name,
-        hint: [`My ${tier}`, infusionLabel(config), statText(w), specialText(w)].filter(Boolean).join(' · '),
-        keywords: 'my custom artian',
-        icon: equipmentIcon(w.kind, w.rarity),
-      };
-    });
-    for (const w of index?.weaponsByKind.get(this.weaponKind()) ?? []) {
-      if (w.artian?.tier !== 'gogma') {
-        options.push({
-          value: w.id,
-          label: w.name,
-          hint: [`R${w.rarity}`, w.artian ? 'Artian' : '', statText(w), specialText(w), this.skillsText(w.skills)]
-            .filter(Boolean)
-            .join(' · '),
-          keywords: w.series ?? '',
-          icon: equipmentIcon(w.kind, w.rarity),
-        });
-      } else if (w.artian.device === 'attack') {
-        const group = index!.gogmaGroups.get(w.artian.groupId)!;
-        options.push({
-          value: w.artian.groupId,
-          label: w.name,
-          hint: [`R${w.rarity} · Gogma Artian`, ...GOGMA_DEVICES.map((d) => `${DEVICE_LABELS[d]} ${statText(group[d])}`)].join(' · '),
-          keywords: 'artian',
-          icon: equipmentIcon(w.kind, w.rarity),
-        });
-      }
-    }
-    return options;
-  });
+  protected readonly weaponOptions = computed<SelectOption[]>(() =>
+    weaponOptions(this.weaponKind(), this.index(), [...this.customWeapons.weapons().values()], this.customWeapons.configs()),
+  );
 
   protected readonly gogmaDevices = GOGMA_DEVICES;
   protected readonly deviceLabels = DEVICE_LABELS;
   /** Device variants of the equipped Gogma Artian, or null for any other weapon. */
-  protected readonly gogmaGroup = computed(() => {
-    const weapon = this.build().weapon;
-    if (isCustomWeapon(weapon)) return null; // device is part of the saved config
-    const artian = weapon?.artian;
-    return artian?.tier === 'gogma' ? (this.index()?.gogmaGroups.get(artian.groupId) ?? null) : null;
-  });
+  protected readonly gogmaGroup = computed(() => gogmaGroupOf(this.build().weapon, this.index()));
   protected readonly gogmaDevice = computed(() => {
     const artian = this.build().weapon?.artian;
     return artian?.tier === 'gogma' ? artian.device : null;
@@ -258,11 +213,7 @@ export class Builder {
   }
 
   protected equippedId(slot: EquipSlot): string {
-    if (slot === 'weapon') {
-      const weapon = this.build().weapon;
-      if (isCustomWeapon(weapon)) return weapon!.id;
-      return weapon?.artian?.tier === 'gogma' ? weapon.artian.groupId : (weapon?.id ?? '');
-    }
+    if (slot === 'weapon') return weaponOptionValue(this.build().weapon);
     if (slot === 'talisman') return this.build().talisman?.id ?? '';
     // Transcended pieces share their option with the normal piece.
     return baseArmorId(this.build().armor[slot]?.id ?? '');
@@ -333,9 +284,7 @@ export class Builder {
     this.saved.update((b) => {
       const decorations = { ...b.decorations, [slot]: [] };
       if (slot === 'weapon') {
-        // A game-data Gogma Artian option is keyed by group id; equip its attack device.
-        const weaponId = id ? (index.gogmaGroups.get(id)?.attack.id ?? id) : null;
-        return { ...b, weaponId, decorations };
+        return { ...b, weaponId: weaponIdForOption(id, index), decorations };
       }
       if (slot === 'talisman') return { ...b, talismanId: id || null, decorations };
       // Swapping pieces keeps the slot transcended when the new piece can be.
@@ -369,34 +318,14 @@ export class Builder {
 
   /** "Weakness Exploit 2, Agitator 1"; set/group bonuses only when `includeBonuses`. */
   private skillsText(skills: readonly SkillLevel[], includeBonuses = true): string {
-    const index = this.index();
-    return skills
-      .map(({ skillId, level }) => ({ skill: index?.skills.get(skillId), level }))
-      .filter(({ skill }) => skill && (includeBonuses || (skill.kind !== 'set' && skill.kind !== 'group')))
-      .map(({ skill, level }) => `${skill!.name} ${level}`)
-      .join(', ');
+    return skillsText(skills, this.index()?.skills, includeBonuses);
   }
 
 }
 
 
-function statText(w: Weapon): string {
-  return `${w.attack} atk${w.affinity ? ` ${w.affinity > 0 ? '+' : ''}${w.affinity}%` : ''}`;
-}
-
 function slotText(slots: readonly number[]): string {
   return slots.length ? slots.map((s) => `[${s}]`).join('') : '';
-}
-
-function specialText(w: Weapon): string {
-  return w.specials
-    .map((s) => `${s.hidden ? '(' : ''}${s.kind === 'element' ? s.element : s.status} ${s.value}${s.hidden ? ')' : ''}`)
-    .join(' ');
-}
-
-/** In-game equipment type icon tinted for `rarity` (assets/data/icons.json, from the MH Wiki). */
-function equipmentIcon(kind: string, rarity: number | 'base'): string | undefined {
-  return (icons.equipment as Record<string, Record<string, string>>)[kind]?.[rarity];
 }
 
 function buffHint(o: BuffOption): string {

@@ -15,6 +15,8 @@ export interface SelectOption {
   label: string;
   /** Secondary text shown under the label; also searchable. */
   hint?: string;
+  /** Longer text shown under the hint, wrapping (e.g. a skill's effect); also searchable. */
+  description?: string;
   /** Extra searchable text that is not displayed (e.g. skill names). */
   keywords?: string;
   /** Small image shown before the label, and in the field while selected. */
@@ -30,8 +32,8 @@ let nextId = 0;
 
 /**
  * Dropdown with a search box. Every whitespace-separated term must appear in the
- * option's label, hint or keywords. Options whose label matches every term are
- * listed before options matched through hint/keywords only.
+ * option's label, hint, keywords or description. Options whose label matches every term are
+ * listed before options matched through hint/keywords/description only.
  */
 @Component({
   selector: 'app-search-select',
@@ -66,7 +68,7 @@ export class SearchSelect {
     this.options().map((o) => ({
       ...o,
       labelText: normalize(o.label),
-      searchText: normalize(`${o.label} ${o.hint ?? ''} ${o.keywords ?? ''}`),
+      searchText: normalize(`${o.label} ${o.hint ?? ''} ${o.keywords ?? ''} ${o.description ?? ''}`),
     })),
   );
 

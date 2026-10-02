@@ -3,7 +3,7 @@ import { SearchSelect, SelectOption } from './search-select';
 
 const OPTIONS: SelectOption[] = [
   { value: 'a', label: 'Attack Jewel [3]', hint: 'Attack Boost 1' },
-  { value: 'b', label: 'Expert Jewel [3]', hint: 'Weakness Exploit 1' },
+  { value: 'b', label: 'Expert Jewel [3]', hint: 'Weakness Exploit 1', description: 'Raises affinity on weak points.' },
   { value: 'c', label: 'Gore Helm α', keywords: 'Gore α Evade Window' },
   { value: 'd', label: 'Evasion Jewel [1]', hint: 'Evade Window 1' },
 ];
@@ -51,6 +51,13 @@ describe('SearchSelect', () => {
     expect(labels()).toEqual(['Evasion Jewel [1]']);
     await type('weakness');
     expect(labels()).toEqual(['Expert Jewel [3]']);
+  });
+
+  it('shows option descriptions and matches them', async () => {
+    await type('affinity');
+    expect(labels()).toEqual(['Expert Jewel [3]']);
+    const desc = (fixture.nativeElement as HTMLElement).querySelectorAll('li[role="option"] .desc');
+    expect([...desc].map((e) => e.textContent)).toEqual(['Raises affinity on weak points.']);
   });
 
   it('shows an empty state', async () => {
