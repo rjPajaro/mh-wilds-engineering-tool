@@ -10,6 +10,7 @@
     "hunting-horn.json",
     "monsters.json",
     "artian.json",
-    "moves.json"
+    "moves.json",
+    "icons.json"
   ]
 }

@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { newArtianConfig } from '../core/artian/artian';
 import { emptySavedBuild } from '../core/build/build';
 import { CurrentBuildService } from './current-build.service';
+import { CustomTalismansService } from './custom-talismans.service';
 import { CustomWeaponsService } from './custom-weapons.service';
 import { DamageSettingsService } from './damage-settings.service';
 import { GameDataService } from './game-data.service';
@@ -17,6 +18,7 @@ function setup() {
     loadouts: TestBed.inject(LoadoutsService),
     current: TestBed.inject(CurrentBuildService),
     artians: TestBed.inject(CustomWeaponsService),
+    talismans: TestBed.inject(CustomTalismansService),
     settings: TestBed.inject(DamageSettingsService),
   };
 }
@@ -100,24 +102,28 @@ describe('LoadoutsService', () => {
     expect(friend.loadouts.loadouts()[0]).toMatchObject({ name: 'Dragon SnS', build: { weaponId: received.id } });
   });
 
-  it('exports and imports loadouts and Artians', () => {
+  it('exports and imports loadouts, Artians and talismans', () => {
     const source = setup();
     const artian = newArtianConfig('bow', 'artian', 'b');
+    const talisman = { id: 'custom:t1', name: 'Mine', rarity: 8, skills: [{ skillId: 5, level: 2 }], slots: [] };
     source.artians.save(artian);
-    source.current.saved.set({ ...emptySavedBuild(), weaponId: artian.id });
+    source.talismans.save(talisman);
+    source.current.saved.set({ ...emptySavedBuild(), weaponId: artian.id, talismanId: talisman.id });
     source.loadouts.saveAs('Bow');
+    expect(source.loadouts.loadouts()[0].talisman).toEqual(talisman);
     source.current.saved.set(hammerBuild);
     source.loadouts.saveAs('Hammer');
     const json = source.loadouts.exportJson();
 
     localStorage.clear();
     const target = setup();
-    expect(target.loadouts.importJson(json)).toEqual({ loadouts: 2, artians: 1, skipped: 0 });
+    expect(target.loadouts.importJson(json)).toEqual({ loadouts: 2, artians: 1, talismans: 1, skipped: 0 });
     const bow = target.loadouts.loadouts().find((l) => l.name === 'Bow')!;
     expect(target.artians.configs().map((c) => c.id)).toContain(bow.build.weaponId);
+    expect(target.talismans.configs().map((c) => c.id)).toContain(bow.build.talismanId);
 
-    // Importing the same file again adds the loadouts as new entries but not the Artian.
-    expect(target.loadouts.importJson(json)).toMatchObject({ loadouts: 2, artians: 0 });
+    // Importing the same file again adds the loadouts as new entries but not the Artian or talisman.
+    expect(target.loadouts.importJson(json)).toMatchObject({ loadouts: 2, artians: 0, talismans: 0 });
     expect(new Set(target.loadouts.loadouts().map((l) => l.id)).size).toBe(4);
   });
 });

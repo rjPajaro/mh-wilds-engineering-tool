@@ -66,7 +66,7 @@ export class MovesPanel {
     const source = this.source();
     if (!weapon || !source) return [];
 
-    const base = { weapon, skills: this.skills(), toggles: this.settings.toggles() };
+    const base = { weapon, skills: this.skills(), toggles: this.settings.toggles(), buffs: this.settings.buffEffects() };
     const perPart = this.targetParts().map((part) => ({
       part: part?.name ?? null,
       results: calculateMoves({ ...base, target: part ? { hitzones: part.hitzones, wounded: this.settings.wounded() } : null }, source.moves),

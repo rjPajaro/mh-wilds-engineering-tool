@@ -93,3 +93,41 @@ function variantDamage(move: Move, v: MoveVariant, s: HitStats): MoveVariantResu
   });
   return { ...(v.label ? { label: v.label } : {}), hits: v.hits, perHit, raw, element, total: raw + element };
 }
+
+export interface AverageHit {
+  /** Expected damage of an average hit (raw + element). */
+  total: number;
+  raw: number;
+  element: number;
+  /** Average motion value of the hits counted. */
+  motionValue: number;
+  hits: number;
+  moves: number;
+}
+
+/** Riding, mounting and sneak attacks are not part of normal fighting, so they are left out of the average. */
+const OUT_OF_COMBAT = /riding|mount|sneak/i;
+
+/**
+ * The average hit across a weapon's move list: every hit of every move and
+ * charge level/state counts once. Returns null when there are no moves.
+ */
+export function averageHit(results: readonly MoveResult[]): AverageHit | null {
+  let hits = 0;
+  let raw = 0;
+  let element = 0;
+  let motion = 0;
+  let moves = 0;
+  for (const move of results) {
+    if (OUT_OF_COMBAT.test(move.section)) continue;
+    moves++;
+    for (const v of move.variants) {
+      hits += v.hits.length;
+      raw += v.raw;
+      element += v.element;
+      motion += v.hits.reduce((a, b) => a + b, 0);
+    }
+  }
+  if (!hits) return null;
+  return { total: (raw + element) / hits, raw: raw / hits, element: element / hits, motionValue: motion / hits, hits, moves };
+}

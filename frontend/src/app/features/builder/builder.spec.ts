@@ -82,4 +82,106 @@ describe('Builder persistence', () => {
     const second = await mount();
     expect(second.api.build().weapon?.artian).toMatchObject({ tier: 'gogma', device: 'affinity' });
   });
+
+  it('shows the thumbnail of picked gear and hides images that fail to load', async () => {
+    const sieglinde = index.files.weapons.find((w) => w.id === 'great-sword:8')!;
+    const head = index.armorByKind.head.find((p) => p.thumbnail)!;
+    const charm = index.files.talismans.find((t) => t.rarity === 6)!;
+    const { fixture, api } = await mount();
+    const el = fixture.nativeElement as HTMLElement;
+    const images = () => [...el.querySelectorAll<HTMLImageElement>('img.thumb')].map((img) => img.getAttribute('src'));
+    expect(images()).toEqual([]);
+
+    api.setWeaponKind('great-sword');
+    api.equip('weapon', sieglinde.id);
+    api.equip('head', head.id);
+    api.equip('talisman', charm.id);
+    await fixture.whenStable();
+    expect(images()).toEqual([
+      'https://mhwilds.kiranico.net/tex_thumbnail/it0000_0008.webp',
+      head.thumbnail,
+      'https://monsterhunterwiki.org/images/7/70/MHWilds-Charm_Icon_Violet.png',
+    ]);
+
+    el.querySelector('img.thumb')!.dispatchEvent(new Event('error'));
+    await fixture.whenStable();
+    expect(images()).toEqual([head.thumbnail, charm.thumbnail]);
+  });
+
+  it('shows equipment and decoration icons beside their fields', async () => {
+    const head = index.armorByKind.head.find((p) => p.slots[0] === 3 && p.rarity === 8)!;
+    const jewel = index.files.decorations.find((d) => d.allowedOn === 'armor' && d.slotLevel === 2)!;
+    const { fixture, api } = await mount();
+    const el = fixture.nativeElement as HTMLElement;
+    const headIcon = () => el.querySelector('#equip-head')!.closest('app-search-select')!.querySelector('img')!.getAttribute('src');
+    const decoField = () => el.querySelector<HTMLElement>('.decos app-search-select')!;
+    expect(headIcon()).toContain('MHWA-Helmet_Icon_Base');
+
+    api.equip('head', head.id);
+    await fixture.whenStable();
+    expect(headIcon()).toContain('MHWA-Helmet_Icon_Rare_8');
+    expect(decoField().querySelector('input')!.placeholder).toBe('Armor slot');
+    expect(decoField().querySelector('img')!.getAttribute('src')).toContain('Decoration_Level_3-Armor_Icon_Gray');
+
+    api.setDecoration('head', 0, String(jewel.id));
+    await fixture.whenStable();
+    expect(jewel.thumbnail).toContain('Decoration_Level_2-Armor_Icon_');
+    expect(decoField().querySelector('img')!.getAttribute('src')).toBe(jewel.thumbnail);
+    expect(decoField().querySelector('input')!.value).toBe(jewel.name);
+  });
+
+  it('transcends rarity 5+ armor, upgrading slots and keeping decorations that still fit', async () => {
+    const pieces = index.files.armor.flatMap((s) => s.pieces);
+    const chest = pieces.find((p) => p.name === 'G. Ebony Mail β')!;
+    const head = pieces.find((p) => p.name === 'G. Ebony Helm α')!;
+    const jewel1 = index.files.decorations.find((d) => d.allowedOn === 'armor' && d.slotLevel === 1)!;
+    const { fixture, api } = await mount();
+    const el = fixture.nativeElement as HTMLElement;
+    const toggle = (slot: string) =>
+      el.querySelector(`#equip-${slot}`)!.closest('.equip')!.querySelector<HTMLButtonElement>('button.transcend');
+    const slotCount = (slot: string) => el.querySelector(`#equip-${slot}`)!.closest('.equip')!.querySelectorAll('.decos app-search-select').length;
+
+    api.equip('chest', chest.id);
+    api.equip('head', head.id);
+    await fixture.whenStable();
+    expect(chest.slots).toEqual([2, 2]);
+    expect(slotCount('head')).toBe(0);
+
+    toggle('chest')!.click();
+    toggle('head')!.click();
+    await fixture.whenStable();
+    expect((api.build().armor['chest'] as { slots?: number[] }).slots).toEqual([3, 3]);
+    expect(toggle('chest')!.textContent!.trim()).toBe('Transcended');
+    expect(slotCount('head')).toBe(2); // no slots -> two level 1 slots
+
+    api.setDecoration('head', 1, String(jewel1.id));
+    toggle('head')!.click(); // back to no slots: the decoration goes
+    await fixture.whenStable();
+    expect(api.build().armor['head']?.id).toBe(head.id);
+    expect(api.build().decorations['head']).toEqual([]);
+
+    // Swapping to another eligible piece stays transcended.
+    api.equip('chest', pieces.find((p) => p.name === 'G. Ebony Mail α')!.id);
+    await fixture.whenStable();
+    expect(api.build().armor['chest']?.id).toMatch(/:transcended$/);
+  });
+
+  it("lists each piece's set bonuses, then its skills with levels", async () => {
+    const set = index.files.armor.find((s) => s.name === 'Arkveld γ')!;
+    const helm = set.pieces.find((p) => p.name === 'Arkvulcan Helm γ')!;
+    const { fixture, api } = await mount();
+    const el = fixture.nativeElement as HTMLElement;
+    const card = (slot: string) => el.querySelector(`#equip-${slot}`)!.closest('.equip')!.querySelector('.item-skills')!;
+    const lines = (slot: string) => [...card(slot).querySelectorAll('li')].map((li) => li.textContent!.replace(/\s+/g, ' ').trim());
+
+    api.equip('head', helm.id);
+    await fixture.whenStable();
+    expect(lines('head')).toEqual(["Arkveld's Hunger", "Lord's Soul", 'Weakness Exploit 3']);
+    expect(card('head').querySelectorAll('li.bonus')).toHaveLength(2);
+    expect(card('head').querySelector('li.bonus.active')).toBeNull(); // one piece activates neither
+
+    api.equip('chest', set.pieces.find((p) => p.kind === 'chest')!.id);
+    await fixture.whenStable();
+    expect(card('head').querySelector('li.bonus.active')?.textContent).toContain("Arkveld's Hunger");
+  });
 });

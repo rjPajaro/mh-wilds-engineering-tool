@@ -9,7 +9,11 @@ function active(name: string, level: number, kind: Skill['kind'] = 'armor'): Act
 }
 
 describe('DamagePanel', () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    localStorage.clear();
+    // No item buffs, so the numbers below are the weapon's and skills' alone.
+    localStorage.setItem('mhwet.damage.buffs.v1', JSON.stringify({ powercharm: '' }));
+  });
 
   async function render(weapon = LONG_SWORD, skills: ActiveSkill[] = []) {
     const fixture = TestBed.createComponent(DamagePanel);

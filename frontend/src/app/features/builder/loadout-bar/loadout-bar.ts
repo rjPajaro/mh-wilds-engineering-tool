@@ -3,7 +3,7 @@ import { ImportError } from '../../../core/loadouts/loadout';
 import { LoadoutsService } from '../../../data/loadouts.service';
 import { SearchSelect, SelectOption } from '../../../shared/search-select/search-select';
 
-type Mode = 'idle' | 'save-as' | 'rename' | 'delete' | 'confirm-load' | 'share' | 'menu';
+type Mode = 'idle' | 'save-as' | 'rename' | 'delete' | 'confirm-load' | 'confirm-new' | 'share' | 'menu';
 
 @Component({
   selector: 'app-loadout-bar',
@@ -47,6 +47,20 @@ export class LoadoutBar {
     this.loadouts.load(id);
     this.setMode('idle');
     this.flash('ok', `Loaded "${this.loadouts.active()?.name}".`);
+  }
+
+  protected startNew(): void {
+    if (this.unsaved()) {
+      this.setMode('confirm-new');
+      return;
+    }
+    this.newNow();
+  }
+
+  protected newNow(): void {
+    this.loadouts.newBuild();
+    this.setMode('idle');
+    this.flash('ok', 'Started a new build.');
   }
 
   protected save(): void {
@@ -105,7 +119,7 @@ export class LoadoutBar {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     this.setMode('idle');
-    this.flash('ok', `Exported ${this.loadouts.loadouts().length} loadout(s) and your Artians.`);
+    this.flash('ok', `Exported ${this.loadouts.loadouts().length} loadout(s), your Artians and your talismans.`);
   }
 
   protected chooseImport(): void {
@@ -119,7 +133,7 @@ export class LoadoutBar {
     try {
       const result = this.loadouts.importJson(await file.text());
       const skipped = result.skipped ? ` ${result.skipped} invalid entr${result.skipped === 1 ? 'y was' : 'ies were'} skipped.` : '';
-      this.flash('ok', `Imported ${result.loadouts} loadout(s) and ${result.artians} new Artian(s).${skipped}`);
+      this.flash('ok', `Imported ${result.loadouts} loadout(s), ${result.artians} new Artian(s) and ${result.talismans} new talisman(s).${skipped}`);
     } catch (e) {
       this.flash('error', e instanceof ImportError ? e.message : 'Could not read that file.');
     }

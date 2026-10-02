@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { calculateDamage } from '../../../core/calc/damage';
+import { comboDamage, LIGHT_COMBOS } from '../../../core/calc/combos';
+import { averageHit, calculateMoves } from '../../../core/calc/moves';
 import { SHARPNESS_COLORS, Weapon } from '../../../core/models/game-data';
 import { ActiveSkill } from '../../../core/skills/skill-resolver';
 import { GameDataService } from '../../../data/game-data.service';
 import { DamageSettingsService } from '../../../data/damage-settings.service';
+import { persistedSignal } from '../../../shared/persisted-signal';
 import { SearchSelect, SelectOption } from '../../../shared/search-select/search-select';
 
 /** Wilds displays element and status at 10x their true value. */
@@ -59,7 +62,42 @@ export class DamagePanel {
   protected readonly result = computed(() => {
     const weapon = this.weapon();
     if (!weapon) return null;
-    return calculateDamage({ weapon, skills: this.skills(), toggles: this.toggles(), target: this.settings.target() });
+    return calculateDamage({ weapon, skills: this.skills(), toggles: this.toggles(), buffs: this.settings.buffEffects(), target: this.settings.target() });
+  });
+
+  /**
+   * Headline number: the weapon's light-attack combo, the average hit of all its
+   * moves, or a 100 MV reference hit.
+   */
+  protected readonly view = persistedSignal<'combo' | 'average' | 'mv100'>('damage.view.v2', 'combo', (v) =>
+    v === 'combo' || v === 'average' || v === 'mv100',
+  );
+
+  /** Per-move damage; null when the weapon type's motion values are not available. */
+  private readonly moveResults = computed(() => {
+    const weapon = this.weapon();
+    const moves = weapon ? this.data.index()?.files.moves.weapons[weapon.kind] : undefined;
+    if (!weapon || !moves) return null;
+    return calculateMoves({ weapon, skills: this.skills(), toggles: this.toggles(), buffs: this.settings.buffEffects(), target: this.settings.target() }, moves.moves);
+  });
+
+  protected readonly average = computed(() => {
+    const results = this.moveResults();
+    return results ? averageHit(results) : null;
+  });
+
+  protected readonly combo = computed(() => {
+    const results = this.moveResults();
+    const combo = this.weapon() ? LIGHT_COMBOS[this.weapon()!.kind] : undefined;
+    return results && combo ? comboDamage(combo, results) : null;
+  });
+
+  /** The view to show: falls back when the chosen one is not available for this weapon. */
+  protected readonly shownView = computed(() => {
+    const view = this.view();
+    if (view === 'combo' && !this.combo()) return this.average() ? 'average' : 'mv100';
+    if (view === 'average' && !this.average()) return 'mv100';
+    return view;
   });
 
   /** Target stats when a part is selected, otherwise base stats. */

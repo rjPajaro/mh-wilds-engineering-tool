@@ -24,6 +24,8 @@ export interface DamageInput {
   target?: DamageTarget | null;
   /** Hitzone type to use instead of the weapon type's (e.g. a blunt move on a slash weapon). */
   hitzoneKind?: HitzoneKind;
+  /** Always-on bonuses from items and meals (see buffs.ts). */
+  buffs?: readonly { label: string; values: EffectValues }[];
 }
 
 export interface Contribution {
@@ -124,7 +126,7 @@ export function calculateDamage(input: DamageInput): DamageResult {
   }
 
   const statsFor = (weakPoint: boolean, wounded: boolean): Stats => {
-    const parts: { label: string; values: EffectValues }[] = [];
+    const parts: { label: string; values: EffectValues }[] = [...(input.buffs ?? [])];
     for (const { name, level: lv, effect } of modeled) {
       const values = effect.levels[Math.min(lv, effect.levels.length) - 1];
       const c = effect.condition;

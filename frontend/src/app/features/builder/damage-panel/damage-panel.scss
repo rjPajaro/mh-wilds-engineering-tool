@@ -152,3 +152,80 @@
     font-size: 0.75rem;
   }
 }
+
+.view {
+  display: flex;
+
+  button {
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+
+    &:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    & + button {
+      margin-left: -1px;
+    }
+    &.on {
+      position: relative;
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+  }
+}
+
+.combo-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  margin: 0.3rem 0 0.4rem;
+
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+  strong {
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // The headline: what the whole combo deals.
+  .combo-total strong {
+    color: var(--accent);
+    font-size: 1.6rem;
+    line-height: 1.15;
+  }
+}
+
+.combo-steps {
+  max-width: 22rem;
+  margin: 0 0 0.4rem;
+  padding-left: 1.4rem;
+  font-size: 0.85rem;
+
+  li {
+    padding: 0.1rem 0;
+    border-bottom: 1px solid var(--border);
+
+    // Name on the left, damage right-aligned; the list keeps its numbers.
+    > span {
+      display: inline-block;
+      width: calc(100% - 3rem);
+    }
+    strong {
+      display: inline-block;
+      width: 3rem;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}

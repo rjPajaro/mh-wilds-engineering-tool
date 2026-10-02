@@ -27,8 +27,9 @@ describe('loadout helpers', () => {
 
   it('round-trips an export file', () => {
     const artian = newArtianConfig('lance', 'artian', 'x');
-    const file = createExport([loadout()], [artian], new Date('2026-10-02T00:00:00Z'));
-    expect(parseExport(JSON.stringify(file))).toEqual({ loadouts: [loadout()], artians: [artian], skipped: 0 });
+    const talisman = { id: 'custom:t', name: '', rarity: 8, skills: [{ skillId: 1, level: 2 }], slots: [{ level: 1, accepts: 'weapon' as const }] };
+    const file = createExport([loadout()], [artian], [talisman], new Date('2026-10-02T00:00:00Z'));
+    expect(parseExport(JSON.stringify(file))).toEqual({ loadouts: [loadout()], artians: [artian], talismans: [talisman], skipped: 0 });
   });
 
   it('skips invalid entries and rejects other files', () => {

@@ -2,7 +2,7 @@ import { ArtianConfig, newArtianConfig } from '../artian/artian';
 import { emptySavedBuild } from '../build/build';
 import { ARMOR_KINDS, ArmorSet, Decoration, Talisman, Weapon } from '../models/game-data';
 import { LoadoutContent } from './loadout';
-import { decodeShareCode, encodeShareCode, SHARED_ARTIAN_ID, ShareCodeError } from './share-code';
+import { decodeShareCode, encodeShareCode, SHARED_ARTIAN_ID, SHARED_TALISMAN_ID, ShareCodeError } from './share-code';
 import weapons from '../../../assets/data/weapons.json';
 import armor from '../../../assets/data/armor.json';
 import decorations from '../../../assets/data/decorations.json';
@@ -14,7 +14,7 @@ const DECOS = decorations as unknown as Decoration[];
 const TALISMANS = talismans as unknown as Talisman[];
 
 function content(overrides: Partial<LoadoutContent> = {}): LoadoutContent {
-  return { name: '', weaponKind: 'long-sword', build: emptySavedBuild(), artian: null, setup: null, ...overrides };
+  return { name: '', weaponKind: 'long-sword', build: emptySavedBuild(), artian: null, talisman: null, setup: null, ...overrides };
 }
 
 const roundTrip = (c: LoadoutContent) => decodeShareCode(encodeShareCode(c));
@@ -99,7 +99,37 @@ describe('share codes', () => {
   });
 
   it('rejects codes from a newer format', () => {
-    const newer = 'Ag' + encodeShareCode(content()).slice(2); // first byte 0x02
-    expect(() => decodeShareCode(newer)).toThrow(/newer version/);
+    expect(() => decodeShareCode(toCode([4, 0, 0, 0]))).toThrow(/newer version/);
+  });
+
+  it('round-trips a custom talisman with its skills and slots', () => {
+    const talisman = {
+      id: 'custom:mine',
+      name: 'WEX charm',
+      rarity: 8,
+      skills: [{ skillId: -1234, level: 2 }, { skillId: 99, level: 1 }],
+      slots: [{ level: 3, accepts: 'armor' as const }, { level: 1, accepts: 'weapon' as const }],
+    };
+    const decoded = roundTrip(content({ build: { ...emptySavedBuild(), talismanId: talisman.id }, talisman }));
+    expect(decoded.talisman).toEqual({ ...talisman, id: SHARED_TALISMAN_ID });
+    expect(decoded.build.talismanId).toBe(SHARED_TALISMAN_ID);
+    // Without its config a custom talisman cannot be shared.
+    expect(roundTrip(content({ build: { ...emptySavedBuild(), talismanId: 'custom:gone' } })).build.talismanId).toBeNull();
+  });
+
+  it('round-trips transcended armor', () => {
+    const build = { ...emptySavedBuild(), armor: { head: '-123:head:transcended', chest: '-456:chest', legs: '7:legs:transcended' } };
+    expect(roundTrip(content({ build })).build.armor).toEqual(build.armor);
+  });
+
+  it('still decodes version 1 codes (no transcended byte)', () => {
+    // Version 1, long sword, no name, no weapon, head with set id -123 (opt zz = varint 246),
+    // four empty armor slots, no talisman, 7 empty decoration lists, no setup.
+    const v1 = toCode([1, 0, 0, 0, 246, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    expect(decodeShareCode(v1).build.armor).toEqual({ head: '-123:head' });
   });
 });
+
+function toCode(bytes: number[]): string {
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}

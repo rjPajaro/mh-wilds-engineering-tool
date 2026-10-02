@@ -1,5 +1,6 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { ArtianConfig } from '../core/artian/artian';
+import { emptySavedBuild } from '../core/build/build';
 import {
   createExport,
   DamageSetup,
@@ -11,8 +12,10 @@ import {
   sameContent,
 } from '../core/loadouts/loadout';
 import { decodeShareCode, encodeShareCode } from '../core/loadouts/share-code';
+import { CustomTalismanConfig, sameTalisman } from '../core/talismans/custom-talisman';
 import { isString, persistedSignal } from '../shared/persisted-signal';
 import { CurrentBuildService } from './current-build.service';
+import { CustomTalismansService } from './custom-talismans.service';
 import { CustomWeaponsService } from './custom-weapons.service';
 import { DamageSettingsService } from './damage-settings.service';
 
@@ -25,13 +28,14 @@ export class LoadoutsService {
   private readonly current = inject(CurrentBuildService);
   private readonly settings = inject(DamageSettingsService);
   private readonly artians = inject(CustomWeaponsService);
+  private readonly talismans = inject(CustomTalismansService);
 
   readonly loadouts = persistedSignal<Loadout[]>('loadouts.v1', [], (v) => Array.isArray(v) && v.every(isLoadout));
   /** The loadout the current build was loaded from or last saved to; '' for none. */
   readonly activeId = persistedSignal('loadouts.active.v1', '', isString);
   readonly active = computed(() => this.loadouts().find((l) => l.id === this.activeId()) ?? null);
 
-  /** The current build, setup and its custom Artian, as loadout content. */
+  /** The current build, setup and its custom Artian / talisman, as loadout content. */
   readonly currentContent = computed<LoadoutContent>(() => {
     const build = this.current.saved();
     return {
@@ -39,6 +43,7 @@ export class LoadoutsService {
       weaponKind: this.current.weaponKind(),
       build,
       artian: this.artians.configs().find((c) => c.id === build.weaponId) ?? null,
+      talisman: this.talismans.configs().find((c) => c.id === build.talismanId) ?? null,
       setup: this.currentSetup(),
     };
   });
@@ -95,6 +100,8 @@ export class LoadoutsService {
     // A local loadout refers to its Artian by id. Keep the Forge's (possibly
     // edited) version; restore the saved copy only if it was deleted.
     if (loadout.artian && !this.artians.configs().some((c) => c.id === loadout.artian!.id)) this.artians.save(loadout.artian);
+    // Same for its custom talisman.
+    if (loadout.talisman && !this.talismans.configs().some((c) => c.id === loadout.talisman!.id)) this.talismans.save(loadout.talisman);
     this.apply(loadout);
     this.activeId.set(id);
   }
@@ -102,6 +109,12 @@ export class LoadoutsService {
   /** Starts a fresh, unsaved build. */
   detach(): void {
     this.activeId.set('');
+  }
+
+  /** Clears the equipment and starts a new, unsaved build. Keeps the weapon type and damage setup. */
+  newBuild(): void {
+    this.current.saved.set(emptySavedBuild());
+    this.detach();
   }
 
   // ------------------------------------------------------------ sharing
@@ -122,13 +135,13 @@ export class LoadoutsService {
 
   /** Loads shared content into the Builder as an unsaved build. */
   loadShared(content: LoadoutContent): void {
-    this.apply(this.adoptArtian(content));
+    this.apply(this.adopt(content));
     this.activeId.set('');
   }
 
   /** Saves shared content as a new loadout without changing the current build. */
   saveShared(content: LoadoutContent): Loadout {
-    const adopted = this.adoptArtian(content);
+    const adopted = this.adopt(content);
     const now = new Date().toISOString();
     const loadout: Loadout = { ...adopted, name: adopted.name.trim() || 'Shared build', id: this.newId(), createdAt: now, updatedAt: now };
     this.loadouts.update((list) => [...list, loadout]);
@@ -138,24 +151,31 @@ export class LoadoutsService {
   // ------------------------------------------------------------ export / import
 
   exportJson(): string {
-    return JSON.stringify(createExport(this.loadouts(), this.artians.configs()), null, 2);
+    return JSON.stringify(createExport(this.loadouts(), this.artians.configs(), this.talismans.configs()), null, 2);
   }
 
-  /** Adds the loadouts and Artians from an export file. Throws ImportError for bad files. */
-  importJson(text: string): { loadouts: number; artians: number; skipped: number } {
+  /** Adds the loadouts, Artians and talismans from an export file. Throws ImportError for bad files. */
+  importJson(text: string): { loadouts: number; artians: number; talismans: number; skipped: number } {
     const file = parseExport(text);
-    const before = this.artians.configs().length;
-    // Artians first, so loadouts can be pointed at the Forge copies.
+    const artiansBefore = this.artians.configs().length;
+    const talismansBefore = this.talismans.configs().length;
+    // Artians and talismans first, so loadouts can be pointed at the saved copies.
     const idMap = new Map<string, string>();
     for (const artian of file.artians) idMap.set(artian.id, this.ensureArtian(artian).id);
+    for (const talisman of file.talismans) idMap.set(talisman.id, this.ensureTalisman(talisman).id);
 
     const existingIds = new Set(this.loadouts().map((l) => l.id));
     const added = file.loadouts.map((l) => {
-      const adopted = this.adoptArtian(l, idMap);
+      const adopted = this.adopt(l, idMap);
       return { ...l, ...adopted, id: existingIds.has(l.id) ? this.newId() : l.id };
     });
     this.loadouts.update((list) => [...list, ...added]);
-    return { loadouts: added.length, artians: this.artians.configs().length - before, skipped: file.skipped };
+    return {
+      loadouts: added.length,
+      artians: this.artians.configs().length - artiansBefore,
+      talismans: this.talismans.configs().length - talismansBefore,
+      skipped: file.skipped,
+    };
   }
 
   // ------------------------------------------------------------ internals
@@ -180,6 +200,11 @@ export class LoadoutsService {
     }
   }
 
+  /** Content from outside brings its own Artian and talisman; see adoptArtian. */
+  private adopt(content: LoadoutContent, idMap?: Map<string, string>): LoadoutContent {
+    return this.adoptTalisman(this.adoptArtian(content, idMap), idMap);
+  }
+
   /**
    * Content from outside (a share link or import) brings its own Artian. Reuse an
    * identical one already in the Forge, otherwise add it with a fresh id, and point
@@ -198,6 +223,23 @@ export class LoadoutsService {
     if (existing) return existing;
     const added = { ...structuredClone(config), id: `custom:${this.artians.newId()}` };
     this.artians.save(added);
+    return added;
+  }
+
+  /** Like adoptArtian, for the build's custom talisman. */
+  private adoptTalisman(content: LoadoutContent, idMap?: Map<string, string>): LoadoutContent {
+    if (!content.talisman) return content;
+    const mapped = idMap?.get(content.talisman.id);
+    const talisman = mapped ? this.talismans.configs().find((c) => c.id === mapped)! : this.ensureTalisman(content.talisman);
+    const build = content.build.talismanId === content.talisman.id ? { ...content.build, talismanId: talisman.id } : content.build;
+    return { ...content, talisman, build };
+  }
+
+  private ensureTalisman(config: CustomTalismanConfig): CustomTalismanConfig {
+    const existing = this.talismans.configs().find((c) => sameTalisman(c, config));
+    if (existing) return existing;
+    const added = { ...structuredClone(config), id: this.talismans.newId() };
+    this.talismans.save(added);
     return added;
   }
 

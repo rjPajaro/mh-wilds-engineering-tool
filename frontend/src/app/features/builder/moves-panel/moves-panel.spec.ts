@@ -68,7 +68,7 @@ describe('MovesPanel', () => {
     const overhead = rows(el).filter((r) => r.querySelector('.name')?.textContent === 'Overhead Slash');
     expect(overhead.map((r) => r.querySelector('.part')?.textContent)).toEqual(arkveld.parts.map((p) => p.name));
     expect(el.textContent).toContain('vs Arkveld · all parts');
-  });
+  }, 20_000); // renders every move for every part: slow under jsdom
 
   it('sorts by damage and filters', async () => {
     const fixture = await render(greatSword);

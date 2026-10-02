@@ -1,8 +1,21 @@
 <header class="section-head">
   <h2>Damage</h2>
-  <span class="muted" title="Expected damage of one hit with motion value 100, with crit chance averaged in. Not damage per second: move timings are not in the data.">
-    average per hit, 100 MV
-  </span>
+  @if (average()) {
+    <div class="view" role="radiogroup" aria-label="Damage shown">
+      @if (combo()) {
+        <button type="button" role="radio" [attr.aria-checked]="shownView() === 'combo'" [class.on]="shownView() === 'combo'" (click)="view.set('combo')"
+          title="The combo from pressing only light attack, without charging">Light combo</button>
+      }
+      <button type="button" role="radio" [attr.aria-checked]="shownView() === 'average'" [class.on]="shownView() === 'average'" (click)="view.set('average')"
+        title="Average damage of one hit across all the weapon's moves, crits averaged in">All moves</button>
+      <button type="button" role="radio" [attr.aria-checked]="shownView() === 'mv100'" [class.on]="shownView() === 'mv100'" (click)="view.set('mv100')"
+        title="Damage of a reference hit with motion value 100; multiply by a move's MV / 100">Per 100 MV</button>
+    </div>
+  } @else {
+    <span class="muted" title="Expected damage of one hit with motion value 100, with crit chance averaged in. Motion values for this weapon type are not available yet.">
+      per hit, 100 MV
+    </span>
+  }
 </header>
 
 @if (result(); as r) {
@@ -97,9 +110,65 @@
     }
   </div>
 
-  @if (r.vsTarget; as t) {
+  @if (shownView() === 'combo' && combo(); as c) {
     <div class="hit">
-      <div class="hit-label">Average damage per hit · 100 MV, crits averaged in</div>
+      <div class="hit-label">Light attack combo · crits averaged in</div>
+      <div class="combo-totals">
+        <div class="combo-total">
+          <span class="muted">Full combo</span>
+          <strong>{{ c.total | number: '1.0-0' }}</strong>
+        </div>
+        <div>
+          <span class="muted">Average per hit</span>
+          <strong>{{ c.perHit | number: '1.1-1' }}</strong>
+        </div>
+        <div>
+          <span class="muted">Hits</span>
+          <strong>{{ c.hits }}</strong>
+        </div>
+      </div>
+      <ol class="combo-steps">
+        @for (s of c.steps; track $index) {
+          <li>
+            <span>{{ s.move }}@if (s.variant) { <span class="muted">({{ s.variant === 'LV 0' ? 'uncharged' : s.variant }})</span>}</span>
+            <strong>{{ s.damage | number: '1.0-0' }}</strong>
+          </li>
+        }
+      </ol>
+      <div class="muted">
+        = {{ c.raw | number: '1.0-0' }} raw
+        @if (r.elementKind) { + {{ c.element | number: '1.0-0' }} {{ r.elementKind }} }
+        @if (r.vsTarget; as t) {
+          · vs {{ t.hit.hitzoneKind === 'pierce' ? 'shot' : t.hit.hitzoneKind }} hitzone {{ pct(t.hit.rawHitzone) }}
+          @if (t.hit.weakPoint) { · <span class="weak">weak point</span> }
+        } @else {
+          · no target (hitzones 100)
+        }
+      </div>
+    </div>
+  } @else if (shownView() === 'average' && average(); as a) {
+    <div class="hit">
+      <div class="hit-label">Average damage per hit · crits averaged in</div>
+      <div class="hit-main">
+        <strong>{{ a.total | number: '1.1-1' }}</strong>
+        <span class="muted">
+          = {{ a.raw | number: '1.1-1' }} raw
+          @if (r.elementKind) { + {{ a.element | number: '1.1-1' }} {{ r.elementKind }} }
+        </span>
+      </div>
+      <div class="muted">
+        average of {{ a.hits }} hits across {{ a.moves }} moves (motion value {{ a.motionValue | number: '1.0-1' }})
+        @if (r.vsTarget; as t) {
+          · vs {{ t.hit.hitzoneKind === 'pierce' ? 'shot' : t.hit.hitzoneKind }} hitzone {{ pct(t.hit.rawHitzone) }}
+          @if (t.hit.weakPoint) { · <span class="weak">weak point</span> }
+        } @else {
+          · no target (hitzones 100)
+        }
+      </div>
+    </div>
+  } @else if (r.vsTarget; as t) {
+    <div class="hit">
+      <div class="hit-label">Damage at 100 MV · crits averaged in · multiply by a move's MV / 100</div>
       <div class="hit-main">
         <strong>{{ t.hit.total | number: '1.1-1' }}</strong>
         <span class="muted">

@@ -57,6 +57,10 @@ export interface ArmorPiece {
   /** Decoration slot levels (1-3). */
   slots: number[];
   skills: SkillLevel[];
+  /** Hotlinked image URL (scripts/extract-thumbnails.mjs); absent when no source has one. */
+  thumbnail?: string;
+  /** Set on the transcended version made by core/armor/transcend.ts; never in the data. */
+  transcended?: true;
 }
 
 export interface ArmorSet {
@@ -80,6 +84,8 @@ export interface Decoration {
   slotLevel: number;
   allowedOn: SlotTarget;
   skills: SkillLevel[];
+  /** The decoration's in-game icon (scripts/extract-thumbnails.mjs). */
+  thumbnail?: string;
 }
 
 export interface TalismanSlot {
@@ -95,6 +101,8 @@ export interface Talisman {
   /** Craftable talismans have no slots; random/custom ones may. */
   slots: TalismanSlot[];
   skills: SkillLevel[];
+  /** Charm icon in the rarity's colour (scripts/extract-thumbnails.mjs). */
+  thumbnail?: string;
 }
 
 // ---------------------------------------------------------------- weapons
@@ -164,6 +172,8 @@ interface WeaponBase {
   series: string | null;
   previousId: string | null;
   artian: ArtianInfo | null;
+  /** Hotlinked image URL (scripts/extract-thumbnails.mjs); absent when no source has one. */
+  thumbnail?: string;
 }
 
 export const GOGMA_DEVICES = ['attack', 'affinity', 'element'] as const;

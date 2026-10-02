@@ -1,0 +1,130 @@
+@if (loadError()) {
+  <p class="error">Could not load the game data. Check your connection and reload the page.</p>
+} @else if (loading() || !index()) {
+  <p class="muted">Loading game data…</p>
+} @else {
+  <div class="layout">
+    <aside class="saved">
+      <header class="section-head">
+        <h2>My Talismans</h2>
+      </header>
+      <button type="button" class="new" (click)="newTalisman()">+ Talisman</button>
+      <ul>
+        @for (c of configs(); track c.id) {
+          <li>
+            <button type="button" class="saved-item" [class.on]="draft()?.id === c.id" (click)="edit(c)">
+              <img class="charm-icon" [src]="charmIcons[c.rarity]" alt="" referrerpolicy="no-referrer" />
+              <span class="text">
+                <span class="name">{{ displayName(c) }}</span>
+                <span class="hint">{{ summary(c) || 'No skills' }}</span>
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="muted">No talismans yet. Add the ones you rolled to use them in the Builder.</li>
+        }
+      </ul>
+    </aside>
+
+    @if (draft(); as d) {
+      <section class="editor">
+        <header class="section-head">
+          <h2>{{ saved() ? 'Edit talisman' : 'New talisman' }}</h2>
+          <div class="actions">
+            @if (saved() && dirty()) {
+              <button type="button" (click)="revert()">Revert</button>
+            }
+            <button type="button" [disabled]="!valid()" (click)="equip()">Save &amp; equip</button>
+            <button type="button" class="primary" [disabled]="!valid() || !dirty()" (click)="save()">
+              {{ saved() ? (dirty() ? 'Save changes' : 'Saved') : 'Save talisman' }}
+            </button>
+          </div>
+        </header>
+
+        <div class="field">
+          <span class="label">Charm</span>
+          <div class="segmented" role="radiogroup" aria-label="Charm type">
+            @for (t of charmTypes; track t.rarity) {
+              <button type="button" role="radio" [attr.aria-checked]="d.rarity === t.rarity" [class.on]="d.rarity === t.rarity" (click)="setRarity('' + t.rarity)">
+                <img class="charm-icon small" [src]="charmIcons[t.rarity]" alt="" referrerpolicy="no-referrer" />
+                {{ t.name }} <span class="muted">R{{ t.rarity }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="talisman-name">Name</label>
+          <input id="talisman-name" type="text" maxlength="60" placeholder="Optional, e.g. WEX/Agi charm" [value]="d.name"
+            (input)="patch({ name: $any($event.target).value })" />
+        </div>
+
+        <h3>Skills <span class="count">{{ d.skills.length }}/{{ maxSkills }}</span></h3>
+        @for (s of d.skills; track $index; let i = $index) {
+          <div class="row">
+            <app-search-select
+              class="skill"
+              [ariaLabel]="'Skill ' + (i + 1)"
+              [clearable]="false"
+              [options]="skillOptions()"
+              [value]="'' + s.skillId"
+              (valueChange)="setSkill(i, $event)"
+            />
+            <select [attr.aria-label]="'Skill ' + (i + 1) + ' level'" [value]="'' + s.level" (change)="setSkillLevel(i, $any($event.target).value)">
+              @for (l of levels(s.skillId); track l) {
+                <option [value]="'' + l" [selected]="l === s.level">Lv {{ l }}</option>
+              }
+            </select>
+            <button type="button" class="remove" [attr.aria-label]="'Remove skill ' + (i + 1)" (click)="removeSkill(i)">×</button>
+          </div>
+        }
+        @if (d.skills.length < maxSkills) {
+          <button type="button" (click)="addSkill()">+ Skill</button>
+        }
+
+        <h3>Slots <span class="count">{{ d.slots.length }}/{{ maxSlots }}</span></h3>
+        @for (s of d.slots; track $index; let i = $index) {
+          <div class="row">
+            <img class="slot-icon" [src]="slotIcons[s.accepts][s.level]" alt="" referrerpolicy="no-referrer" />
+            <div class="segmented small" role="radiogroup" [attr.aria-label]="'Slot ' + (i + 1) + ' level'">
+              @for (l of slotLevels; track l) {
+                <button type="button" role="radio" [attr.aria-checked]="s.level === l" [class.on]="s.level === l" (click)="setSlot(i, { level: l })">Lv {{ l }}</button>
+              }
+            </div>
+            <div class="segmented small" role="radiogroup" [attr.aria-label]="'Slot ' + (i + 1) + ' type'">
+              <button type="button" role="radio" [attr.aria-checked]="s.accepts === 'armor'" [class.on]="s.accepts === 'armor'" (click)="setSlot(i, { accepts: 'armor' })">Armor</button>
+              <button type="button" role="radio" [attr.aria-checked]="s.accepts === 'weapon'" [class.on]="s.accepts === 'weapon'" (click)="setSlot(i, { accepts: 'weapon' })">Weapon</button>
+            </div>
+            <button type="button" class="remove" [attr.aria-label]="'Remove slot ' + (i + 1)" (click)="removeSlot(i)">×</button>
+          </div>
+        }
+        @if (d.slots.length < maxSlots) {
+          <div class="add-slots">
+            <button type="button" (click)="addSlot('armor')">+ Armor slot</button>
+            <button type="button" (click)="addSlot('weapon')">+ Weapon slot</button>
+          </div>
+        }
+
+        @for (issue of issues(); track $index) {
+          <p class="issue" [class.error]="issue.severity === 'error'" [class.warning]="issue.severity === 'warning'">{{ issue.message }}</p>
+        }
+
+        @if (saved()) {
+          <div class="danger">
+            @if (confirmDelete()) {
+              <span>Delete this talisman? Builds using it lose their talisman.</span>
+              <button type="button" class="delete" (click)="remove()">Delete</button>
+              <button type="button" (click)="confirmDelete.set(false)">Cancel</button>
+            } @else {
+              <button type="button" (click)="confirmDelete.set(true)">Delete talisman</button>
+            }
+          </div>
+        }
+      </section>
+    } @else {
+      <section class="editor empty">
+        <p class="muted">Pick a talisman on the left, or add a new one.</p>
+      </section>
+    }
+  </div>
+}

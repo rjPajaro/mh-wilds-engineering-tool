@@ -3,6 +3,7 @@ import {
   ArtianData,
   ArtianElement,
   GogmaDevice,
+  REINFORCEMENT_LEVELS,
   ReinforcementLevel,
   SkillId,
   SkillLevel,
@@ -96,7 +97,8 @@ export function artianBase(config: ArtianConfig, index: GameIndex): Weapon | und
 export function allowedLevels(type: ReinforcementType, tier: 'artian' | 'gogma', data: ArtianData, kind: WeaponKind): ReinforcementLevel[] {
   if (tier === 'artian') return ['I'];
   const table = type === 'element' ? (data.reinforcement.element[kind] ?? {}) : data.reinforcement[type];
-  return (Object.keys(table) as ReinforcementLevel[]).filter((l) => l in table);
+  // Only real levels: the tables may carry other keys (e.g. a "$source" note).
+  return REINFORCEMENT_LEVELS.filter((l) => l in table);
 }
 
 /** Element/status value from the parts (true units), or null if the weapon has none. */

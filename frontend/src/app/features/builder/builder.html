@@ -25,61 +25,114 @@
 
       @for (slot of equipSlots; track slot) {
         <div class="equip">
-          <div class="row">
+          <div class="slot-card">
+            @if (thumbnail(slot); as src) {
+              <img class="thumb" [src]="src" alt="" loading="lazy" referrerpolicy="no-referrer" (error)="thumbnailFailed(src)" />
+            }
             <label [for]="'equip-' + slot">{{ slotLabels[slot] }}</label>
+            @if (transcendable(slot)) {
+              <button
+                type="button"
+                class="transcend"
+                [class.on]="isTranscended(slot)"
+                [attr.aria-pressed]="isTranscended(slot)"
+                title="Transcending adds max defense and, on rarity 5-6 armor, raises decoration slots"
+                (click)="setTranscended($any(slot), !isTranscended(slot))"
+              >
+                {{ isTranscended(slot) ? 'Transcended' : 'Transcend' }}
+              </button>
+            }
+            <ul class="item-skills">
+              @for (s of itemSkills(slot); track s.id) {
+                <li [class.bonus]="s.level === null" [class.active]="s.active" [title]="s.description">
+                  {{ s.name }}@if (s.level !== null) {{{ ' ' }}<span class="lvl">{{ s.level }}</span>}
+                </li>
+              }
+            </ul>
+          </div>
+
+          <div class="slot-main">
             <app-search-select
+              class="item-select"
               [inputId]="'equip-' + slot"
+              [emptyIcon]="emptyEquipmentIcon(slot)"
               [options]="equipOptions(slot)"
               [value]="equippedId(slot)"
               (valueChange)="equip(slot, $event)"
             />
+
+            @if (slot === 'weapon' && gogmaGroup(); as group) {
+              <div class="devices" role="radiogroup" aria-label="Production device">
+                @for (d of gogmaDevices; track d) {
+                  <button
+                    type="button"
+                    role="radio"
+                    [attr.aria-checked]="gogmaDevice() === d"
+                    [class.on]="gogmaDevice() === d"
+                    (click)="setGogmaDevice(d)"
+                  >
+                    <span class="device-name">{{ deviceLabels[d] }} device</span>
+                    <span class="device-stats">{{ group[d].attack }} atk · {{ group[d].affinity > 0 ? '+' : '' }}{{ group[d].affinity }}%</span>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (itemName(slot)) {
+              <div class="decos">
+                @for (s of slots(slot); track $index; let i = $index) {
+                  <app-search-select
+                    class="deco"
+                    [ariaLabel]="slotLabels[slot] + ' slot ' + (i + 1)"
+                    [placeholder]="(s.accepts === 'weapon' ? 'Weapon' : 'Armor') + ' slot'"
+                  [emptyIcon]="emptySlotIcons[s.accepts][s.level]"
+                    [options]="decorationOptions(s.accepts, s.level)"
+                    [value]="decorationId(slot, i)"
+                    (valueChange)="setDecoration(slot, i, $event)"
+                  />
+                } @empty {
+                  <span class="muted">No slots</span>
+                }
+              </div>
+            }
           </div>
-
-          @if (slot === 'weapon' && gogmaGroup(); as group) {
-            <div class="devices" role="radiogroup" aria-label="Production device">
-              @for (d of gogmaDevices; track d) {
-                <button
-                  type="button"
-                  role="radio"
-                  [attr.aria-checked]="gogmaDevice() === d"
-                  [class.on]="gogmaDevice() === d"
-                  (click)="setGogmaDevice(d)"
-                >
-                  <span class="device-name">{{ deviceLabels[d] }} device</span>
-                  <span class="device-stats">{{ group[d].attack }} atk · {{ group[d].affinity > 0 ? '+' : '' }}{{ group[d].affinity }}%</span>
-                </button>
-              }
-            </div>
-          }
-
-          @if (itemName(slot)) {
-            <div class="decos">
-              @for (s of slots(slot); track $index; let i = $index) {
-                <app-search-select
-                  class="deco"
-                  [ariaLabel]="slotLabels[slot] + ' slot ' + (i + 1)"
-                  [placeholder]="'[' + s.level + '] ' + s.accepts + ' slot'"
-                  [options]="decorationOptions(s.accepts, s.level)"
-                  [value]="decorationId(slot, i)"
-                  (valueChange)="setDecoration(slot, i, $event)"
-                />
-              } @empty {
-                <span class="muted">No slots</span>
-              }
-            </div>
-          }
         </div>
       }
 
-      <app-moves-panel [weapon]="build().weapon" [skills]="activeSkills()" />
+      <section class="buffs" aria-labelledby="buffs-title">
+        <header class="section-head">
+          <h2 id="buffs-title">Buffs</h2>
+          <span class="muted">Items and meals; same-type items don't stack</span>
+        </header>
+        <div class="buff-toggles">
+          @for (g of buffToggles; track g.id) {
+            <label class="check" [title]="buffHintFor(g)">
+              <input type="checkbox" [checked]="buffChoice(g) !== ''" (change)="setBuff(g, $any($event.target).checked ? g.options[0].id : '')" />
+              {{ g.label }} <span class="muted">{{ buffHintFor(g) }}</span>
+            </label>
+          }
+        </div>
+        @for (c of buffChoices; track c.group.id) {
+          <div class="row">
+            <label [for]="'buff-' + c.group.id">{{ c.group.label }}</label>
+            <app-search-select
+              [inputId]="'buff-' + c.group.id"
+              placeholder="None"
+              [options]="c.options"
+              [value]="buffChoice(c.group)"
+              (valueChange)="setBuff(c.group, $event)"
+            />
+          </div>
+        }
+      </section>
     </section>
 
     <section class="skills">
-      <app-damage-panel [weapon]="build().weapon" [skills]="activeSkills()" />
-
       <header class="section-head">
         <h2>Skills</h2>
-        <span class="muted">Defense {{ totalDefense() }}</span>
+        <span class="muted" title="Armor defense as crafted · fully upgraded · fully upgraded with buffs">
+          Defense {{ totalDefense().base }} · max {{ totalDefense().max }}@if (buffedDefense() !== totalDefense().max) { · buffed {{ buffedDefense() }}}
+        </span>
       </header>
 
       @for (issue of issues(); track $index) {
@@ -117,6 +170,11 @@
           <li class="muted">Equip gear to see skills.</li>
         }
       </ul>
+    </section>
+
+    <section class="damage">
+      <app-damage-panel [weapon]="build().weapon" [skills]="activeSkills()" />
+      <app-moves-panel [weapon]="build().weapon" [skills]="activeSkills()" />
     </section>
   </div>
 }

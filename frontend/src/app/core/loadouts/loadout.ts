@@ -1,6 +1,7 @@
 import { ArtianConfig } from '../artian/artian';
 import { isSavedBuild, SavedBuild } from '../build/build';
 import { WEAPON_KINDS, WeaponKind } from '../models/game-data';
+import { CustomTalismanConfig, isCustomTalismanConfig } from '../talismans/custom-talisman';
 
 /** Damage panel state: target and condition toggles. Ids are strings as stored by the UI. */
 export interface DamageSetup {
@@ -21,6 +22,11 @@ export interface LoadoutContent {
    * shared or exported on its own.
    */
   artian: ArtianConfig | null;
+  /**
+   * The player's own talisman the build uses (build.talismanId === talisman.id),
+   * embedded like `artian`. Absent in loadouts saved before custom talismans.
+   */
+  talisman?: CustomTalismanConfig | null;
   setup: DamageSetup | null;
 }
 
@@ -40,7 +46,7 @@ export function emptySetup(): DamageSetup {
  * count: the name and a Loadout's id/timestamps are ignored.
  */
 export function sameContent(a: LoadoutContent, b: LoadoutContent): boolean {
-  const pick = ({ weaponKind, build, artian, setup }: LoadoutContent) => ({ weaponKind, build, artian, setup });
+  const pick = ({ weaponKind, build, artian, talisman, setup }: LoadoutContent) => ({ weaponKind, build, artian, talisman: talisman ?? null, setup });
   return canonical(pick(a)) === canonical(pick(b));
 }
 
@@ -95,6 +101,7 @@ export function isLoadoutContent(v: unknown): v is LoadoutContent {
     WEAPON_KINDS.includes(v['weaponKind'] as WeaponKind) &&
     isSavedBuild(v['build']) &&
     (v['artian'] === null || isArtianConfig(v['artian'])) &&
+    (v['talisman'] === undefined || v['talisman'] === null || isCustomTalismanConfig(v['talisman'])) &&
     (v['setup'] === null || isDamageSetup(v['setup']))
   );
 }
@@ -115,16 +122,30 @@ export interface ExportFile {
   loadouts: Loadout[];
   /** All saved Artians, so an export is a full backup of the Forge too. */
   artians: ArtianConfig[];
+  /** All saved custom talismans (absent in older exports). */
+  talismans?: CustomTalismanConfig[];
 }
 
-export function createExport(loadouts: readonly Loadout[], artians: readonly ArtianConfig[], now = new Date()): ExportFile {
-  return { format: EXPORT_FORMAT, version: EXPORT_VERSION, exportedAt: now.toISOString(), loadouts: [...loadouts], artians: [...artians] };
+export function createExport(
+  loadouts: readonly Loadout[],
+  artians: readonly ArtianConfig[],
+  talismans: readonly CustomTalismanConfig[] = [],
+  now = new Date(),
+): ExportFile {
+  return {
+    format: EXPORT_FORMAT,
+    version: EXPORT_VERSION,
+    exportedAt: now.toISOString(),
+    loadouts: [...loadouts],
+    artians: [...artians],
+    talismans: [...talismans],
+  };
 }
 
 export class ImportError extends Error {}
 
 /** Parses and validates an export file. Invalid entries are skipped and counted. */
-export function parseExport(text: string): { loadouts: Loadout[]; artians: ArtianConfig[]; skipped: number } {
+export function parseExport(text: string): { loadouts: Loadout[]; artians: ArtianConfig[]; talismans: CustomTalismanConfig[]; skipped: number } {
   let data: unknown;
   try {
     data = JSON.parse(text);
@@ -137,7 +158,10 @@ export function parseExport(text: string): { loadouts: Loadout[]; artians: Artia
   }
   const rawLoadouts = Array.isArray(data['loadouts']) ? data['loadouts'] : [];
   const rawArtians = Array.isArray(data['artians']) ? data['artians'] : [];
+  const rawTalismans = Array.isArray(data['talismans']) ? data['talismans'] : [];
   const loadouts = rawLoadouts.filter(isLoadout);
   const artians = rawArtians.filter(isArtianConfig);
-  return { loadouts, artians, skipped: rawLoadouts.length - loadouts.length + rawArtians.length - artians.length };
+  const talismans = rawTalismans.filter(isCustomTalismanConfig);
+  const skipped = rawLoadouts.length - loadouts.length + rawArtians.length - artians.length + rawTalismans.length - talismans.length;
+  return { loadouts, artians, talismans, skipped };
 }

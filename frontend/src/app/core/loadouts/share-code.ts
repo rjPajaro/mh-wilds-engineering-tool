@@ -1,4 +1,6 @@
 import { ArtianConfig, PartBonus, REINFORCEMENT_TYPES } from '../artian/artian';
+import { baseArmorId, isTranscendedId, transcendedId } from '../armor/transcend';
+import { CustomTalismanConfig, isCustomTalismanId } from '../talismans/custom-talisman';
 import { EQUIP_SLOTS, SavedBuild } from '../build/build';
 import { ARMOR_KINDS, ARTIAN_ELEMENTS, GOGMA_DEVICES, REINFORCEMENT_LEVELS, WEAPON_KINDS } from '../models/game-data';
 import { DamageSetup, LoadoutContent } from './loadout';
@@ -10,26 +12,33 @@ import { DamageSetup, LoadoutContent } from './loadout';
  * signed, so they are zigzag-encoded. "opt" values are 0 for none, else value + 1.
  * Game ids (not list positions) are used so codes survive data updates.
  *
- *   u8      format version (1)
+ *   u8      format version (3; 1 and 2 are still decoded)
  *   varint  weapon kind (index in WEAPON_KINDS)
  *   string  name
  *   weapon  u8 tag: 0 none | 1 game weapon: varint kind, zz game id | 2 custom Artian (block below)
  *   armor   5 x opt zz set id (ARMOR_KINDS order)
- *   talisman opt zz game id, varint rank (only when present)
+ *   talisman v1-2: opt zz game id, varint rank (only when present)
+ *            v3+: u8 tag: 0 none | 1 game: zz game id, varint rank | 2 custom talisman (block below)
  *   decos   7 x (varint count, count x opt zz decoration id) (EQUIP_SLOTS order)
  *   setup   u8 flag; if 1: opt zz monster id, opt part index, u8 wounded, varint n, n x (string skill, u8 on)
+ *   v2+     u8 transcended armor bits (bit i = ARMOR_KINDS[i])
  *
  * Custom Artian: varint kind, u8 tier, u8 rarity, opt element, u8 matching parts,
  * u8 part-bonus bits (1 = affinity), u8 device, varint n, n x u8 (type * 4 + level),
  * opt zz set skill, opt zz group skill, string name.
  *
+ * Custom talisman: u8 rarity, varint n, n x (zz skill id, u8 level), varint m,
+ * m x u8 (slot level * 2 + 1 if weapon slot), string name.
+ *
  * Strings: varint byte length + UTF-8. Bump the version for incompatible changes
  * and keep decoding old versions.
  */
-export const SHARE_CODE_VERSION = 1;
+export const SHARE_CODE_VERSION = 3;
 
 /** Id given to a decoded custom Artian; callers replace it with a real one. */
 export const SHARED_ARTIAN_ID = 'custom:shared';
+/** Id given to a decoded custom talisman; callers replace it with a real one. */
+export const SHARED_TALISMAN_ID = 'custom:shared-talisman';
 
 export class ShareCodeError extends Error {}
 
@@ -57,15 +66,22 @@ export function encodeShareCode(content: LoadoutContent): string {
 
   for (const kind of ARMOR_KINDS) {
     const id = build.armor[kind];
-    w.opt(id ? zigzag(Number(splitLast(id)[0])) : null);
+    w.opt(id ? zigzag(Number(splitLast(baseArmorId(id))[0])) : null);
   }
 
-  if (build.talismanId) {
-    const [gameId, rank] = splitLast(build.talismanId);
-    w.opt(zigzag(Number(gameId)));
-    w.varint(Number(rank));
+  if (!build.talismanId) {
+    w.u8(0);
+  } else if (content.talisman && build.talismanId === content.talisman.id) {
+    w.u8(2);
+    writeTalisman(w, content.talisman);
+  } else if (isCustomTalismanId(build.talismanId)) {
+    // Custom talisman without its config: nothing to share.
+    w.u8(0);
   } else {
-    w.opt(null);
+    const [gameId, rank] = splitLast(build.talismanId);
+    w.u8(1);
+    w.zz(Number(gameId));
+    w.varint(Number(rank));
   }
 
   for (const slot of EQUIP_SLOTS) {
@@ -89,6 +105,7 @@ export function encodeShareCode(content: LoadoutContent): string {
       w.u8(on ? 1 : 0);
     }
   }
+  w.u8(ARMOR_KINDS.reduce((bits, kind, i) => bits | (isTranscendedId(build.armor[kind] ?? '') ? 1 << i : 0), 0));
   return toBase64Url(w.bytes());
 }
 
@@ -125,8 +142,22 @@ export function decodeShareCode(code: string): LoadoutContent {
       if (id !== null) build.armor[kind] = `${unzigzag(id)}:${kind}`;
     }
 
-    const talisman = r.opt();
-    if (talisman !== null) build.talismanId = `${unzigzag(talisman)}:${r.varint()}`;
+    let talisman: CustomTalismanConfig | null = null;
+    if (version < 3) {
+      const id = r.opt();
+      if (id !== null) build.talismanId = `${unzigzag(id)}:${r.varint()}`;
+    } else {
+      const tag = r.u8();
+      if (tag === 1) {
+        const gameId = r.zz();
+        build.talismanId = `${gameId}:${r.varint()}`;
+      } else if (tag === 2) {
+        talisman = readTalisman(r);
+        build.talismanId = talisman.id;
+      } else if (tag !== 0) {
+        throw new ShareCodeError('This share link is not valid.');
+      }
+    }
 
     for (const slot of EQUIP_SLOTS) {
       const count = r.varint();
@@ -152,8 +183,15 @@ export function decodeShareCode(code: string): LoadoutContent {
         toggles,
       };
     }
+    if (version >= 2) {
+      const bits = r.u8();
+      ARMOR_KINDS.forEach((kind, i) => {
+        const id = build.armor[kind];
+        if (id && bits & (1 << i)) build.armor[kind] = transcendedId(id);
+      });
+    }
     if (!r.done()) throw new ShareCodeError('This share link is not valid.');
-    return { name, weaponKind, build, artian, setup };
+    return { name, weaponKind, build, artian, talisman, setup };
   } catch (e) {
     if (e instanceof ShareCodeError) throw e;
     throw new ShareCodeError('This share link is not valid or was cut off.');
@@ -206,6 +244,35 @@ function readArtian(r: Reader): ArtianConfig {
     setSkillId: set === null ? null : unzigzag(set),
     groupSkillId: group === null ? null : unzigzag(group),
   };
+}
+
+function writeTalisman(w: Writer, t: CustomTalismanConfig): void {
+  w.u8(t.rarity);
+  w.varint(t.skills.length);
+  for (const s of t.skills) {
+    w.zz(s.skillId);
+    w.u8(s.level);
+  }
+  w.varint(t.slots.length);
+  for (const s of t.slots) w.u8(s.level * 2 + (s.accepts === 'weapon' ? 1 : 0));
+  w.string(t.name);
+}
+
+function readTalisman(r: Reader): CustomTalismanConfig {
+  const rarity = r.u8();
+  const n = r.varint();
+  if (n > 5) throw new ShareCodeError('This share link is not valid.');
+  const skills = Array.from({ length: n }, () => {
+    const skillId = r.zz();
+    return { skillId, level: r.u8() };
+  });
+  const m = r.varint();
+  if (m > 5) throw new ShareCodeError('This share link is not valid.');
+  const slots = Array.from({ length: m }, () => {
+    const v = r.u8();
+    return { level: v >> 1, accepts: v & 1 ? ('weapon' as const) : ('armor' as const) };
+  });
+  return { id: SHARED_TALISMAN_ID, name: r.string(), rarity, skills, slots };
 }
 
 // ---------------------------------------------------------------- helpers

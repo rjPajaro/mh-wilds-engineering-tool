@@ -1,7 +1,7 @@
 import { Hitzones, Move, Skill, Weapon } from '../models/game-data';
 import { ActiveSkill } from '../skills/skill-resolver';
 import { LONG_SWORD } from '../testing/fixtures';
-import { calculateMoves } from './moves';
+import { averageHit, calculateMoves } from './moves';
 
 // 200 attack, 0 affinity, white sharpness (raw ×1.32, element ×1.15), 30 fire.
 const SWORD: Weapon = {
@@ -82,5 +82,31 @@ describe('calculateMoves', () => {
     const [overhead] = calculateMoves({ weapon: SWORD, skills: [] }, MOVES);
     expect(overhead.variants[0].raw).toBeCloseTo(EFR * 0.8, 6);
     expect(overhead.variants[0].element).toBeCloseTo(EFE, 6);
+  });
+});
+
+describe('averageHit', () => {
+  const input = { weapon: SWORD, skills: [], toggles: {}, target: null };
+
+  it('averages every hit of every move and charge level', () => {
+    const avg = averageHit(calculateMoves(input, MOVES))!;
+    // Hits: 80 | 100 | 10, 150 | 30 (blunt, no element) -> 5 hits, MV 370 in total.
+    expect(avg.hits).toBe(5);
+    expect(avg.moves).toBe(3);
+    expect(avg.motionValue).toBeCloseTo(74);
+    expect(avg.raw).toBeCloseTo((EFR * 3.7) / 5);
+    // Element modifiers: 1 + 1.5 + (1 + 2) + 0.
+    expect(avg.element).toBeCloseTo((EFE * 5.5) / 5);
+    expect(avg.total).toBeCloseTo(avg.raw + avg.element);
+  });
+
+  it('leaves out riding, mounting and sneak attacks', () => {
+    const extra: Move[] = [
+      { section: 'Riding Attacks', name: 'Riding Attack', variants: [{ hits: [500] }] },
+      { section: 'Mount', name: 'Mount Finisher', variants: [{ hits: [500] }] },
+      { section: 'Sneaking', name: 'Sneak Attack', variants: [{ hits: [500] }] },
+    ];
+    expect(averageHit(calculateMoves(input, [...MOVES, ...extra]))!.hits).toBe(5);
+    expect(averageHit(calculateMoves(input, extra))).toBeNull();
   });
 });

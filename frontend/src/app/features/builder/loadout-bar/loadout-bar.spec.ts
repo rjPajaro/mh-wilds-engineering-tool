@@ -61,6 +61,37 @@ describe('LoadoutBar', () => {
     await fixture.whenStable();
     expect(loadouts.loadouts()).toEqual([]);
   });
+
+  it('starts a new build, asking first when there are unsaved changes', async () => {
+    const current = TestBed.inject(CurrentBuildService);
+    const loadouts = TestBed.inject(LoadoutsService);
+    current.weaponKind.set('hammer');
+    current.saved.set({ ...emptySavedBuild(), weaponId: 'hammer:5' });
+    const saved = loadouts.saveAs('Hammer KO');
+    current.saved.update((b) => ({ ...b, talismanId: '1:1' }));
+
+    const fixture = TestBed.createComponent(LoadoutBar);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+
+    button(el, 'New').click();
+    await fixture.whenStable();
+    expect(el.textContent).toContain('Starting a new build clears it.');
+    expect(current.saved().weaponId).toBe('hammer:5');
+
+    button(el, 'Start new anyway').click();
+    await fixture.whenStable();
+    expect(current.saved()).toEqual(emptySavedBuild());
+    expect(current.weaponKind()).toBe('hammer');
+    expect(loadouts.activeId()).toBe('');
+    expect(loadouts.loadouts()[0]).toMatchObject({ id: saved.id, build: { weaponId: 'hammer:5' } });
+    expect(loadouts.loadouts()[0].build.talismanId).not.toBe('1:1');
+
+    // An empty, unsaved build has nothing to lose: no confirmation.
+    button(el, 'New').click();
+    await fixture.whenStable();
+    expect(el.textContent).not.toContain('Starting a new build clears it.');
+  });
 });
 
 describe('SharedBuildBanner', () => {

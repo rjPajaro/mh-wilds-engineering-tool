@@ -17,6 +17,8 @@ export interface SelectOption {
   hint?: string;
   /** Extra searchable text that is not displayed (e.g. skill names). */
   keywords?: string;
+  /** Small image shown before the label, and in the field while selected. */
+  icon?: string;
 }
 
 interface IndexedOption extends SelectOption {
@@ -48,6 +50,8 @@ export class SearchSelect {
   readonly ariaLabel = input<string | undefined>(undefined);
   /** Show a clear button when a value is selected. */
   readonly clearable = input(true);
+  /** Image shown in the field while nothing is selected. */
+  readonly emptyIcon = input<string | undefined>(undefined);
 
   protected readonly open = signal(false);
   protected readonly query = signal('');
@@ -67,6 +71,7 @@ export class SearchSelect {
   );
 
   protected readonly selected = computed(() => this.options().find((o) => o.value === this.value()));
+  protected readonly fieldIcon = computed(() => (this.selected() ? this.selected()!.icon : this.emptyIcon()));
 
   protected readonly filtered = computed<IndexedOption[]>(() => {
     const terms = normalize(this.query()).split(' ').filter(Boolean);

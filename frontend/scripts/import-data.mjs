@@ -381,18 +381,21 @@ function perKind(table, name, map) {
   return out;
 }
 
+/** Drops "$source"-style note keys, which document the supplement but are not data. */
+const withoutNotes = (table) => Object.fromEntries(Object.entries(table).filter(([k]) => !k.startsWith('$')));
+
 const r = artianSource.reinforcement;
 const artian = {
-  parts: artianSource.parts,
+  parts: withoutNotes(artianSource.parts),
   elements: perKind(artianSource.elements, 'elements', expandElements),
   reinforcement: {
     slots: r.slots,
     maxSameEx: r.maxSameEx,
-    attack: r.attack,
-    affinity: r.affinity,
+    attack: withoutNotes(r.attack),
+    affinity: withoutNotes(r.affinity),
     sharpness: { I: r.sharpness.I, EX: r.sharpness.EX },
     insectGlaiveSharpnessI: r.sharpness.insectGlaiveI,
-    ammo: r.ammo,
+    ammo: withoutNotes(r.ammo),
     element: perKind(r.element, 'reinforcement.element', (_, row) =>
       row === null ? null : Object.fromEntries(Object.entries(row).map(([lvl, v]) => [lvl, toTrue(v)])),
     ),
@@ -422,6 +425,33 @@ for (const [kind, entry] of Object.entries(movesSource.weapons)) {
   }
   moves.weapons[kind] = entry;
 }
+
+// ---------------------------------------------------------------- thumbnails (supplement)
+// Image URLs per weapon / armor piece id from scripts/supplements/thumbnails.json
+// (see scripts/extract-thumbnails.mjs). The app hotlinks them; items without one
+// show no image.
+
+const thumbnailSource = JSON.parse(readFileSync(join(here, 'supplements/thumbnails.json'), 'utf8'));
+const thumbnailMisses = [];
+for (const [table, items] of [['weapons', weapons], ['armor', armorSets.flatMap((s) => s.pieces)]]) {
+  const known = new Set(items.map((item) => item.id));
+  for (const id of Object.keys(thumbnailSource[table])) {
+    if (!known.has(id)) warnings.push(`thumbnails.json: ${table} has an image for unknown id ${id}`);
+  }
+  for (const item of items) {
+    if (thumbnailSource[table][item.id]) item.thumbnail = thumbnailSource[table][item.id];
+    else thumbnailMisses.push(item.name);
+  }
+}
+for (const d of decorations) {
+  if (thumbnailSource.decorations[d.id]) d.thumbnail = thumbnailSource.decorations[d.id];
+  else thumbnailMisses.push(d.name);
+}
+for (const t of talismans) {
+  if (thumbnailSource.charmsByRarity[t.rarity]) t.thumbnail = thumbnailSource.charmsByRarity[t.rarity];
+  else thumbnailMisses.push(t.name);
+}
+if (thumbnailMisses.length) warnings.push(`no thumbnail for ${thumbnailMisses.length} item(s): ${thumbnailMisses.join(', ')}`);
 
 // ---------------------------------------------------------------- write
 
@@ -459,6 +489,8 @@ const files = {
   'monsters.json': monsters,
   'artian.json': artian,
   'moves.json': moves,
+  // Equipment type icons per rarity, empty slot and charm icons; imported by the app directly.
+  'icons.json': { ...thumbnailSource.icons, charms: thumbnailSource.charmsByRarity },
 };
 for (const [name, data] of Object.entries(files)) {
   const text = JSON.stringify(data);

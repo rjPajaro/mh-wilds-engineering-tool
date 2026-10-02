@@ -13,12 +13,14 @@ import {
   Weapon,
   WeaponKind,
 } from '../models/game-data';
+import { transcend } from '../armor/transcend';
 
 /** Lookup tables over the raw data files. Pure TS so the worker and tests can use it. */
 export interface GameIndex {
   readonly files: GameDataFiles;
   readonly skills: ReadonlyMap<SkillId, Skill>;
   readonly armorSets: ReadonlyMap<number, ArmorSet>;
+  /** Every piece by id, including transcended versions (`<id>:transcended`). */
   readonly armorPieces: ReadonlyMap<string, ArmorPiece>;
   readonly armorByKind: Readonly<Record<ArmorKind, readonly ArmorPiece[]>>;
   readonly decorations: ReadonlyMap<number, Decoration>;
@@ -53,7 +55,7 @@ export function buildGameIndex(files: GameDataFiles): GameIndex {
     files,
     skills: byId(files.skills),
     armorSets: byId(files.armor),
-    armorPieces: byId(armorPieces),
+    armorPieces: byId([...armorPieces, ...armorPieces.map(transcend).filter((p) => p !== null)]),
     armorByKind,
     decorations: byId(files.decorations),
     talismans: byId(files.talismans),

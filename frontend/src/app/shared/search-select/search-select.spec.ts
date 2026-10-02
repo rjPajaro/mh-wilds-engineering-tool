@@ -82,4 +82,24 @@ describe('SearchSelect', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.value()).toBe('');
   });
+
+  it('shows option icons in the list and the field, and the empty icon with no selection', async () => {
+    const el = fixture.nativeElement as HTMLElement;
+    const fieldIcon = () => el.querySelector<HTMLImageElement>('img.field-icon')?.getAttribute('src') ?? null;
+    fixture.componentRef.setInput('options', OPTIONS.map((o) => ({ ...o, icon: o.value === 'c' ? undefined : `${o.value}.png` })));
+    fixture.componentRef.setInput('emptyIcon', 'empty.png');
+    await fixture.whenStable();
+    expect(fieldIcon()).toBe('empty.png');
+
+    input.click();
+    await fixture.whenStable();
+    expect([...el.querySelectorAll('li[role="option"] img')].map((i) => i.getAttribute('src'))).toEqual(['a.png', 'b.png', 'd.png']);
+
+    fixture.componentInstance.value.set('b');
+    await fixture.whenStable();
+    expect(fieldIcon()).toBe('b.png');
+    fixture.componentInstance.value.set('c'); // selected option without an icon
+    await fixture.whenStable();
+    expect(fieldIcon()).toBeNull();
+  });
 });

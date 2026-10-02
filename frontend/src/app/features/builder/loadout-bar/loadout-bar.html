@@ -13,6 +13,7 @@
     <span class="status" title="The current build differs from the selected loadout">● Unsaved changes</span>
   }
   <div class="actions">
+    <button type="button" title="Start a new, empty set of equipment" (click)="startNew()">New</button>
     <button type="button" [disabled]="!loadouts.active() || !loadouts.dirty()" (click)="save()">Save</button>
     <button type="button" [class.primary]="!loadouts.active()" (click)="startSaveAs()">Save as…</button>
     <button type="button" class="primary" (click)="share()">Share</button>
@@ -28,7 +29,7 @@
       <span class="sep"></span>
       <button type="button" [disabled]="!loadouts.loadouts().length" (click)="exportAll()">Export all…</button>
       <button type="button" (click)="chooseImport()">Import…</button>
-      <span class="hint">Export saves every loadout and Artian to a file, for backups or moving to another browser.</span>
+      <span class="hint">Export saves every loadout, Artian and talisman to a file, for backups or moving to another browser.</span>
     </div>
   }
   @case ('save-as') {
@@ -62,12 +63,20 @@
       <button type="button" (click)="setMode('idle')">Cancel</button>
     </div>
   }
+  @case ('confirm-new') {
+    <div class="panel warn">
+      <span>Your current build has unsaved changes. Starting a new build clears it.</span>
+      <button type="button" class="danger" (click)="newNow()">Start new anyway</button>
+      <button type="button" (click)="startSaveAs()">Save current first</button>
+      <button type="button" (click)="setMode('idle')">Cancel</button>
+    </div>
+  }
   @case ('share') {
     <div class="panel share">
       <label for="share-url">Share link</label>
       <input #shareInput id="share-url" type="text" readonly [value]="shareUrl()" (focus)="$any($event.target).select()" />
       <button type="button" (click)="setMode('idle')">Done</button>
-      <span class="hint">Anyone with the link can open this build. It includes your custom Artian and damage setup.</span>
+      <span class="hint">Anyone with the link can open this build. It includes your custom Artian, talisman and damage setup.</span>
     </div>
   }
 }
