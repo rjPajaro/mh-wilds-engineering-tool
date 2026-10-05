@@ -1,0 +1,52 @@
+@let t = table();
+<div class="head">
+  <strong>{{ t.skill.name }}</strong>
+  @if (t.level) {
+    <span class="current">Lv {{ t.level }} / {{ t.skill.maxLevel }}</span>
+  }
+</div>
+@if (t.skill.description) {
+  <p class="desc">{{ t.skill.description }}</p>
+}
+
+@if (t.rows.length) {
+  <table>
+    <thead>
+      <tr>
+        <th scope="col"><span class="visually-hidden">Stat</span></th>
+        @for (l of t.levels; track l) {
+          <th scope="col" [class.on]="l === t.level">Lv {{ l }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (r of t.rows; track r.stat) {
+        <tr>
+          <th scope="row">{{ r.stat }}</th>
+          @for (v of r.values; track $index) {
+            <td [class.on]="$index + 1 === t.level">{{ v || '—' }}</td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else if (t.lines.length) {
+  <ul>
+    @for (l of t.lines; track l.level) {
+      <li [class.on]="l.level === t.level">
+        <span class="label">{{ l.label }}</span>
+        {{ l.text }}
+      </li>
+    }
+  </ul>
+}
+
+@if (t.condition) {
+  <p class="meta">When: {{ t.condition }}</p>
+}
+@if (t.note) {
+  <p class="meta">{{ t.note }}</p>
+}
+@if (t.researched; as r) {
+  <p class="meta source">{{ r.weapons }} · {{ sourceText(r) }}</p>
+}

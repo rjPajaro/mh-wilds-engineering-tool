@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { EquipSlot } from '../../../core/build/build';
-import { Decoration, SlotTarget } from '../../../core/models/game-data';
+import { Decoration, Skill, SlotTarget, WeaponKind } from '../../../core/models/game-data';
 import { ArmorSetResult } from '../../../core/search/armor-search';
+import { SkillTip } from '../../../shared/skill-tip/skill-tip';
 import icons from '../../../../assets/data/icons.json';
 
 export interface ItemRow {
@@ -17,7 +18,9 @@ export interface ItemRow {
 export interface ResultView {
   result: ArmorSetResult;
   rows: ItemRow[];
-  skills: { name: string; level: number; requested: boolean; description: string }[];
+  skills: { name: string; level: number; requested: boolean; skill: Skill }[];
+  /** Weapon type for the skills' numbers. */
+  weaponKind: WeaponKind;
   freeSlots: { level: number; target: SlotTarget }[];
 }
 
@@ -34,6 +37,7 @@ const SLOT_LABELS: Record<EquipSlot, string> = {
 /** One armor search result: gear, jewels, free slots and skills. */
 @Component({
   selector: 'app-set-card',
+  imports: [SkillTip],
   templateUrl: './set-card.html',
   styleUrl: './set-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

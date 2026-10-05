@@ -41,6 +41,8 @@ export interface ArmorSearchInput {
   maxResults: number;
   rankBy: ArmorSetRanking;
   timeLimitMs?: number;
+  /** Stop once this many sets are found (a feasibility check); the results are then not the best. */
+  stopAfter?: number;
 }
 
 /**
@@ -60,6 +62,8 @@ export interface ArmorSetResult {
   freeSlots: Record<SlotTarget, number[]>;
   /** Sum of the pieces' fully upgraded defense. */
   defense: number;
+  /** Expected damage of a 100 MV hit; set by the highest-damage search (damage-search.ts). */
+  damage?: number;
 }
 
 export interface ArmorSearchOutput {
@@ -70,9 +74,22 @@ export interface ArmorSearchOutput {
   /** True when the time limit ended the search before it tried every combination. */
   timedOut: boolean;
   elapsedMs: number;
+  /** Upper bound on the requested skill points any set can reach (each capped at its need). */
+  pointsBound?: number;
 }
 
 export const DEFAULT_TIME_LIMIT_MS = 30_000;
+
+/** How far a search has got, for a progress bar. */
+export interface SearchProgress {
+  /** 0 to 1; an estimate. */
+  fraction: number;
+  /** What the search is doing, for display. */
+  phase: string;
+}
+
+/** Progress is reported at most this often. */
+export const PROGRESS_INTERVAL_MS = 100;
 
 /** Points a requirement needs: the level, or for set/group skills the rank's piece count. */
 export function requiredPoints(skill: Skill, level: number): number {
@@ -109,7 +126,8 @@ interface DecoPlan {
   free: SlotCounts;
 }
 
-export function searchArmorSets(input: ArmorSearchInput): ArmorSearchOutput {
+/** `onProgress` gets the share of the search tree covered so far (an estimate: branches differ in size). */
+export function searchArmorSets(input: ArmorSearchInput, onProgress?: (progress: SearchProgress) => void): ArmorSearchOutput {
   const started = Date.now();
   const deadline = started + (input.timeLimitMs ?? DEFAULT_TIME_LIMIT_MS);
   const skillsById = new Map(input.skills.map((s) => [s.id, s]));
@@ -197,6 +215,8 @@ export function searchArmorSets(input: ArmorSearchInput): ArmorSearchOutput {
   const acc = input.weapon ? project(input.weapon.skills) : new Array<number>(n).fill(0);
   const slots = weaponSlots.slice();
   const chosen: Candidate<ArmorPiece | Talisman | null>[] = [];
+  const pointsBound =
+    acc.reduce((sum, p, i) => sum + Math.min(p, need[i]), 0) + slots.reduce((sum, count, s) => sum + count * perSlotTotal[s], 0) + remTotal[0];
 
   const memo = new Map<string, DecoPlan | null>();
   const solveDecos = (deficit: number[], free: SlotCounts): DecoPlan | null => {
@@ -241,7 +261,21 @@ export function searchArmorSets(input: ArmorSearchInput): ArmorSearchOutput {
   let best: Found[] = [];
   let found = 0;
   let stopped = false;
+  let enough = false;
   let nodes = 0;
+  // Position in the first levels of the tree, for progress.
+  const position = new Array<number>(depth).fill(0);
+  const PROGRESS_LEVELS = Math.min(3, depth);
+  let lastReport = Date.now();
+  const report = () => {
+    let fraction = 0;
+    let width = 1;
+    for (let k = 0; k < PROGRESS_LEVELS; k++) {
+      width /= levels[k].length;
+      fraction += position[k] * width;
+    }
+    onProgress!({ fraction, phase: 'Searching armor sets' });
+  };
 
   const canStillReach = (k: number) => {
     let sum = 0;
@@ -256,10 +290,17 @@ export function searchArmorSets(input: ArmorSearchInput): ArmorSearchOutput {
   };
 
   const visit = (k: number): void => {
-    if (stopped) return;
-    if (++nodes % 2048 === 0 && Date.now() > deadline) {
-      stopped = true;
-      return;
+    if (stopped || enough) return;
+    if (++nodes % 2048 === 0) {
+      const now = Date.now();
+      if (now > deadline) {
+        stopped = true;
+        return;
+      }
+      if (onProgress && now - lastReport >= PROGRESS_INTERVAL_MS) {
+        lastReport = now;
+        report();
+      }
     }
     if (!canStillReach(k)) return;
     if (k === depth) {
@@ -269,13 +310,16 @@ export function searchArmorSets(input: ArmorSearchInput): ArmorSearchOutput {
       );
       if (plan) {
         found++;
+        if (input.stopAfter && found >= input.stopAfter) enough = true;
         const defense = chosen.reduce((sum, c, i) => sum + (i > 0 ? (c.item as ArmorPiece).defense.max : 0), 0);
         best.push({ chosen: chosen.slice(), decos: plan.decos, slotScore: freeScore(plan.free), defense });
         if (best.length >= maxResults * 2) best = best.sort(compare).slice(0, maxResults);
       }
       return;
     }
-    for (const c of levels[k]) {
+    for (let j = 0; j < levels[k].length; j++) {
+      const c = levels[k][j];
+      position[k] = j;
       for (let i = 0; i < n; i++) acc[i] += c.points[i];
       for (let s = 0; s < 6; s++) slots[s] += c.slots[s];
       chosen.push(c);
@@ -283,7 +327,7 @@ export function searchArmorSets(input: ArmorSearchInput): ArmorSearchOutput {
       chosen.pop();
       for (let i = 0; i < n; i++) acc[i] -= c.points[i];
       for (let s = 0; s < 6; s++) slots[s] -= c.slots[s];
-      if (stopped) return;
+      if (stopped || enough) return;
     }
   };
   visit(0);
@@ -296,6 +340,7 @@ export function searchArmorSets(input: ArmorSearchInput): ArmorSearchOutput {
     found,
     timedOut: stopped,
     elapsedMs: Date.now() - started,
+    pointsBound,
   };
 }
 

@@ -1,0 +1,88 @@
+:host {
+  position: fixed;
+  z-index: 100;
+  // As wide as the table needs; text wraps at 26rem.
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  overflow-x: auto;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.3);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.current,
+.on {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.desc,
+.meta,
+ul {
+  max-width: 26rem;
+}
+
+.desc,
+.meta {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+}
+
+table {
+  margin-top: 0.45rem;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: 0.12rem 0.45rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+thead th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+tbody th {
+  padding-left: 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+ul {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  margin-bottom: 0.15rem;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

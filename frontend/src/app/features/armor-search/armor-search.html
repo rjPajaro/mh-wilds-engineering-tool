@@ -69,9 +69,12 @@
         <ul class="skills">
           @for (r of g.rows; track r.req.skillId) {
             <li>
-              <span class="text" [title]="r.description">
+              <span class="text" [appSkillTip]="{ skill: r.skill, level: r.req.level, weaponKind: settings().weapon.kind }">
                 <span class="name">{{ r.skill.name }}</span>
                 <span class="hint">{{ r.hint }}</span>
+                @if (r.effect) {
+                  <span class="effect">{{ r.effect }}</span>
+                }
               </span>
               <select [attr.aria-label]="r.skill.name + ' level'" (change)="setLevel(r.i, $any($event.target).value)">
                 @for (l of r.levels; track l.level) {
@@ -109,12 +112,21 @@
 
       <div class="search-actions">
         @if (running()) {
-          <button type="button" class="primary" disabled>Searching…</button>
+          <button type="button" class="primary" disabled>Searching… {{ percent(progress()?.fraction ?? 0) }}%</button>
           <button type="button" (click)="cancel()">Cancel</button>
         } @else {
           <button type="button" class="primary" [disabled]="!groups().length" (click)="search()">Search</button>
+          <button type="button" class="damage" [disabled]="!weapon()" (click)="searchDamage()">Top {{ topDamage }} by damage</button>
         }
       </div>
+      <p class="hint damage-hint">
+        @if (weapon()) {
+          Top {{ topDamage }} by damage raises damage skills as far as the armor, jewels and talismans allow, on top of the skills above.
+          Damage uses the Builder's Damage panel conditions and buffs, against {{ damageTarget() }}.
+        } @else {
+          Pick a weapon to find the top {{ topDamage }} sets by damage.
+        }
+      </p>
     </aside>
 
     <section class="browser">
@@ -138,6 +150,21 @@
               @for (line of b.description; track $index) {
                 <span class="desc">{{ line }}</span>
               }
+              @if (b.values; as v) {
+                <span class="levels">
+                  @for (l of v.levels; track l.level) {
+                    <span class="lv"><span class="lv-n">Lv {{ l.level }}</span>{{ l.text }}</span>
+                  }
+                </span>
+                @if (v.researched; as r) {
+                  @if (r.note) {
+                    <span class="desc">{{ r.note }}</span>
+                  }
+                  <span class="source" [title]="sourceLinks(r)">
+                    {{ r.weapons }} · {{ sourceText(r) }}
+                  </span>
+                }
+              }
             </button>
           }
         </div>
@@ -146,15 +173,46 @@
 
     <section class="results">
       <header class="section-head">
-        <h2>Sets</h2>
-        <div class="field inline">
-          <label for="search-rank">Rank by</label>
-          <select id="search-rank" (change)="setRankBy($any($event.target).value)">
-            <option value="slots" [selected]="settings().rankBy === 'slots'">Free slots</option>
-            <option value="defense" [selected]="settings().rankBy === 'defense'">Defense</option>
-          </select>
-        </div>
+        @if (shownMode() === 'damage') {
+          <h2>Top {{ topDamage }} by damage</h2>
+        } @else {
+          <h2>Sets</h2>
+          <div class="field inline">
+            <label for="search-rank">Rank by</label>
+            <select id="search-rank" (change)="setRankBy($any($event.target).value)">
+              <option value="slots" [selected]="settings().rankBy === 'slots'">Free slots</option>
+              <option value="defense" [selected]="settings().rankBy === 'defense'">Defense</option>
+            </select>
+          </div>
+        }
       </header>
+
+      @if (progress(); as p) {
+        <div class="progress">
+          <div class="progress-head">
+            <span>{{ p.phase }}…</span>
+            <strong>{{ percent(p.fraction) }}%</strong>
+          </div>
+          <div
+            class="track"
+            role="progressbar"
+            aria-label="Search progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuenow]="percent(p.fraction)"
+          >
+            <div class="fill" [style.width.%]="p.fraction * 100"></div>
+          </div>
+          <p class="hint">
+            {{ duration(p.elapsedMs, 'down') }} elapsed ·
+            @if (p.remainingMs !== null) {
+              about {{ duration(p.remainingMs) }} left
+            } @else {
+              estimating time left…
+            }
+          </p>
+        </div>
+      }
 
       @if (error(); as e) {
         <p class="issue error">{{ e }}</p>
@@ -162,7 +220,14 @@
 
       @if (output(); as out) {
         <p class="status">
-          @if (out.found) {
+          @if (mode() === 'damage') {
+            @if (out.results.length) {
+              Checked {{ checks().toLocaleString() }} skill combinations in {{ seconds(out.elapsedMs) }} s.
+              Damage is the expected damage of a 100 motion value hit against {{ damageTarget() }}.
+            } @else {
+              No set reaches the requested skills. Try lower levels, more talismans or transcended armor.
+            }
+          } @else if (out.found) {
             Found {{ out.found.toLocaleString() }} {{ out.found === 1 ? 'set' : 'sets' }} in {{ seconds(out.elapsedMs) }} s.
             @if (out.found > maxResults) {
               Showing the best {{ maxResults }}.
@@ -172,13 +237,17 @@
           }
         </p>
         @if (out.timedOut) {
-          <p class="issue warning">The search stopped at its time limit, so these are the best of the sets found so far. Add skills or raise levels to narrow it.</p>
+          @if (mode() === 'damage') {
+            <p class="issue warning">The search stopped at its time limit, so these are the best sets found so far.</p>
+          } @else {
+            <p class="issue warning">The search stopped at its time limit, so these are the best of the sets found so far. Add skills or raise levels to narrow it.</p>
+          }
         }
         @if (stale()) {
           <p class="issue">The skills or options changed since this search. Search again to update.</p>
         }
 
-        <ol class="sets">
+        <ol class="sets" [class.dimmed]="running()">
           @for (v of views(); track $index; let n = $index) {
             <li>
               <app-set-card [view]="v" [rank]="n + 1" (equip)="equip(v.result)" />

@@ -42,6 +42,19 @@
     margin: 0 0 0.75rem;
     font-size: 1.1rem;
   }
+  > button {
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    &:hover {
+      background: var(--hover);
+    }
+  }
 }
 
 .equip {
@@ -231,6 +244,11 @@
 .sources,
 .detail {
   color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.effect {
+  color: var(--accent);
   font-size: 0.8rem;
 }
 

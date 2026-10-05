@@ -184,4 +184,75 @@ describe('Builder persistence', () => {
     await fixture.whenStable();
     expect(card('head').querySelector('li.bonus.active')?.textContent).toContain("Arkveld's Hunger");
   });
+
+  it('shows what each active skill gives at its level', async () => {
+    const skillId = (name: string) => index.files.skills.find((s) => s.name === name)!.id;
+    const helm = index.files.armor.flatMap((s) => s.pieces).find((p) => p.name === 'Arkvulcan Helm γ')!;
+    const burstPiece = index.files.armor
+      .flatMap((s) => s.pieces)
+      .find((p) => p.kind === 'chest' && p.skills.some((s) => s.skillId === skillId('Burst')))!;
+    const burstLevel = burstPiece.skills.find((s) => s.skillId === skillId('Burst'))!.level;
+    const { fixture, api } = await mount();
+    const el = fixture.nativeElement as HTMLElement;
+    const effect = (name: string) =>
+      [...el.querySelectorAll('section.skills li')]
+        .find((li) => li.querySelector('.name')?.textContent === name)
+        ?.querySelector('.effect')
+        ?.textContent!.replace(/\s+/g, ' ')
+        .trim();
+
+    api.setWeaponKind('great-sword');
+    api.equip('head', helm.id);
+    api.equip('chest', burstPiece.id);
+    await fixture.whenStable();
+
+    // Game text with numbers.
+    expect(effect('Weakness Exploit')).toBe('Attacks that hit weak points gain affinity +15%, with an extra 10% on wounds.');
+    // Researched numbers for the weapon type, with their source.
+    const greatSword = ['Attack +10, element +80', 'Attack +12, element +100', 'Attack +14, element +120'][burstLevel - 1];
+    expect(effect('Burst')).toBe(`${greatSword} · Game8 + Fextralife`);
+
+    api.setWeaponKind('bow');
+    await fixture.whenStable();
+    expect(effect('Burst')).toBe(`${['Attack +6, element +40', 'Attack +7, element +60', 'Attack +8, element +80'][burstLevel - 1]} · Game8 + Fextralife`);
+  });
+
+  it('shows a skill tooltip with numbers by stat and level on hover and focus', async () => {
+    const helm = index.files.armor.flatMap((s) => s.pieces).find((p) => p.name === 'Arkvulcan Helm γ')!;
+    const { fixture, api } = await mount();
+    const el = fixture.nativeElement as HTMLElement;
+    api.equip('head', helm.id);
+    await fixture.whenStable();
+    const row = [...el.querySelectorAll<HTMLElement>('section.skills li')].find((li) => li.querySelector('.name')?.textContent === 'Weakness Exploit')!;
+    const tip = () => document.body.querySelector('app-skill-tip-panel');
+    const cells = (stat: string) =>
+      [...tip()!.querySelectorAll('tbody tr')].find((tr) => tr.querySelector('th')!.textContent === stat)!.querySelectorAll('td');
+
+    row.dispatchEvent(new MouseEvent('mouseenter'));
+    await fixture.whenStable();
+    expect(tip()!.getAttribute('role')).toBe('tooltip');
+    expect(row.getAttribute('aria-describedby')).toBe(tip()!.id);
+    expect(tip()!.querySelector('.current')!.textContent).toBe('Lv 3 / 5');
+    expect([...cells('Affinity')].map((td) => td.textContent)).toEqual(['+5%', '+10%', '+15%', '+20%', '+30%']);
+    // The current level is highlighted.
+    expect(cells('Affinity')[2].classList).toContain('on');
+    expect(tip()!.textContent).toContain('When: Hitting a weak point');
+
+    row.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(tip()).toBeNull();
+
+    // Keyboard: the skill can be focused, Escape closes the tooltip.
+    expect(row.tabIndex).toBe(0);
+    row.dispatchEvent(new FocusEvent('focusin'));
+    expect(tip()).not.toBeNull();
+    row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(tip()).toBeNull();
+
+    // The gear card's skills have it too.
+    const cardSkill = el.querySelector<HTMLElement>('#equip-head')!.closest('.equip')!.querySelector<HTMLElement>('.item-skills li:not(.bonus)')!;
+    cardSkill.dispatchEvent(new MouseEvent('mouseenter'));
+    expect(tip()!.querySelector('strong')!.textContent).toBe('Weakness Exploit');
+    fixture.destroy();
+    expect(tip()).toBeNull();
+  });
 });

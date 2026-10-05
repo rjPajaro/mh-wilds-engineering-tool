@@ -6,12 +6,14 @@ import {
   Decoration,
   GOGMA_DEVICES,
   GogmaDevice,
+  Skill,
   SkillLevel,
   SlotTarget,
   Weapon,
   WeaponKind,
 } from '../../core/models/game-data';
 import { resolveBuildSkills } from '../../core/skills/skill-resolver';
+import { levelEffect, sourceText } from '../../core/skills/skill-values';
 import { isCustomWeapon } from '../../core/artian/artian';
 import { baseArmorId, canTranscend, isTranscendedId, transcendedId } from '../../core/armor/transcend';
 import { BUFF_GROUPS, BuffGroup, buffedDefense, BuffOption } from '../../core/calc/buffs';
@@ -22,6 +24,7 @@ import { CustomWeaponsService } from '../../data/custom-weapons.service';
 import { GameDataService } from '../../data/game-data.service';
 import { WEAPON_KIND_OPTIONS } from '../../shared/labels';
 import { SearchSelect, SelectOption } from '../../shared/search-select/search-select';
+import { SkillTip } from '../../shared/skill-tip/skill-tip';
 import { DEVICE_LABELS, equipmentIcon, gogmaGroupOf, skillsText, weaponIdForOption, weaponOptions, weaponOptionValue } from '../../shared/weapon-options';
 import { DamagePanel } from './damage-panel/damage-panel';
 import { LoadoutBar } from './loadout-bar/loadout-bar';
@@ -41,7 +44,7 @@ const SLOT_LABELS: Record<EquipSlot, string> = {
 
 @Component({
   selector: 'app-builder',
-  imports: [SearchSelect, DamagePanel, MovesPanel, LoadoutBar, SharedBuildBanner],
+  imports: [SearchSelect, SkillTip, DamagePanel, MovesPanel, LoadoutBar, SharedBuildBanner],
   templateUrl: './builder.html',
   styleUrl: './builder.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -144,6 +147,11 @@ export class Builder {
     const index = this.index();
     return index ? resolveBuildSkills(this.build(), index.skills) : [];
   });
+  /** What each active skill gives at its current level, by skill id, for the weapon type. */
+  protected readonly skillEffects = computed(
+    () => new Map(this.activeSkills().map((s) => [s.skill.id, levelEffect(s.skill, s.level, this.weaponKind())])),
+  );
+  protected readonly sourceText = sourceText;
   protected readonly issues = computed(() => validateDecorations(this.build()));
   /** Armor defense as crafted, and fully upgraded (transcending raises the latter). */
   protected readonly totalDefense = computed(() =>
@@ -186,7 +194,12 @@ export class Builder {
    * Skills on the item in `slot`: its set and group bonuses first (`active` once the
    * build has enough pieces), then its own skills with their levels.
    */
-  protected itemSkills(slot: EquipSlot): { id: number; name: string; description: string; level: number | null; active: boolean }[] {
+  /**
+   * A piece's skills: set and group bonuses first (level null), then skills with the
+   * points the piece gives. `tipLevel` is the level the tooltip highlights: the piece's
+   * points, or the bonus rank the whole build reaches.
+   */
+  protected itemSkills(slot: EquipSlot): { id: number; skill: Skill; name: string; level: number | null; tipLevel: number; active: boolean }[] {
     const skills = this.index()?.skills;
     const item = equippedItem(this.build(), slot);
     if (!skills || !item) return [];
@@ -198,12 +211,14 @@ export class Builder {
       .sort((a, b) => order(a.skill!.kind) - order(b.skill!.kind) || b.s.level - a.s.level)
       .map(({ s, skill }) => {
         const bonus = isBonus(skill!.kind);
+        const rank = bonus ? (this.activeSkills().find((a) => a.skill.id === skill!.id)?.level ?? 0) : 0;
         return {
           id: skill!.id,
+          skill: skill!,
           name: skill!.name,
-          description: skill!.description,
           level: bonus ? null : s.level,
-          active: bonus && this.activeSkills().some((a) => a.skill.id === skill!.id && a.level > 0),
+          tipLevel: bonus ? rank : s.level,
+          active: rank > 0,
         };
       });
   }

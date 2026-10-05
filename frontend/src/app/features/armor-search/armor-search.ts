@@ -5,9 +5,11 @@ import { ARMOR_KINDS, Decoration, GOGMA_DEVICES, GogmaDevice, Skill, SlotTarget,
 import { ArmorSetRanking, ArmorSetResult, requiredPoints } from '../../core/search/armor-search';
 import { SKILL_CATEGORIES, SkillCategory, skillCategory } from '../../core/skills/skill-categories';
 import { resolveSkills } from '../../core/skills/skill-resolver';
-import { ArmorSearchService, MAX_RESULTS, TalismanPool } from '../../data/armor-search.service';
+import { SkillLevelValues, skillLevelValues, sourceText } from '../../core/skills/skill-values';
+import { ArmorSearchService, MAX_RESULTS, TalismanPool, TOP_DAMAGE_RESULTS } from '../../data/armor-search.service';
 import { CurrentBuildService } from '../../data/current-build.service';
 import { CustomWeaponsService } from '../../data/custom-weapons.service';
+import { DamageSettingsService } from '../../data/damage-settings.service';
 import { GameDataService } from '../../data/game-data.service';
 import { WEAPON_KIND_OPTIONS } from '../../shared/labels';
 import { SearchSelect, SelectOption } from '../../shared/search-select/search-select';
@@ -20,6 +22,7 @@ import {
   weaponOptions,
   weaponOptionValue,
 } from '../../shared/weapon-options';
+import { SkillTip } from '../../shared/skill-tip/skill-tip';
 import { ItemRow, ResultView, SetCard } from './set-card/set-card';
 
 const PAGE = 20;
@@ -36,7 +39,7 @@ const CATEGORY_LABELS = Object.fromEntries(SKILL_CATEGORIES.map((c) => [c.id, c.
 /** Pick a weapon and skills; find armor sets (with talisman and jewels) that reach them. */
 @Component({
   selector: 'app-armor-search',
-  imports: [SearchSelect, SetCard],
+  imports: [SearchSelect, SkillTip, SetCard],
   templateUrl: './armor-search.html',
   styleUrl: './armor-search.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +49,7 @@ export class ArmorSearch {
   private readonly store = inject(ArmorSearchService);
   private readonly current = inject(CurrentBuildService);
   private readonly customWeapons = inject(CustomWeaponsService);
+  private readonly damageSettings = inject(DamageSettingsService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
 
@@ -58,6 +62,11 @@ export class ArmorSearch {
   protected readonly running = this.store.running;
   protected readonly error = this.store.error;
   protected readonly stale = this.store.stale;
+  protected readonly mode = this.store.mode;
+  protected readonly progress = this.store.progress;
+  /** Search the results column is about: the running one, else the one the results came from. */
+  protected readonly shownMode = computed(() => this.progress()?.kind ?? (this.output() ? this.mode() : 'sets'));
+  protected readonly topDamage = TOP_DAMAGE_RESULTS;
   protected readonly maxResults = MAX_RESULTS;
   protected readonly categories = SKILL_CATEGORIES;
 
@@ -134,6 +143,7 @@ export class ArmorSearch {
           on: this.requested().has(skill.id),
           weapon: skill.kind === 'weapon',
           description: describeSkill(skill),
+          values: levelValues(skill, this.settings().weapon.kind),
         }))
       : [];
   });
@@ -148,8 +158,8 @@ export class ArmorSearch {
       const levels = isBonus(skill)
         ? skill.ranks.map((r) => ({ level: r.level, label: `${r.name ?? `Rank ${r.level}`} (${requiredPoints(skill, r.level)} pieces)` }))
         : skill.ranks.map((r) => ({ level: r.level, label: `Lv ${r.level}` }));
-      const description = describeSkill(skill).join('\n');
-      return [{ i, req, skill, levels, hint: KIND_LABELS[skill.kind], category: skillCategory(skill), description }];
+      const effect = levelValues(skill, this.settings().weapon.kind)?.levels.find((l) => l.level === req.level)?.text ?? null;
+      return [{ i, req, skill, levels, hint: KIND_LABELS[skill.kind], category: skillCategory(skill), effect }];
     });
     return SKILL_CATEGORIES.map((c) => ({ ...c, rows: rows.filter((r) => r.category === c.id) })).filter((g) => g.rows.length);
   });
@@ -160,6 +170,19 @@ export class ArmorSearch {
   );
 
   // ---------------------------------------------------------------- results
+
+  /** Skill combinations the highest-damage search checked; 0 for a skill search. */
+  protected readonly checks = computed(() => {
+    const output = this.output();
+    return output && 'checks' in output ? output.checks : 0;
+  });
+
+  /** What damage is measured against: the Damage panel's target part, or a neutral weak point. */
+  protected readonly damageTarget = computed(() => {
+    const monster = this.damageSettings.monster();
+    const part = this.damageSettings.part();
+    return monster && part ? `${monster.name} (${part.name})` : 'a neutral weak point (hitzone 100)';
+  });
 
   protected readonly views = computed<ResultView[]>(() => {
     const output = this.output();
@@ -202,11 +225,12 @@ export class ArmorSearch {
           name: s.rankName ?? s.skill.name,
           level: s.level,
           requested: requested.has(s.skill.id),
-          description: s.skill.description,
+          skill: s.skill,
         }))
         .sort((a, b) => Number(b.requested) - Number(a.requested));
       return {
         result,
+        weaponKind: weapon?.kind ?? this.settings().weapon.kind,
         rows,
         skills,
         freeSlots: [
@@ -287,12 +311,17 @@ export class ArmorSearch {
   protected setRankBy(value: string): void {
     this.store.patch({ rankBy: value as ArmorSetRanking });
     // Re-rank right away; the search takes well under a second for most requests.
-    if (this.output() && !this.running()) this.search();
+    if (this.output() && this.mode() === 'sets' && !this.running()) this.search();
   }
 
   protected search(): void {
     this.shown.set(PAGE);
     this.store.search();
+  }
+
+  protected searchDamage(): void {
+    this.shown.set(PAGE);
+    this.store.searchDamage();
   }
 
   protected cancel(): void {
@@ -308,8 +337,26 @@ export class ArmorSearch {
     void this.router.navigateByUrl('/builder');
   }
 
+  protected readonly sourceText = sourceText;
+
+  /** Source pages, one per line, for a tooltip. */
+  protected sourceLinks(researched: NonNullable<SkillLevelValues['researched']>): string {
+    return researched.sources.map((s) => `${s.name}: ${s.url}`).join('\n');
+  }
+
   protected seconds(ms: number): string {
     return (ms / 1000).toFixed(ms < 10_000 ? 2 : 0);
+  }
+
+  protected percent(fraction: number): number {
+    return Math.floor(fraction * 100);
+  }
+
+  /** Whole seconds, with minutes past one minute: "12 s", "1 min 5 s". Rounds up (time left) or down (elapsed). */
+  protected duration(ms: number, round: 'up' | 'down' = 'up'): string {
+    const total = round === 'up' ? Math.ceil(ms / 1000) : Math.floor(ms / 1000);
+    const minutes = Math.floor(total / 60);
+    return minutes ? `${minutes} min ${total % 60} s` : `${total} s`;
   }
 }
 
@@ -327,6 +374,17 @@ function describeSkill(skill: Skill): string[] {
   }
   return skill.description ? [skill.description] : [];
 }
+
+/**
+ * Numbers per level for armor and weapon skills; null for set and group bonuses (their
+ * ranks are already listed) and for skills where no level states a number.
+ */
+function levelValues(skill: Skill, weaponKind: WeaponKind): SkillLevelValues | null {
+  if (isBonus(skill)) return null;
+  const values = skillLevelValues(skill, weaponKind);
+  return values.numeric ? values : null;
+}
+
 
 function skillHint(skill: Skill): string {
   if (isBonus(skill)) return skill.ranks.map((r) => r.name).filter(Boolean).join(', ');

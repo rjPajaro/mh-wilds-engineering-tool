@@ -44,7 +44,7 @@
             }
             <ul class="item-skills">
               @for (s of itemSkills(slot); track s.id) {
-                <li [class.bonus]="s.level === null" [class.active]="s.active" [title]="s.description">
+                <li [class.bonus]="s.level === null" [class.active]="s.active" [appSkillTip]="{ skill: s.skill, level: s.tipLevel, weaponKind: weaponKind() }">
                   {{ s.name }}@if (s.level !== null) {{{ ' ' }}<span class="lvl">{{ s.level }}</span>}
                 </li>
               }
@@ -141,7 +141,7 @@
 
       <ul>
         @for (s of activeSkills(); track s.skill.id) {
-          <li [class.inactive]="s.level === 0" [title]="s.skill.description">
+          <li [class.inactive]="s.level === 0" [appSkillTip]="{ skill: s.skill, level: s.level, weaponKind: weaponKind() }">
             <div class="skill-head">
               <span class="name">{{ s.skill.name }}</span>
               <span class="kind">{{ s.skill.kind }}</span>
@@ -158,6 +158,14 @@
                 }
                 <span class="lvl">{{ s.level }}/{{ s.skill.maxLevel }}</span>
                 @if (s.wasted) { <span class="warn">+{{ s.wasted }} over</span> }
+              </div>
+            }
+            @if (skillEffects().get(s.skill.id); as e) {
+              <div class="effect">
+                {{ e.text }}
+                @if (e.researched; as r) {
+                  <span class="kind" [title]="'Researched values for ' + r.weapons">· {{ sourceText(r) }}</span>
+                }
               </div>
             }
             <div class="sources">

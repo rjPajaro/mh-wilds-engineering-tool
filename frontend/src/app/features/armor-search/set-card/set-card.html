@@ -1,5 +1,8 @@
 <header class="set-head">
   <span class="rank">#{{ rank() }}</span>
+  @if (view().result.damage; as damage) {
+    <span class="stat damage" title="Expected damage of a 100 motion value hit">Damage <strong>{{ damage.toFixed(1) }}</strong></span>
+  }
   <span class="stat">Defense <strong>{{ view().result.defense }}</strong></span>
   <span class="stat free">
     Free
@@ -48,6 +51,6 @@
 
 <ul class="set-skills">
   @for (s of view().skills; track s.name) {
-    <li [class.requested]="s.requested" [title]="s.description">{{ s.name }} <span class="lvl">{{ s.level }}</span></li>
+    <li [class.requested]="s.requested" [appSkillTip]="{ skill: s.skill, level: s.level, weaponKind: view().weaponKind }">{{ s.name }} <span class="lvl">{{ s.level }}</span></li>
   }
 </ul>

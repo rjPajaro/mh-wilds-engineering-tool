@@ -104,6 +104,10 @@ button {
   .name {
     font-weight: 600;
   }
+  .effect {
+    color: var(--accent);
+    font-size: 0.78rem;
+  }
   select {
     max-width: 11rem;
   }
@@ -141,13 +145,46 @@ button {
   display: flex;
   gap: 0.4rem;
   margin-top: 1rem;
-  .primary {
+  .primary,
+  .damage {
     flex: 1;
   }
 }
 
+.damage-hint {
+  margin: 0.4rem 0 0;
+}
+
 .status {
   margin: 0 0 0.6rem;
+}
+
+.progress {
+  margin: 0 0 0.75rem;
+  .progress-head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+  }
+  .track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+    transition: width 0.2s ease-out;
+  }
+  .hint {
+    margin: 0.3rem 0 0;
+  }
+}
+
+.sets.dimmed {
+  opacity: 0.5;
 }
 
 .issue {
@@ -260,5 +297,22 @@ button.on {
   .tag {
     color: var(--muted);
     font-size: 0.68rem;
+  }
+  // What each level does: "Lv 3  Attack +7".
+  .levels {
+    font-size: 0.8rem;
+    font-weight: 400;
+  }
+  .lv {
+    display: grid;
+    grid-template-columns: 2.4rem 1fr;
+  }
+  .lv-n {
+    color: var(--accent);
+  }
+  .source {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 400;
   }
 }

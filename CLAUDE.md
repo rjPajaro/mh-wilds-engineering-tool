@@ -23,7 +23,8 @@ rankable by calculated DPS.
 - Saved builds: localStorage or IndexedDB, with JSON export/import.
 - Calculator and skill logic live in plain TypeScript (no Angular
   imports) with unit tests.
-- Solver runs in a Web Worker.
+- Solver runs in a Web Worker. Armor search: `core/search/armor-search.ts`
+  + `features/armor-search/` (Armor Search tab). See `docs/SEARCH.md`.
 - Angular 22, Node 24 (`frontend/.nvmrc`). Tests: `npm test` (Vitest).
 - Pure logic lives in `frontend/src/app/core/` (no Angular imports).
 - Hosted on GitHub Pages (https://rjpajaro.github.io/mh-wilds-engineering-tool/),
