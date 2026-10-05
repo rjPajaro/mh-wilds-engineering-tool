@@ -1,4 +1,4 @@
-import { ElementKind } from '../models/game-data';
+import { ElementKind, WeaponKind } from '../models/game-data';
 
 /** Per-level stat changes. Element values are in true units (in-game display ÷ 10). */
 export interface EffectValues {
@@ -34,6 +34,8 @@ export interface SkillEffect {
   levels: readonly EffectValues[];
   /** Only applies to weapons with this element. */
   element?: ElementKind;
+  /** Only applies to these weapon types. */
+  weapons?: readonly WeaponKind[];
   /** Extra values when the target is wounded (Weakness Exploit). */
   wound?: readonly EffectValues[];
   /** false when the numbers are not in the game's skill text and were assumed. */
@@ -45,6 +47,9 @@ const toggle = (label: string, defaultOn = true) => ({ kind: 'toggle', label, de
 const atk = (...v: number[]) => v.map((attackFlat) => ({ attackFlat }));
 const aff = (...v: number[]) => v.map((affinity) => ({ affinity }));
 const pct = (...v: number[]) => v.map((attackPct) => ({ attackPct }));
+
+/** Weapons that can perfect guard. */
+const GUARD_WEAPONS: readonly WeaponKind[] = ['great-sword', 'sword-shield', 'lance', 'gunlance', 'charge-blade'];
 
 const elementAttack = (element: ElementKind): SkillEffect => ({
   condition: always,
@@ -117,7 +122,7 @@ export const SKILL_EFFECTS: Readonly<Record<string, SkillEffect>> = {
     verified: true,
   },
   Heroics: { condition: toggle('Health ≤ 35%', false), levels: pct(0, 5, 5, 10, 30), verified: true },
-  'Offensive Guard': { condition: toggle('After perfect guard', false), levels: pct(5, 10, 15), verified: true },
+  'Offensive Guard': { condition: toggle('After perfect guard', false), levels: pct(5, 10, 15), weapons: GUARD_WEAPONS, verified: true },
   Ambush: { condition: toggle('After sneak attack', false), levels: pct(5, 10, 15), verified: true },
   Antivirus: { condition: toggle('Frenzy cured'), levels: aff(3, 6, 10), verified: true },
   'Slicked Blade': { condition: toggle('Wet', false), levels: aff(3, 6, 9), verified: true },

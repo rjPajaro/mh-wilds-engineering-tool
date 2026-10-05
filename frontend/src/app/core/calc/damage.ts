@@ -118,6 +118,7 @@ export function calculateDamage(input: DamageInput): DamageResult {
       continue;
     }
     if (effect.element && effect.element !== elementKind) continue;
+    if (effect.weapons && !effect.weapons.includes(weapon.kind)) continue;
     if (effect.condition.kind === 'toggle') {
       conditions.push({ skill: name, label: effect.condition.label, on: toggles[name] ?? effect.condition.defaultOn });
     }

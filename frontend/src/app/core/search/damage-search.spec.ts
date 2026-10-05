@@ -81,6 +81,14 @@ describe('searchDamageSets', () => {
     expect(evade.results[0].damage!).toBeLessThanOrEqual(out.results[0].damage!);
   });
 
+  it('skips guard skills for weapons that cannot guard', () => {
+    const bow = [...index.weapons.values()].find((w) => w.kind === 'bow' && w.slots.some((l) => l >= 3))!;
+    const sets = searchDamageSets(input({ weapon: bow, toggles: { 'Offensive Guard': true }, maxResults: 1 }));
+    expect(sets.results.length).toBe(1);
+    const decos = Object.values(sets.results[0].decorations).flat();
+    expect(decos.some((d) => d?.skills.some((s) => s.skillId === skillId('Offensive Guard')))).toBe(false);
+  });
+
   it('finds nothing when the requested skills cannot be reached', () => {
     // A weapon skill with no weapon slots and no talismans.
     const none = searchDamageSets(

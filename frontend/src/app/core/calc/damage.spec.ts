@@ -74,6 +74,16 @@ describe('calculateDamage', () => {
     expect(base.efe).toBeCloseTo(42 * 1.15, 5); // white element sharpness, no crit element
   });
 
+  it('applies guard skills only to weapons that can guard', () => {
+    const skills = [active('Offensive Guard', 3)];
+    const toggles = { 'Offensive Guard': true };
+    const bow = calculateDamage({ weapon: { ...RAW_SWORD, kind: 'bow', coatings: [] }, skills, toggles });
+    expect(bow.base.attack).toBe(200);
+    expect(bow.conditions).toEqual([]);
+    const lance = calculateDamage({ weapon: { ...RAW_SWORD, kind: 'lance' }, skills, toggles });
+    expect(lance.base.attack).toBeCloseTo(230, 5);
+  });
+
   it('applies Weakness Exploit only on weak points, plus wound bonus', () => {
     const skills = [active('Weakness Exploit', 5, 'attack', 'armor')];
     const weak = calculateDamage({ weapon: RAW_SWORD, skills, target: { hitzones: HZ(0.65), wounded: true } });
