@@ -116,6 +116,21 @@ describe('searchDamageSets', () => {
     );
     expect(none.results).toEqual([]);
   });
+
+  it.each(['paralysis', 'blastblight'])('adds no element jewels for a %s weapon, only raw ones', (status) => {
+    const statusWeapon = [...index.weapons.values()]
+      .filter((w) => w.specials.some((s) => s.kind === 'status' && s.status === status))
+      .sort((a, b) => b.rarity - a.rarity)[0];
+    const elementSkills = new Set(['Fire Attack', 'Water Attack', 'Thunder Attack', 'Ice Attack', 'Dragon Attack', 'Critical Element'].map(skillId));
+    const sets = searchDamageSets(input({ weapon: statusWeapon, maxResults: 3 }));
+    expect(sets.results.length).toBeGreaterThan(0);
+    for (const set of sets.results) {
+      const jewels = Object.values(set.decorations).flat();
+      expect(jewels.flatMap((d) => d?.skills ?? []).filter((s) => elementSkills.has(s.skillId))).toEqual([]);
+      const skills = resolveSkills(collectSkillSources({ weapon: statusWeapon, armor: set.armor, talisman: set.talisman, decorations: set.decorations }), index.skills);
+      expect(skillLevel(skills, skillId('Attack Boost')) + skillLevel(skills, skillId('Critical Boost'))).toBeGreaterThan(0);
+    }
+  }, 20_000);
 });
 
 describe('search progress', () => {

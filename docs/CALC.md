@@ -26,7 +26,13 @@ per hit = effective raw × raw hitzone + effective element × element hitzone
   handled.
 - Element: the data holds true values. The game shows them ×10, so the UI does too. Element skill
   text uses the displayed units, so "Fire attack +40" is +4 true element.
+- Element cap (`elementCap`): element after skills is at most the larger of base + 400 and base × 2.3
+  (display units), every weapon type, since Title Update 4 (before: +350 / ×1.9). The Damage panel
+  shows a capped element in red (`--error`). Modeled skills alone rarely reach it.
 - Weapon status (poison etc.) is shown, but status buildup isn't calculated.
+- Weakness indicator (`weakness.ts`): the monster's 1–3 weakness stars per element and status from
+  the game data, "resists" when listed as a resistance, "—" otherwise. Shown as a strip under the
+  target (the weapon's own element/status outlined) and in the monster picker's hints.
 - Sharpness uses the bar's top color after Handicraft (a fresh weapon).
 
 ## Skill effects

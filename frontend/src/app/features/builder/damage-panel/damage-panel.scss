@@ -38,9 +38,52 @@
     font-size: 1.1rem;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-    &.neg {
+    &.neg,
+    &.capped {
       color: var(--error);
     }
+  }
+}
+
+.breakdown .capped {
+  color: var(--error);
+}
+
+.weaknesses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+
+  li {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.15rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--muted);
+  }
+  .rating {
+    font-variant-numeric: tabular-nums;
+  }
+  .stars-2 .rating,
+  .stars-3 .rating {
+    color: var(--accent);
+  }
+  .stars-1 .rating {
+    color: var(--text);
+  }
+  .resisted .rating {
+    color: var(--error);
+  }
+  .mine {
+    border-color: var(--accent);
+    color: var(--text);
+    font-weight: 600;
   }
 }
 

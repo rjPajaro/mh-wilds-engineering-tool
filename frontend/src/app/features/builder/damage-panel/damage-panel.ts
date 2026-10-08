@@ -3,6 +3,7 @@ import { DecimalPipe } from '@angular/common';
 import { calculateDamage, ConditionState } from '../../../core/calc/damage';
 import { comboDamage, LIGHT_COMBOS } from '../../../core/calc/combos';
 import { averageHit, calculateMoves } from '../../../core/calc/moves';
+import { ratingText, WEAKNESS_LABELS, WeaknessKind, weaknessRating, weaknessRatings, WeaknessRating } from '../../../core/calc/weakness';
 import { SHARPNESS_COLORS, Weapon } from '../../../core/models/game-data';
 import { ActiveSkill } from '../../../core/skills/skill-resolver';
 import { GameDataService } from '../../../data/game-data.service';
@@ -39,11 +40,30 @@ export class DamagePanel {
   protected readonly displayScale = ELEMENT_DISPLAY_SCALE;
   protected readonly pct = pct;
 
-  protected readonly monsterOptions = computed<SelectOption[]>(() =>
-    [...(this.data.index()?.files.monsters ?? [])]
+  /** The weapon's element or status, if any. */
+  protected readonly weaponKind = computed<WeaknessKind | null>(() => {
+    const special = this.weapon()?.specials[0];
+    return special ? (special.kind === 'element' ? special.element : special.status) : null;
+  });
+
+  /** Monsters with the weapon's element/status rating, so they can be compared before picking one. */
+  protected readonly monsterOptions = computed<SelectOption[]>(() => {
+    const kind = this.weaponKind();
+    return [...(this.data.index()?.files.monsters ?? [])]
       .sort((a, b) => a.name.localeCompare(b.name))
-      .map((m) => ({ value: String(m.id), label: m.name, hint: m.speciesName })),
-  );
+      .map((m) => ({
+        value: String(m.id),
+        label: m.name,
+        hint: kind ? `${m.speciesName} · ${WEAKNESS_LABELS[kind]} ${ratingText(weaknessRating(m, kind))}` : m.speciesName,
+      }));
+  });
+
+  protected readonly weaknesses = computed(() => {
+    const monster = this.monster();
+    return monster ? weaknessRatings(monster) : [];
+  });
+  protected readonly weaknessLabels = WEAKNESS_LABELS;
+  protected readonly ratingText = ratingText;
 
 
   protected readonly partOptions = computed<SelectOption[]>(() =>
@@ -114,6 +134,12 @@ export class DamagePanel {
   protected setToggle(c: ConditionState, on: boolean): void {
     this.settings.setToggle(c.key, on);
     if (on) for (const key of c.excludes) this.settings.setToggle(key, false);
+  }
+
+  protected weaknessTitle(r: WeaknessRating): string {
+    const label = WEAKNESS_LABELS[r.kind];
+    const text = r.resisted ? `${label}: resisted` : r.stars ? `${label}: weakness ${r.stars} of 3` : `${label}: not a weakness`;
+    return r.note ? `${text}. ${r.note}` : text;
   }
 
   protected barWidth(hits: number, bar: readonly number[]): number {

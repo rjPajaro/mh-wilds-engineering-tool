@@ -11,6 +11,14 @@ export const WEAK_POINT_HITZONE = 0.45;
 
 export type HitzoneKind = 'slash' | 'blunt' | 'pierce';
 
+/**
+ * Most element a weapon reaches with skills, in true units: the larger of base + 400 and base x 2.3
+ * (display units), all weapon types, since Title Update 4. Game8 (archives 500260) and Switchblade Gaming.
+ */
+export function elementCap(baseElement: number): number {
+  return Math.max(baseElement + 40, baseElement * 2.3);
+}
+
 export interface DamageTarget {
   hitzones: Hitzones;
   wounded: boolean;
@@ -50,9 +58,13 @@ export interface Stats {
   affinityParts: Contribution[];
   critMultiplier: number;
   critElement: number;
-  /** Element in true units after skills; null for raw/status weapons. */
+  /** Element in true units after skills, at most `elementCap`; null for raw/status weapons. */
   element: number | null;
   elementParts: Contribution[];
+  /** Highest element skills can reach (see elementCap); null for raw/status weapons. */
+  elementCap: number | null;
+  /** Skills would push element past the cap, so it was cut to the cap. */
+  elementCapped: boolean;
   rawDamagePct: number;
   /** Expected raw per 100 MV against hitzone 100 (effective raw). */
   efr: number;
@@ -272,7 +284,9 @@ function computeStats(
 
   // Percentages scale the weapon's base value; flat bonuses are added after.
   const attack = weapon.attack * (1 + attackPct / 100) + attackFlat;
-  const element = baseElement === null ? null : baseElement * (1 + elementPct / 100) + elementFlat;
+  const uncapped = baseElement === null ? null : baseElement * (1 + elementPct / 100) + elementFlat;
+  const cap = baseElement === null ? null : elementCap(baseElement);
+  const element = uncapped === null || cap === null ? null : Math.min(uncapped, cap);
   const clamped = Math.max(-100, Math.min(100, affinity));
   const p = clamped / 100;
   const rawCrit = p >= 0 ? 1 + p * (critMultiplier - 1) : 1 + -p * (NEGATIVE_CRIT_MULTIPLIER - 1);
@@ -287,6 +301,8 @@ function computeStats(
     critElement,
     element,
     elementParts,
+    elementCap: cap,
+    elementCapped: uncapped !== null && cap !== null && uncapped > cap + 1e-9,
     rawDamagePct,
     efr: attack * (sharpness?.raw ?? 1) * rawCrit * (1 + rawDamagePct / 100),
     efe: (element ?? 0) * (sharpness?.element ?? 1) * elementCrit,

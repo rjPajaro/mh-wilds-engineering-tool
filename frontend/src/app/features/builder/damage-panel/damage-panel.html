@@ -36,7 +36,12 @@
     @if (r.elementKind && s.element !== null) {
       <div>
         <dt class="cap">{{ r.elementKind }}</dt>
-        <dd>{{ s.element * displayScale | number: '1.0-0' }}</dd>
+        <dd
+          [class.capped]="s.elementCapped"
+          [attr.title]="s.elementCapped ? 'Element cap reached (' + (s.elementCap! * displayScale | number: '1.0-0') + '): more element skills add nothing' : null"
+        >
+          {{ s.element * displayScale | number: '1.0-0' }}
+        </dd>
       </div>
     } @else if (r.status) {
       <div>
@@ -56,6 +61,9 @@
       }
       @for (p of s.elementParts; track p.label) {
         <span>+{{ p.value * displayScale | number: '1.0-0' }} {{ r.elementKind }} {{ p.label }}</span>
+      }
+      @if (s.elementCapped) {
+        <span class="capped">capped at {{ s.elementCap! * displayScale | number: '1.0-0' }} {{ r.elementKind }}</span>
       }
     </p>
   }
@@ -109,6 +117,22 @@
       </label>
     }
   </div>
+
+  @if (weaknesses().length) {
+    <ul class="weaknesses" aria-label="Element and status weaknesses">
+      @for (w of weaknesses(); track w.kind) {
+        <li
+          [class.mine]="w.kind === weaponKind()"
+          [class.resisted]="w.resisted"
+          [class]="'stars-' + w.stars"
+          [title]="weaknessTitle(w)"
+        >
+          <span class="label">{{ weaknessLabels[w.kind] }}</span>
+          <span class="rating">{{ ratingText(w) }}@if (w.note) {*}</span>
+        </li>
+      }
+    </ul>
+  }
 
   @if (shownView() === 'combo' && combo(); as c) {
     <div class="hit">

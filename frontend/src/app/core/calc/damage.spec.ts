@@ -1,7 +1,7 @@
 import { Hitzones, Skill, Weapon } from '../models/game-data';
 import { ActiveSkill } from '../skills/skill-resolver';
 import { LONG_SWORD } from '../testing/fixtures';
-import { calculateDamage, hitzoneKind } from './damage';
+import { calculateDamage, elementCap, hitzoneKind } from './damage';
 import { SET_EFFECTS, SKILL_EFFECTS } from './skill-effects';
 import realSkills from '../../../assets/data/skills.json';
 
@@ -72,6 +72,20 @@ describe('calculateDamage', () => {
     expect(base.element).toBeCloseTo(30 * 1.2 + 6, 5);
     expect(base.elementParts.map((p) => p.label)).toEqual(['Fire Attack']);
     expect(base.efe).toBeCloseTo(42 * 1.15, 5); // white element sharpness, no crit element
+  });
+
+  it('caps element at the larger of base + 400 and base x 2.3 (display units)', () => {
+    expect(elementCap(10)).toBe(50); // 100 -> 500
+    expect(elementCap(50)).toBeCloseTo(115, 9); // 500 -> 1150
+    const normal = calculateDamage({ weapon: FIRE_SWORD, skills: [active('Fire Attack', 3, 'element')] }).base;
+    expect(normal.elementCap).toBeCloseTo(70, 9);
+    expect(normal.elementCapped).toBe(false);
+
+    const capped = calculateDamage({ weapon: FIRE_SWORD, skills: [], buffs: [{ label: 'Test', values: { elementFlat: 100 } }] }).base;
+    expect(capped.element).toBeCloseTo(70, 9);
+    expect(capped.elementCapped).toBe(true);
+    expect(capped.efe).toBeCloseTo(70 * 1.15, 9);
+    expect(calculateDamage({ weapon: RAW_SWORD, skills: [] }).base).toMatchObject({ elementCap: null, elementCapped: false });
   });
 
   it('applies guard skills only to weapons that can guard', () => {
