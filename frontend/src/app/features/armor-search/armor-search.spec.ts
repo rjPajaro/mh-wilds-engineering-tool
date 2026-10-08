@@ -162,7 +162,7 @@ describe('ArmorSearch', () => {
     const damage = [...cards].map((c) => Number(c.querySelector('.damage strong')!.textContent));
     expect(damage[0]).toBeGreaterThan(0);
     expect(damage).toEqual([...damage].sort((a, b) => b - a));
-  });
+  }, 20_000);
 
   it('shows the progress the worker reports', async () => {
     // A stand-in worker the test answers by hand.

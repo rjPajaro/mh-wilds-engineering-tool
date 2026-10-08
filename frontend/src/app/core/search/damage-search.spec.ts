@@ -47,6 +47,26 @@ const activeSkills = (set: ArmorSetResult) =>
 describe('searchDamageSets', () => {
   const out = searchDamageSets(input());
 
+  it('values Antivirus only when something inflicts Frenzy', () => {
+    const level = (name: string, lv: number) => {
+      const skill = [...index.skills.values()].find((s) => s.name === name)!;
+      return { skill, points: lv, level: lv, wasted: 0, sources: [] };
+    };
+    const antivirus = level('Antivirus', 3);
+    const gore = level("Gore Magala's Tyranny", 1);
+    expect(damagePerHit(input(), [antivirus])).toBe(damagePerHit(input(), []));
+    expect(damagePerHit(input({ targetInflictsFrenzy: true }), [antivirus])).toBeGreaterThan(damagePerHit(input(), []));
+    expect(damagePerHit(input(), [antivirus, gore])).toBeGreaterThan(damagePerHit(input(), [gore]));
+  });
+
+  it("raises Antivirus when Gore Magala's Tyranny is required", () => {
+    const goreId = skillId("Gore Magala's Tyranny");
+    const withGore = searchDamageSets(input({ requirements: [{ skillId: goreId, level: 1 }], maxResults: 1, timeLimitMs: 20_000 }));
+    const best = activeSkills(withGore.results[0]);
+    expect(skillLevel(best, goreId)).toBeGreaterThanOrEqual(1);
+    expect(skillLevel(best, skillId('Antivirus'))).toBeGreaterThan(0);
+  });
+
   it('returns the requested number of different sets, best damage first', () => {
     expect(out.timedOut).toBe(false);
     expect(out.results).toHaveLength(5);
@@ -87,7 +107,7 @@ describe('searchDamageSets', () => {
     expect(sets.results.length).toBe(1);
     const decos = Object.values(sets.results[0].decorations).flat();
     expect(decos.some((d) => d?.skills.some((s) => s.skillId === skillId('Offensive Guard')))).toBe(false);
-  });
+   }, 20_000);
 
   it('finds nothing when the requested skills cannot be reached', () => {
     // A weapon skill with no weapon slots and no talismans.

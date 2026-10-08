@@ -1,6 +1,6 @@
 import { collectSkillSources } from '../build/build';
 import { calculateDamage, DamageInput, DamageTarget } from '../calc/damage';
-import { SKILL_EFFECTS, SPECIAL_SKILLS } from '../calc/skill-effects';
+import { SET_EFFECTS, SKILL_EFFECTS, SPECIAL_SKILLS } from '../calc/skill-effects';
 import { ARMOR_KINDS, ArmorKind, ArmorPiece, Skill, Talisman, Weapon } from '../models/game-data';
 import { ActiveSkill, resolveSkills } from '../skills/skill-resolver';
 import { ArmorSearchInput, ArmorSearchOutput, ArmorSetResult, DEFAULT_TIME_LIMIT_MS, PROGRESS_INTERVAL_MS, requiredPoints, searchArmorSets, SearchProgress, SkillRequirement } from './armor-search';
@@ -31,6 +31,7 @@ export interface DamageSearchInput extends Omit<ArmorSearchInput, 'weapon' | 'ma
   requirements: readonly SkillRequirement[];
   weapon: Weapon;
   toggles: DamageInput['toggles'];
+  targetInflictsFrenzy?: boolean;
   buffs: DamageInput['buffs'];
   /** Null: a neutral weak point (every hitzone 100), so Weakness Exploit counts. */
   target: DamageTarget | null;
@@ -59,8 +60,18 @@ const MAX_WITNESSES = 8;
 const EPSILON = 1e-9;
 
 /** Expected damage of one 100 MV hit with these active skills (against the target, or a neutral weak point). */
-export function damagePerHit(input: Pick<DamageSearchInput, 'weapon' | 'toggles' | 'buffs' | 'target'>, skills: readonly ActiveSkill[]): number {
-  const result = calculateDamage({ weapon: input.weapon, skills, toggles: input.toggles, buffs: input.buffs, target: input.target ?? NEUTRAL_TARGET });
+export function damagePerHit(
+  input: Pick<DamageSearchInput, 'weapon' | 'toggles' | 'buffs' | 'target' | 'targetInflictsFrenzy'>,
+  skills: readonly ActiveSkill[],
+): number {
+  const result = calculateDamage({
+    weapon: input.weapon,
+    skills,
+    toggles: input.toggles,
+    buffs: input.buffs,
+    target: input.target ?? NEUTRAL_TARGET,
+    targetInflictsFrenzy: input.targetInflictsFrenzy,
+  });
   return result.vsTarget!.hit.total;
 }
 
@@ -81,8 +92,14 @@ export function searchDamageSets(input: DamageSearchInput, onProgress?: (progres
     .filter((s): s is Skill => !!s && (s.kind === 'armor' || s.kind === 'weapon'))
     .map((skill) => ({ skill, lb: Math.min(skill.maxLevel, Math.max(userLevel(skill), weaponLevel(skill))) }));
 
-  const active = (dims: readonly Skill[], levels: readonly number[]): ActiveSkill[] =>
-    dims.flatMap((skill, i) => (levels[i] > 0 ? [{ skill, points: levels[i], level: levels[i], wasted: 0, sources: [] }] : []));
+  // Required set/group bonuses are in every result, so they count for damage and enable other skills (Antivirus needs Frenzy).
+  const bonuses: ActiveSkill[] = input.skills
+    .filter((s) => (s.kind === 'set' || s.kind === 'group') && SET_EFFECTS[s.name] !== undefined && userLevel(s) > 0)
+    .map((skill) => ({ skill, points: userLevel(skill), level: userLevel(skill), wasted: 0, sources: [] }));
+  const active = (dims: readonly Skill[], levels: readonly number[]): ActiveSkill[] => [
+    ...bonuses,
+    ...dims.flatMap((skill, i) => (levels[i] > 0 ? [{ skill, points: levels[i], level: levels[i], wasted: 0, sources: [] }] : [])),
+  ];
   const allLb = candidates.map((c) => c.lb);
   const baseDamage = damagePerHit(input, active(candidates.map((c) => c.skill), allLb));
   // Keep only skills that add damage on their own at max level.

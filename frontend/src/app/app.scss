@@ -13,11 +13,18 @@
   h1 {
     display: flex;
     align-items: center;
+    gap: 0.6rem;
     margin: 0;
     padding: 0.75rem 0;
     font-size: 1.15rem;
     letter-spacing: 0.01em;
     white-space: nowrap;
+  }
+
+  .logo {
+    width: 1.75rem;
+    height: 1.75rem;
+    object-fit: contain;
   }
 
   nav {

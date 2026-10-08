@@ -1,4 +1,4 @@
-import { EffectValues } from './skill-effects';
+import { BuffEffect } from './damage';
 
 export interface BuffOption {
   id: string;
@@ -7,7 +7,7 @@ export interface BuffOption {
   defense?: number;
   /** Multiplies total defense (Adamant Pill). */
   defenseMultiplier?: number;
-  /** Food skills the meal grants (shown only; not modeled). */
+  /** Food skills the meal grants; those in FOOD_SKILL_EFFECTS count for damage, the rest are shown only. */
   foodSkills?: readonly string[];
 }
 
@@ -94,6 +94,16 @@ export const BUFF_GROUPS: readonly BuffGroup[] = [
   },
 ];
 
+/**
+ * Food skills that raise damage, as Damage panel conditions (key = food skill name). Caprice Meal (Hi):
+ * +15 attack for 10 s at random times (game8 https://game8.co/games/Monster-Hunter-Wilds/archives/503414,
+ * Fextralife). Not here: Exploiter Meal (wound rewards only) and Spicy Red Meal (Attack) (Focus
+ * Strike wound destruction and part damage; no published numbers).
+ */
+export const FOOD_SKILL_EFFECTS: Readonly<Record<string, Omit<BuffEffect, 'label'> & { toggle: NonNullable<BuffEffect['toggle']> }>> = {
+  'Caprice Meal (Hi)': { values: { attackFlat: 15 }, toggle: { label: 'Random attack boost active (10 s)', defaultOn: false } },
+};
+
 /** The chosen options, falling back to each group's default; unknown ids are ignored. */
 export function activeBuffs(selection: BuffSelection): BuffOption[] {
   return BUFF_GROUPS.flatMap((g) => {
@@ -103,11 +113,18 @@ export function activeBuffs(selection: BuffSelection): BuffOption[] {
   });
 }
 
-/** Attack buffs as damage-calculator contributions (flat attack, added after skill percentages). */
-export function buffEffects(selection: BuffSelection): { label: string; values: EffectValues }[] {
-  return activeBuffs(selection)
-    .filter((b) => b.attack)
-    .map((b) => ({ label: b.name, values: { attackFlat: b.attack } }));
+/**
+ * Attack buffs as damage-calculator contributions (flat attack, added after skill percentages),
+ * plus the chosen meal's damage food skills, which apply only when their condition is on.
+ */
+export function buffEffects(selection: BuffSelection): BuffEffect[] {
+  return activeBuffs(selection).flatMap((b): BuffEffect[] => [
+    ...(b.attack ? [{ label: b.name, values: { attackFlat: b.attack } }] : []),
+    ...(b.foodSkills ?? []).flatMap((name) => {
+      const effect = FOOD_SKILL_EFFECTS[name];
+      return effect ? [{ label: name, ...effect }] : [];
+    }),
+  ]);
 }
 
 /** Defense with buffs: flat bonuses are added, then the Adamant Pill multiplier applies (order assumed). */

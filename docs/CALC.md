@@ -41,9 +41,28 @@ Conditions:
 - **toggle** (the user switches these on or off; the default is shown in brackets): Agitator (on),
   Maximum Might (on), Peak Performance (on), Resentment (on), Antivirus (on), Latent Power, Counterstrike, Adrenaline Rush, Foray, Heroics,
   Offensive Guard, Ambush, Slicked Blade, Critical Draw, Punishing Draw (off).
-- **weak point**: Weakness Exploit applies when the raw hitzone is ≥ 45. The Wounded checkbox adds
-  its wound bonus.
+  Peak Performance (full health) excludes Resentment and Heroics (`excludes` on the toggle): the
+  calculator never applies both, an explicitly checked toggle beats a default, and checking one in
+  the panel unchecks the other. Resentment and Heroics can stack.
+- **weak point**: Weakness Exploit applies when the raw hitzone is ≥ 45 (without a target: always)
+  and its condition "Hitting a weak point" is on (default on). The Wounded checkbox adds its wound
+  bonus.
 - **low sharpness**: Bludgeoner, at yellow or lower (Lv1–2) or green or lower (Lv3).
+
+Set and group bonuses are in `SET_EFFECTS` (same file), all toggles keyed by set name, and only shown
+at ranks that change damage. Gore Magala's Tyranny (Lv2: +10 infected, on; +5 more once overcome,
+off), Gogmapocalypse (element ×1.2 + 20 / ×1.3 + 40 display, enraged, on), Lord's Soul (+5%, on);
+off by default: Doshaguma, Xu Wu, Ebony Odogaron (game text), Jin Dahaad, Leviathan's Fury
+(affinity only), Seregios, Omega Resonance (Remote attack / Local affinity), Blangonga, festival
+Prayer sets (Lv2 +9%), Lord's Fury, Lord's Favor, Fortifying Pelt, Buttery Leathercraft. Sources are
+in the file. Extra toggles on one skill (`extra`) use their own key, e.g.
+`"Gore Magala's Tyranny: overcome"`.
+
+Antivirus (`needsFrenzy`) only counts when something infects you with Frenzy: a set in
+`FRENZY_SETS` (Gore Magala's Tyranny, any rank) or a target monster in `FRENZY_MONSTERS` (Gore
+Magala). Otherwise it is listed as "No effect" and adds nothing, so the armor search doesn't raise it.
+The search also counts required set/group bonuses, so requiring Gore Magala's Tyranny makes
+Antivirus worth raising.
 
 Active skills that look damage-related (attack/offense/affinity/element icons, and all set/group
 bonuses) but aren't in the table are listed as "Not modeled" in the UI rather than silently ignored.
@@ -53,7 +72,7 @@ bonuses) but aren't in the table are listed as "Not modeled" in the UI rather th
 `buffs.ts` lists Powercharm (+6 attack), Armorcharm (+12 defense), Demon Powder (+10 attack),
 Hardshell Powder (+20 defense), meals (Meat ration +2 attack, Fish +4 defense, Veggie +2 defense,
 settlement meals such as Kunafa, Azuz, Sild and Suja cuisine and the Grand Hub festival and
-collaboration meals, all +5 attack / +10 defense; their food skills are listed but not modeled), Demondrug / Mega Demondrug (+5 / +7), Might Seed / Pill
+collaboration meals, all +5 attack / +10 defense; their food skills are listed, and Caprice Meal (Hi) (+15 attack, Suja cuisine) is a Damage panel condition, off by default — `FOOD_SKILL_EFFECTS`), Demondrug / Mega Demondrug (+5 / +7), Might Seed / Pill
 (+10 / +25), Armorskin / Mega Armorskin (+15 / +25 defense) and Adamant Seed / Pill (+20 / ×1.3
 defense). Options in one group don't stack, so the UI allows one per group. Sources are in the file
 (game8 and the Monster Hunter Wiki).
@@ -62,7 +81,9 @@ defense). Options in one group don't stack, so the UI allows one per group. Sour
 - Powercharm and Armorcharm are on by default (they work from the item pouch); everything else starts off.
 - Defense buffs only change the "buffed" defense in the Skills header: flat bonuses first, then the
   Adamant Pill multiplier. That order is **assumed**.
-- Food skills (e.g. Caprice Meal) and Hunting Horn songs are not modeled.
+- Food skills other than Caprice Meal (Hi) and Hunting Horn songs are not modeled. Spicy Red Meal
+  (Attack) boosts Focus Strike wound destruction and part damage, but no numbers are published;
+  Exploiter Meal only affects wound rewards.
 
 ## Assumptions to verify in game
 

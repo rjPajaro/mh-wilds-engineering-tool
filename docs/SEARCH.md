@@ -71,6 +71,8 @@ optional and act as must-haves.
 - Damage comes from the calculator (`docs/CALC.md`) with the Builder's Damage panel conditions, buffs
   and target part. With no target, a neutral weak point (every hitzone 100) is used, so Weakness
   Exploit counts.
+- Skills that can't trigger are worth nothing: Antivirus needs Frenzy, from the selected monster
+  (Gore Magala) or a required Gore Magala's Tyranny. Required set/group bonuses count for damage.
 - Talismans follow the Talismans option (default: the user's own plus every craftable one).
 - **Dimensions:** every modeled damage skill (plus Handicraft) that raises damage on its own for this
   weapon and these settings, e.g. element skills only for a matching element, toggles only when on.

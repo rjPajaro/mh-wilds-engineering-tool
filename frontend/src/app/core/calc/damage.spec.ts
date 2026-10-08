@@ -2,7 +2,7 @@ import { Hitzones, Skill, Weapon } from '../models/game-data';
 import { ActiveSkill } from '../skills/skill-resolver';
 import { LONG_SWORD } from '../testing/fixtures';
 import { calculateDamage, hitzoneKind } from './damage';
-import { SKILL_EFFECTS } from './skill-effects';
+import { SET_EFFECTS, SKILL_EFFECTS } from './skill-effects';
 import realSkills from '../../../assets/data/skills.json';
 
 function active(name: string, level: number, icon = 'attack', kind: Skill['kind'] = 'weapon'): ActiveSkill {
@@ -54,8 +54,8 @@ describe('calculateDamage', () => {
     const skills = [active('Agitator', 5, 'offense', 'armor'), active('Counterstrike', 3, 'attack', 'armor')];
     const defaults = calculateDamage({ weapon: RAW_SWORD, skills });
     expect(defaults.conditions).toEqual([
-      { skill: 'Agitator', label: 'Monster enraged', on: true },
-      { skill: 'Counterstrike', label: 'After knockback', on: false },
+      { key: 'Agitator', skill: 'Agitator', label: 'Monster enraged', on: true, excludes: [] },
+      { key: 'Counterstrike', skill: 'Counterstrike', label: 'After knockback', on: false, excludes: [] },
     ]);
     expect(defaults.base.attack).toBe(220);
     expect(defaults.base.affinity).toBe(25);
@@ -87,12 +87,24 @@ describe('calculateDamage', () => {
   it('applies Weakness Exploit only on weak points, plus wound bonus', () => {
     const skills = [active('Weakness Exploit', 5, 'attack', 'armor')];
     const weak = calculateDamage({ weapon: RAW_SWORD, skills, target: { hitzones: HZ(0.65), wounded: true } });
-    expect(weak.base.affinity).toBe(10); // no target context
+    expect(weak.base.affinity).toBe(10 + 30); // no target: a weak point
     expect(weak.vsTarget?.affinity).toBe(10 + 30 + 20);
     expect(weak.vsTarget?.hit.weakPoint).toBe(true);
 
     const hard = calculateDamage({ weapon: RAW_SWORD, skills, target: { hitzones: HZ(0.3), wounded: false } });
     expect(hard.vsTarget?.affinity).toBe(10);
+  });
+
+  it('turns Weakness Exploit off with its condition', () => {
+    const skills = [active('Weakness Exploit', 5, 'attack', 'armor')];
+    const on = calculateDamage({ weapon: RAW_SWORD, skills });
+    expect(on.conditions).toEqual([
+      { key: 'Weakness Exploit', skill: 'Weakness Exploit', label: 'Hitting a weak point (hitzone 45+)', on: true, excludes: [] },
+    ]);
+    const toggles = { 'Weakness Exploit': false };
+    expect(calculateDamage({ weapon: RAW_SWORD, skills, toggles }).base.affinity).toBe(10);
+    const target = { hitzones: HZ(0.65), wounded: true };
+    expect(calculateDamage({ weapon: RAW_SWORD, skills, toggles, target }).vsTarget?.affinity).toBe(10);
   });
 
   it('computes damage per 100 MV against the target hitzones', () => {
@@ -121,6 +133,59 @@ describe('calculateDamage', () => {
     expect(result.notModeled).toEqual(['Burst']); // Evade Window is not damage-related
   });
 
+  it('never applies Peak Performance together with Resentment or Heroics', () => {
+    const skills = [active('Peak Performance', 5, 'attack', 'armor'), active('Resentment', 5, 'attack', 'armor'), active('Heroics', 5, 'attack', 'armor')];
+    const defaults = calculateDamage({ weapon: RAW_SWORD, skills });
+    expect(defaults.conditions.map((c) => [c.key, c.on, c.excludes])).toEqual([
+      ['Peak Performance', true, ['Resentment', 'Heroics']],
+      ['Resentment', false, ['Peak Performance']],
+      ['Heroics', false, ['Peak Performance']],
+    ]);
+    expect(defaults.base.attack).toBe(220); // Peak Performance only
+
+    // Switching on Resentment (or Heroics) wins over Peak Performance's default; those two stack.
+    const red = calculateDamage({ weapon: RAW_SWORD, skills, toggles: { Resentment: true, Heroics: true } });
+    expect(red.conditions.map((c) => c.on)).toEqual([false, true, true]);
+    expect(red.base.attack).toBeCloseTo(200 * 1.3 + 25, 5);
+  });
+
+  it('applies Antivirus only with a Frenzy source', () => {
+    const antivirus = active('Antivirus', 3, 'affinity', 'armor');
+    const none = calculateDamage({ weapon: RAW_SWORD, skills: [antivirus] });
+    expect(none.base.affinity).toBe(10);
+    expect(none.conditions).toEqual([]);
+    expect(none.noEffect).toEqual([{ skill: 'Antivirus', reason: 'nothing infects you with Frenzy' }]);
+
+    const gore = calculateDamage({ weapon: RAW_SWORD, skills: [antivirus, active("Gore Magala's Tyranny", 1, 'set', 'set')] });
+    expect(gore.base.affinity).toBe(20);
+    expect(gore.noEffect).toEqual([]);
+    expect(calculateDamage({ weapon: RAW_SWORD, skills: [antivirus], targetInflictsFrenzy: true }).base.affinity).toBe(20);
+  });
+
+  it('toggles set bonuses, including extra toggles, only at ranks that do something', () => {
+    const gore = (level: number) => active("Gore Magala's Tyranny", level, 'set', 'set');
+    expect(calculateDamage({ weapon: RAW_SWORD, skills: [gore(1)] }).conditions).toEqual([]);
+
+    const four = calculateDamage({ weapon: RAW_SWORD, skills: [gore(2)] });
+    expect(four.conditions.map((c) => [c.key, c.on])).toEqual([
+      ["Gore Magala's Tyranny", true],
+      ["Gore Magala's Tyranny: overcome", false],
+    ]);
+    expect(four.base.attack).toBe(210);
+    expect(four.notModeled).toEqual([]);
+
+    const overcome = calculateDamage({ weapon: RAW_SWORD, skills: [gore(2)], toggles: { "Gore Magala's Tyranny: overcome": true } });
+    expect(overcome.base.attack).toBe(215);
+    const off = calculateDamage({ weapon: RAW_SWORD, skills: [gore(2)], toggles: { "Gore Magala's Tyranny": false } });
+    expect(off.base.attack).toBe(200);
+  });
+
+  it('applies Gogmapocalypse element boost while enraged', () => {
+    const skills = [active('Gogmapocalypse', 2, 'set', 'set')];
+    expect(calculateDamage({ weapon: FIRE_SWORD, skills }).base.element).toBeCloseTo(30 * 1.3 + 4, 5);
+    expect(calculateDamage({ weapon: FIRE_SWORD, skills, toggles: { Gogmapocalypse: false } }).base.element).toBe(30);
+  });
+
   it('picks hitzone type by weapon', () => {
     expect(hitzoneKind('hammer')).toBe('blunt');
     expect(hitzoneKind('bow')).toBe('pierce');
@@ -131,9 +196,12 @@ describe('calculateDamage', () => {
 describe('SKILL_EFFECTS', () => {
   const byName = new Map((realSkills as { name: string; maxLevel: number }[]).map((s) => [s.name, s]));
 
-  it.each(Object.keys(SKILL_EFFECTS))('%s exists in game data with matching level count', (name) => {
+  const all = { ...SKILL_EFFECTS, ...SET_EFFECTS };
+
+  it.each(Object.keys(all))('%s exists in game data with matching level count', (name) => {
     const skill = byName.get(name);
     expect(skill, `${name} not found in skills.json`).toBeDefined();
-    expect(SKILL_EFFECTS[name].levels).toHaveLength(skill!.maxLevel);
+    expect(all[name].levels).toHaveLength(skill!.maxLevel);
+    for (const x of all[name].extra ?? []) expect(x.levels).toHaveLength(skill!.maxLevel);
   });
 });

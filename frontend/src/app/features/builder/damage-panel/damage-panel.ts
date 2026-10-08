@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { calculateDamage } from '../../../core/calc/damage';
+import { calculateDamage, ConditionState } from '../../../core/calc/damage';
 import { comboDamage, LIGHT_COMBOS } from '../../../core/calc/combos';
 import { averageHit, calculateMoves } from '../../../core/calc/moves';
 import { SHARPNESS_COLORS, Weapon } from '../../../core/models/game-data';
@@ -62,7 +62,7 @@ export class DamagePanel {
   protected readonly result = computed(() => {
     const weapon = this.weapon();
     if (!weapon) return null;
-    return calculateDamage({ weapon, skills: this.skills(), toggles: this.toggles(), buffs: this.settings.buffEffects(), target: this.settings.target() });
+    return calculateDamage({ weapon, skills: this.skills(), toggles: this.toggles(), buffs: this.settings.buffEffects(), target: this.settings.target(), targetInflictsFrenzy: this.settings.inflictsFrenzy() });
   });
 
   /**
@@ -78,7 +78,7 @@ export class DamagePanel {
     const weapon = this.weapon();
     const moves = weapon ? this.data.index()?.files.moves.weapons[weapon.kind] : undefined;
     if (!weapon || !moves) return null;
-    return calculateMoves({ weapon, skills: this.skills(), toggles: this.toggles(), buffs: this.settings.buffEffects(), target: this.settings.target() }, moves.moves);
+    return calculateMoves({ weapon, skills: this.skills(), toggles: this.toggles(), buffs: this.settings.buffEffects(), target: this.settings.target(), targetInflictsFrenzy: this.settings.inflictsFrenzy() }, moves.moves);
   });
 
   protected readonly average = computed(() => {
@@ -110,8 +110,10 @@ export class DamagePanel {
     this.settings.selectMonster(id);
   }
 
-  protected setToggle(skill: string, on: boolean): void {
-    this.settings.setToggle(skill, on);
+  /** Switching a condition on switches off the ones that can't hold at the same time. */
+  protected setToggle(c: ConditionState, on: boolean): void {
+    this.settings.setToggle(c.key, on);
+    if (on) for (const key of c.excludes) this.settings.setToggle(key, false);
   }
 
   protected barWidth(hits: number, bar: readonly number[]): number {

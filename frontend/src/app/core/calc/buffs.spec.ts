@@ -25,11 +25,25 @@ describe('buffs', () => {
     const weapon = { ...LONG_SWORD, skills: [] };
     const selection = { meal: 'suja', demondrug: 'mega-demondrug', 'demon-powder': 'demon-powder' };
     const buffs = buffEffects(selection);
-    expect(buffs.map((b) => b.values.attackFlat)).toEqual([6, 10, 5, 7]);
+    expect(buffs.map((b) => b.values.attackFlat)).toEqual([6, 10, 5, 15, 7]); // 15: Caprice Meal (Hi), a condition (off)
     const base = calculateDamage({ weapon, skills: [] }).base.attack;
     const buffed = calculateDamage({ weapon, skills: [], buffs }).base;
     expect(buffed.attack).toBeCloseTo(base + 28);
     expect(buffed.attackParts.map((p) => p.label)).toEqual(['Powercharm', 'Demon Powder', 'Colorful Suja Cuisine', 'Mega Demondrug']);
+  });
+
+  it("adds a meal's damage food skill as a condition, off by default", () => {
+    const weapon = { ...LONG_SWORD, skills: [] };
+    const buffs = buffEffects({ powercharm: '', meal: 'suja' });
+    expect(buffs.map((b) => b.label)).toEqual(['Colorful Suja Cuisine', 'Caprice Meal (Hi)']);
+
+    const off = calculateDamage({ weapon, skills: [], buffs });
+    expect(off.conditions).toEqual([
+      { key: 'Caprice Meal (Hi)', skill: 'Caprice Meal (Hi)', label: 'Random attack boost active (10 s)', on: false, excludes: [] },
+    ]);
+    expect(off.base.attack).toBe(205);
+    expect(calculateDamage({ weapon, skills: [], buffs, toggles: { 'Caprice Meal (Hi)': true } }).base.attack).toBe(220);
+    expect(buffEffects({ powercharm: '', meal: 'kunafa' }).map((b) => b.label)).toEqual(['Springy Kunafa Cuisine']);
   });
 
   it('adds flat defense, then multiplies by the Adamant Pill', () => {

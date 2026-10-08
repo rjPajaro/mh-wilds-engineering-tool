@@ -52,6 +52,20 @@ describe('DamagePanel', () => {
     expect(el.querySelector('.stats dd')?.textContent?.trim()).toBe('200');
   });
 
+  it('unchecks Peak Performance when Resentment is checked', async () => {
+    const fixture = await render(LONG_SWORD, [active('Peak Performance', 5), active('Resentment', 5)]);
+    const el = fixture.nativeElement as HTMLElement;
+    const [peak, resentment] = Array.from(el.querySelectorAll<HTMLInputElement>('.conditions input'));
+    expect([peak.checked, resentment.checked]).toEqual([true, false]);
+
+    resentment.checked = true;
+    resentment.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    const [peakAfter, resentmentAfter] = Array.from(el.querySelectorAll<HTMLInputElement>('.conditions input'));
+    expect([peakAfter.checked, resentmentAfter.checked]).toEqual([false, true]);
+    expect(el.querySelector('.stats dd')?.textContent?.trim()).toBe('225'); // 200 + 25
+  });
+
   it('keeps condition toggles after a reload', async () => {
     const first = await render(LONG_SWORD, [active('Agitator', 5)]);
     const box = (first.nativeElement as HTMLElement).querySelector<HTMLInputElement>('.conditions input')!;

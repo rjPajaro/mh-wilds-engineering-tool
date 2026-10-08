@@ -187,17 +187,20 @@
   @if (r.conditions.length) {
     <fieldset class="conditions">
       <legend>Conditions</legend>
-      @for (c of r.conditions; track c.skill) {
+      @for (c of r.conditions; track c.key) {
         <label class="check">
-          <input type="checkbox" [checked]="c.on" (change)="setToggle(c.skill, $any($event.target).checked)" />
+          <input type="checkbox" [checked]="c.on" (change)="setToggle(c, $any($event.target).checked)" />
           {{ c.skill }} <span class="muted">— {{ c.label }}</span>
         </label>
       }
     </fieldset>
   }
 
-  @if (r.notModeled.length || r.assumed.length) {
+  @if (r.notModeled.length || r.assumed.length || r.noEffect.length) {
     <p class="notes">
+      @for (n of r.noEffect; track n.skill) {
+        <span>No effect: {{ n.skill }} ({{ n.reason }}).</span>
+      }
       @if (r.assumed.length) {
         <span>Assumed values: {{ r.assumed.join(', ') }}.</span>
       }

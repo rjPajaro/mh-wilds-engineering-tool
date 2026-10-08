@@ -1,7 +1,7 @@
 import { ElementKind, Hitzones, StatusKind, Weapon, WeaponKind } from '../models/game-data';
 import { ActiveSkill } from '../skills/skill-resolver';
 import { sharpnessState, SharpnessState } from './sharpness';
-import { EffectValues, SKILL_EFFECTS, SkillEffect, SPECIAL_SKILLS } from './skill-effects';
+import { EffectValues, FRENZY_SETS, SET_EFFECTS, SKILL_EFFECTS, SkillEffect, SPECIAL_SKILLS } from './skill-effects';
 
 /** Not in the dataset; standard series values. */
 export const BASE_CRIT_MULTIPLIER = 1.25;
@@ -16,16 +16,25 @@ export interface DamageTarget {
   wounded: boolean;
 }
 
+/** An item, meal or food skill bonus; with `toggle` it is a Damage panel condition keyed by `label`. */
+export interface BuffEffect {
+  label: string;
+  values: EffectValues;
+  toggle?: { label: string; defaultOn: boolean };
+}
+
 export interface DamageInput {
   weapon: Weapon;
   skills: readonly ActiveSkill[];
-  /** On/off per toggle-condition skill name; missing entries use the skill's default. */
+  /** On/off per condition key (skill name, or an extra toggle's key); missing entries use the default. */
   toggles?: Readonly<Record<string, boolean>>;
   target?: DamageTarget | null;
   /** Hitzone type to use instead of the weapon type's (e.g. a blunt move on a slash weapon). */
   hitzoneKind?: HitzoneKind;
-  /** Always-on bonuses from items and meals (see buffs.ts). */
-  buffs?: readonly { label: string; values: EffectValues }[];
+  /** The target monster inflicts Frenzy (see FRENZY_MONSTERS). */
+  targetInflictsFrenzy?: boolean;
+  /** Bonuses from items and meals (see buffs.ts). */
+  buffs?: readonly BuffEffect[];
 }
 
 export interface Contribution {
@@ -63,16 +72,20 @@ export interface PerHit {
 }
 
 export interface ConditionState {
+  /** Key in `toggles`. */
+  key: string;
   skill: string;
   label: string;
   on: boolean;
+  /** Keys of other listed conditions that can't be on together with this one. */
+  excludes: string[];
 }
 
 export interface DamageResult {
   sharpness: SharpnessState | null;
   elementKind: ElementKind | null;
   status: { kind: StatusKind; value: number } | null;
-  /** Stats without target-dependent effects. */
+  /** Stats without a target: hitzone-dependent skills (Weakness Exploit) count as on a weak point, if their condition is on. */
   base: Stats;
   /** Stats and damage against the target, if one is set. */
   vsTarget: (Stats & { hit: PerHit }) | null;
@@ -81,11 +94,16 @@ export interface DamageResult {
   assumed: string[];
   /** Active skills that may affect damage but are not modeled. */
   notModeled: string[];
+  /** Active skills that can't trigger with this build and target, e.g. Antivirus without Frenzy. */
+  noEffect: { skill: string; reason: string }[];
 }
 
 const BLUNT: readonly WeaponKind[] = ['hammer', 'hunting-horn'];
 const RANGED: readonly WeaponKind[] = ['bow', 'light-bowgun', 'heavy-bowgun'];
 const DAMAGE_ICONS = new Set(['attack', 'offense', 'affinity', 'element']);
+
+const atLevel = (list: readonly EffectValues[], level: number) => list[Math.min(level, list.length) - 1];
+const hasValues = (v: EffectValues) => Object.keys(v).length > 0;
 
 export function hitzoneKind(kind: WeaponKind): HitzoneKind {
   if (BLUNT.includes(kind)) return 'blunt';
@@ -106,12 +124,14 @@ export function calculateDamage(input: DamageInput): DamageResult {
   const conditions: ConditionState[] = [];
   const assumed: string[] = [];
   const notModeled: string[] = [];
+  const noEffect: DamageResult['noEffect'] = [];
+  const frenzy = !!input.targetInflictsFrenzy || FRENZY_SETS.some((name) => level(name) > 0);
   const modeled: { name: string; level: number; effect: SkillEffect }[] = [];
 
   for (const active of skills) {
     if (active.level <= 0) continue;
     const name = active.skill.name;
-    const effect = SKILL_EFFECTS[name];
+    const effect = SKILL_EFFECTS[name] ?? SET_EFFECTS[name];
     if (!effect) {
       const relevant = DAMAGE_ICONS.has(active.skill.icon) || active.skill.kind === 'set' || active.skill.kind === 'group';
       if (relevant && !SPECIAL_SKILLS.has(name)) notModeled.push(name);
@@ -119,22 +139,42 @@ export function calculateDamage(input: DamageInput): DamageResult {
     }
     if (effect.element && effect.element !== elementKind) continue;
     if (effect.weapons && !effect.weapons.includes(weapon.kind)) continue;
-    if (effect.condition.kind === 'toggle') {
-      conditions.push({ skill: name, label: effect.condition.label, on: toggles[name] ?? effect.condition.defaultOn });
+    if (effect.needsFrenzy && !frenzy) {
+      noEffect.push({ skill: name, reason: 'nothing infects you with Frenzy' });
+      continue;
+    }
+    if (effect.condition.kind === 'toggle' && hasValues(atLevel(effect.levels, active.level))) {
+      const c = effect.condition;
+      conditions.push({ key: name, skill: name, label: c.label, on: toggles[name] ?? c.defaultOn, excludes: [...(c.excludes ?? [])] });
+    }
+    if (effect.condition.kind === 'weak-point') {
+      conditions.push({ key: name, skill: name, label: `Hitting a weak point (hitzone ${WEAK_POINT_HITZONE * 100}+)`, on: toggles[name] ?? true, excludes: [] });
+    }
+    for (const x of effect.extra ?? []) {
+      if (hasValues(atLevel(x.levels, active.level))) conditions.push({ key: x.key, skill: name, label: x.label, on: toggles[x.key] ?? x.defaultOn, excludes: [] });
     }
     if (!effect.verified) assumed.push(name);
     modeled.push({ name, level: active.level, effect });
   }
 
+  for (const b of input.buffs ?? []) {
+    if (b.toggle) conditions.push({ key: b.label, skill: b.label, label: b.toggle.label, on: toggles[b.label] ?? b.toggle.defaultOn, excludes: [] });
+  }
+  resolveExclusions(conditions, toggles);
+  const isOn = new Map(conditions.map((c) => [c.key, c.on]));
+
   const statsFor = (weakPoint: boolean, wounded: boolean): Stats => {
-    const parts: { label: string; values: EffectValues }[] = [...(input.buffs ?? [])];
+    const parts: { label: string; values: EffectValues }[] = (input.buffs ?? []).filter((b) => !b.toggle || isOn.get(b.label));
     for (const { name, level: lv, effect } of modeled) {
-      const values = effect.levels[Math.min(lv, effect.levels.length) - 1];
+      for (const x of effect.extra ?? []) {
+        if (isOn.get(x.key)) parts.push({ label: `${name} (${x.label})`, values: atLevel(x.levels, lv) });
+      }
+      const values = atLevel(effect.levels, lv);
       const c = effect.condition;
       const applies =
         c.kind === 'always' ||
-        (c.kind === 'toggle' && (toggles[name] ?? c.defaultOn)) ||
-        (c.kind === 'weak-point' && weakPoint) ||
+        (c.kind === 'toggle' && isOn.get(name)) ||
+        (c.kind === 'weak-point' && weakPoint && isOn.get(name)) ||
         (c.kind === 'low-sharpness' && sharpness !== null && sharpness.top <= c.maxColorIndex[Math.min(lv, c.maxColorIndex.length) - 1]);
       if (!applies) continue;
       parts.push({ label: name, values });
@@ -145,7 +185,7 @@ export function calculateDamage(input: DamageInput): DamageResult {
     return computeStats(weapon, elementSpecial?.value ?? null, sharpness, parts);
   };
 
-  const base = statsFor(false, false);
+  const base = statsFor(true, false);
   let vsTarget: DamageResult['vsTarget'] = null;
   if (input.target) {
     const kind = input.hitzoneKind ?? hitzoneKind(weapon.kind);
@@ -167,7 +207,28 @@ export function calculateDamage(input: DamageInput): DamageResult {
     conditions,
     assumed,
     notModeled,
+    noEffect,
   };
+}
+
+/**
+ * Makes `excludes` symmetric over the listed conditions, then turns off conditions that clash with
+ * one already on. Explicitly switched-on toggles win over defaults; otherwise list order wins.
+ */
+function resolveExclusions(conditions: ConditionState[], toggles: Readonly<Record<string, boolean>>): void {
+  const declared = new Map(conditions.map((c) => [c.key, c.excludes]));
+  for (const c of conditions) {
+    c.excludes = conditions
+      .filter((o) => o !== c && (declared.get(c.key)!.includes(o.key) || declared.get(o.key)!.includes(c.key)))
+      .map((o) => o.key);
+  }
+  const kept = new Set<string>();
+  const order = [...conditions.filter((c) => toggles[c.key] === true), ...conditions.filter((c) => toggles[c.key] !== true)];
+  for (const c of order) {
+    if (!c.on) continue;
+    if (c.excludes.some((k) => kept.has(k))) c.on = false;
+    else kept.add(c.key);
+  }
 }
 
 function computeStats(

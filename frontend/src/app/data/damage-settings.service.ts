@@ -1,6 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { BuffSelection, buffEffects } from '../core/calc/buffs';
 import { DamageTarget } from '../core/calc/damage';
+import { FRENZY_MONSTERS } from '../core/calc/skill-effects';
 import { isBoolean, isObject, isString, persistedSignal } from '../shared/persisted-signal';
 import { GameDataService } from './game-data.service';
 
@@ -19,6 +20,7 @@ export class DamageSettingsService {
   readonly buffEffects = computed(() => buffEffects(this.buffs()));
 
   readonly monster = computed(() => this.data.index()?.monsters.get(Number(this.monsterId())) ?? null);
+  readonly inflictsFrenzy = computed(() => FRENZY_MONSTERS.has(this.monster()?.name ?? ''));
   readonly part = computed(() => this.monster()?.parts[Number(this.partIndex())] ?? null);
   readonly target = computed<DamageTarget | null>(() => {
     const part = this.part();
@@ -34,7 +36,7 @@ export class DamageSettingsService {
     this.buffs.update((b) => ({ ...b, [group]: option }));
   }
 
-  setToggle(skill: string, on: boolean): void {
-    this.toggles.update((t) => ({ ...t, [skill]: on }));
+  setToggle(key: string, on: boolean): void {
+    this.toggles.update((t) => ({ ...t, [key]: on }));
   }
 }

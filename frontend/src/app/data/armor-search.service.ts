@@ -195,6 +195,7 @@ export class ArmorSearchService {
         toggles: this.damageSettings.toggles(),
         buffs: this.damageSettings.buffEffects(),
         target: this.damageSettings.target(),
+        targetInflictsFrenzy: this.damageSettings.inflictsFrenzy(),
         maxResults: TOP_DAMAGE_RESULTS,
         timeLimitMs: DAMAGE_TIME_LIMIT_MS,
       },
