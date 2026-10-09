@@ -305,6 +305,21 @@ export interface MoveVariant {
   /** Per-hit modifiers when hits differ (same length as `hits`). */
   elementModifiers?: number[];
   statusModifiers?: number[];
+  /** Damage added per use that ignores attack, skills and hitzones (Gunlance shell fire). */
+  fixedDamage?: number;
+  /** Only weapons that meet this can use the variant (see movesForWeapon). */
+  requires?: MoveRequirement;
+}
+
+/** Ammo, shell or phial a variant needs. `level` is the ammo or shell level. */
+export interface MoveRequirement {
+  /** Bowgun ammo kinds (as in Ammo.kind), any of which works. */
+  ammo?: string[];
+  /** Rapid Fire version of the ammo: the weapon must have that ammo as rapid. */
+  rapid?: boolean;
+  shell?: ('normal' | 'wide' | 'long')[];
+  phial?: 'impact' | 'element';
+  level?: number;
 }
 
 export interface Move {
@@ -312,6 +327,12 @@ export interface Move {
   name: string;
   /** Hitzone used; defaults to the weapon type's. */
   damageType?: 'slash' | 'blunt';
+  /** Raw damage ignores the hitzone (counts as 100). Element still uses its hitzone. */
+  ignoresHitzone?: boolean;
+  /** false: the move never crits (positive or negative). */
+  canCrit?: boolean;
+  /** Uses this sharpness color instead of the weapon's. */
+  fixedSharpness?: SharpnessColor;
   /** Applies to every variant unless the variant has its own. Default 1. */
   elementModifier?: number;
   statusModifier?: number;
@@ -323,8 +344,8 @@ export interface Move {
 export interface MoveData {
   /** Date the motion values were extracted. */
   extracted: string;
-  /** Only weapon types with published motion values are present. */
-  weapons: Partial<Record<WeaponKind, { source: string; moves: Move[] }>>;
+  /** Only weapon types with motion values are present. `approximate`: the source says the numbers are rough. */
+  weapons: Partial<Record<WeaponKind, { source: string; approximate?: boolean; moves: Move[] }>>;
 }
 
 // ---------------------------------------------------------------- bundle

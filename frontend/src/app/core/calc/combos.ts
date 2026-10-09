@@ -42,7 +42,7 @@ export const LIGHT_COMBOS: Partial<Record<WeaponKind, Combo>> = {
 
 export interface ComboDamage {
   combo: Combo;
-  /** Expected damage of the whole combo (raw + element), crits averaged in. */
+  /** Expected damage of the whole combo (raw + element + fixed), crits averaged in. */
   total: number;
   raw: number;
   element: number;
@@ -60,6 +60,7 @@ export interface ComboDamage {
 export function comboDamage(combo: Combo, results: readonly MoveResult[]): ComboDamage | null {
   let raw = 0;
   let element = 0;
+  let fixed = 0;
   let hits = 0;
   const steps: ComboDamage['steps'] = [];
   for (const step of combo.steps) {
@@ -68,11 +69,13 @@ export function comboDamage(combo: Combo, results: readonly MoveResult[]): Combo
     if (!variant) return null;
     raw += variant.raw;
     element += variant.element;
+    fixed += variant.fixed;
     hits += variant.hits.length;
     steps.push({ move: step.move, ...(step.variant ? { variant: step.variant } : {}), damage: variant.total });
   }
   if (!hits) return null;
-  return { combo, total: raw + element, raw, element, hits, perHit: (raw + element) / hits, steps };
+  const total = raw + element + fixed;
+  return { combo, total, raw, element, hits, perHit: total / hits, steps };
 }
 
 /** Moves a combo needs, for checking the table against moves.json. */

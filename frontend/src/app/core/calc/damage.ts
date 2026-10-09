@@ -66,6 +66,9 @@ export interface Stats {
   /** Skills would push element past the cap, so it was cut to the cap. */
   elementCapped: boolean;
   rawDamagePct: number;
+  /** Expected crit factors folded into efr / efe (1 = no crit effect). */
+  rawCrit: number;
+  elementCrit: number;
   /** Expected raw per 100 MV against hitzone 100 (effective raw). */
   efr: number;
   /** Expected element against element hitzone 100. */
@@ -304,6 +307,8 @@ function computeStats(
     elementCap: cap,
     elementCapped: uncapped !== null && cap !== null && uncapped > cap + 1e-9,
     rawDamagePct,
+    rawCrit,
+    elementCrit,
     efr: attack * (sharpness?.raw ?? 1) * rawCrit * (1 + rawDamagePct / 100),
     efe: (element ?? 0) * (sharpness?.element ?? 1) * elementCrit,
   };

@@ -8,10 +8,7 @@
 @if (!weapon()) {
   <p class="muted">Equip a weapon to see damage per move.</p>
 } @else if (!source()) {
-  <p class="muted">
-    No motion values for {{ kindLabel() }} yet. The source wiki only has complete move tables for
-    Great Sword, Sword &amp; Shield and Hammer so far.
-  </p>
+  <p class="muted">No motion values for {{ kindLabel() }} yet.</p>
 } @else {
   <div class="controls">
     <input type="search" placeholder="Filter moves or parts…" aria-label="Filter moves or parts" [value]="filter()" (input)="filter.set($any($event.target).value)" />
@@ -77,7 +74,16 @@
 
   <p class="muted footnote">
     Attack and Element are average damage per use (all hits, crits averaged in). Hover a row for motion
-    values, total and per-hit damage. Motion values from the
-    <a [href]="source()!.source" target="_blank" rel="noopener">Monster Hunter Wiki</a>.
+    values, total and per-hit damage.
+    @if (fromWiki()) {
+      Motion values from the <a [href]="source()!.source" target="_blank" rel="noopener">Monster Hunter Wiki</a>.
+    } @else {
+      Motion values from the community motion value spreadsheet (Title Update 1.04, datamined by
+      <a href="https://github.com/dtlnor/mhws-rcol-record" target="_blank" rel="noopener">dtlnor</a>).
+    }
+    @if (source()!.approximate) {
+      The source says its bowgun numbers are rough.
+    }
+    Ammo, shells and phial bursts are limited to what this weapon uses.
   </p>
 }

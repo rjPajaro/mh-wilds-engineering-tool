@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { DecimalPipe } from '@angular/common';
 import { calculateDamage, ConditionState } from '../../../core/calc/damage';
 import { comboDamage, LIGHT_COMBOS } from '../../../core/calc/combos';
-import { averageHit, calculateMoves } from '../../../core/calc/moves';
+import { averageHit, calculateMoves, movesForWeapon } from '../../../core/calc/moves';
 import { ratingText, WEAKNESS_LABELS, WeaknessKind, weaknessRating, weaknessRatings, WeaknessRating } from '../../../core/calc/weakness';
 import { SHARPNESS_COLORS, Weapon } from '../../../core/models/game-data';
 import { ActiveSkill } from '../../../core/skills/skill-resolver';
@@ -98,7 +98,7 @@ export class DamagePanel {
     const weapon = this.weapon();
     const moves = weapon ? this.data.index()?.files.moves.weapons[weapon.kind] : undefined;
     if (!weapon || !moves) return null;
-    return calculateMoves({ weapon, skills: this.skills(), toggles: this.toggles(), buffs: this.settings.buffEffects(), target: this.settings.target(), targetInflictsFrenzy: this.settings.inflictsFrenzy() }, moves.moves);
+    return calculateMoves({ weapon, skills: this.skills(), toggles: this.toggles(), buffs: this.settings.buffEffects(), target: this.settings.target(), targetInflictsFrenzy: this.settings.inflictsFrenzy() }, movesForWeapon(weapon, moves.moves));
   });
 
   protected readonly average = computed(() => {

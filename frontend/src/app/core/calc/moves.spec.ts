@@ -1,7 +1,9 @@
-import { Hitzones, Move, Skill, Weapon } from '../models/game-data';
+import { Hitzones, Move, MoveData, Skill, Weapon, WEAPON_KINDS } from '../models/game-data';
 import { ActiveSkill } from '../skills/skill-resolver';
 import { LONG_SWORD } from '../testing/fixtures';
-import { averageHit, calculateMoves } from './moves';
+import { averageHit, calculateMoves, movesForWeapon } from './moves';
+import movesJson from '../../../assets/data/moves.json';
+import weaponsJson from '../../../assets/data/weapons.json';
 
 // 200 attack, 0 affinity, white sharpness (raw ×1.32, element ×1.15), 30 fire.
 const SWORD: Weapon = {
@@ -108,5 +110,118 @@ describe('averageHit', () => {
     ];
     expect(averageHit(calculateMoves(input, [...MOVES, ...extra]))!.hits).toBe(5);
     expect(averageHit(calculateMoves(input, extra))).toBeNull();
+  });
+});
+
+describe('move flags', () => {
+  // 10 affinity from LONG_SWORD's base would muddy the numbers; use 50 so crits clearly matter.
+  const CRITTER: Weapon = { ...SWORD, affinity: 50 };
+  const target = { hitzones: HZ, wounded: false };
+  const crit = 1 + 0.5 * 0.25;
+
+  it('takes crits out of moves that cannot crit', () => {
+    const moves: Move[] = [
+      { section: 'A', name: 'Normal', variants: [{ hits: [100] }] },
+      { section: 'A', name: 'No crit', canCrit: false, variants: [{ hits: [100] }] },
+    ];
+    const [normal, noCrit] = calculateMoves({ weapon: CRITTER, skills: [], target }, moves);
+    expect(normal.variants[0].raw).toBeCloseTo(EFR * crit * 0.5, 6);
+    expect(noCrit.variants[0].raw).toBeCloseTo(EFR * 0.5, 6);
+    expect(noCrit.variants[0].element).toBeCloseTo(EFE * 0.2, 6);
+    expect(noCrit.affinity).toBe(0);
+  });
+
+  it('uses a fixed sharpness color instead of the weapon’s', () => {
+    const moves: Move[] = [{ section: 'A', name: 'Green', fixedSharpness: 'green', variants: [{ hits: [100] }] }];
+    const [green] = calculateMoves({ weapon: SWORD, skills: [], target }, moves);
+    expect(green.variants[0].raw).toBeCloseTo(200 * 1.05 * 0.5, 6);
+    expect(green.variants[0].element).toBeCloseTo(30 * 1.0 * 0.2, 6);
+  });
+
+  it('counts the raw hitzone as 100 for hitzone-ignoring moves, element still uses its hitzone', () => {
+    const moves: Move[] = [{ section: 'A', name: 'Ignore', ignoresHitzone: true, variants: [{ hits: [100] }] }];
+    const [ignore] = calculateMoves({ weapon: SWORD, skills: [], target }, moves);
+    expect(ignore.rawHitzone).toBe(1);
+    expect(ignore.variants[0].raw).toBeCloseTo(EFR, 6);
+    expect(ignore.variants[0].element).toBeCloseTo(EFE * 0.2, 6);
+  });
+
+  it('adds fixed damage to the total and the average hit', () => {
+    const moves: Move[] = [{ section: 'Shelling', name: 'Shell', elementModifier: 0, variants: [{ hits: [10], fixedDamage: 6 }] }];
+    const results = calculateMoves({ weapon: SWORD, skills: [] }, moves);
+    expect(results[0].variants[0].fixed).toBe(6);
+    expect(results[0].variants[0].total).toBeCloseTo(EFR * 0.1 + 6, 6);
+    expect(averageHit(results)!.total).toBeCloseTo(EFR * 0.1 + 6, 6);
+  });
+
+  it('leaves power clashes out of the average', () => {
+    const moves: Move[] = [...MOVES, { section: 'Power Clash', name: 'Clash Finisher', variants: [{ hits: [500] }] }];
+    expect(averageHit(calculateMoves({ weapon: SWORD, skills: [] }, moves))!.hits).toBe(5);
+  });
+});
+
+describe('movesForWeapon', () => {
+  const ammoMove: Move = {
+    section: 'Ammo',
+    name: 'Normal Ammo',
+    variants: [
+      { label: 'LV 1', hits: [10], requires: { ammo: ['normal'], level: 1 } },
+      { label: 'LV 2', hits: [15], requires: { ammo: ['normal'], level: 2 } },
+      { label: 'LV 2, Rapid Fire', hits: [12], requires: { ammo: ['normal'], level: 2, rapid: true } },
+    ],
+  };
+  const fireAmmo: Move = { section: 'Ammo', name: 'Element Ammo', variants: [{ label: 'LV 1', hits: [5], requires: { ammo: ['flaming', 'water'], level: 1 } }] };
+  const plain: Move = { section: 'A', name: 'Melee', variants: [{ hits: [20] }] };
+
+  it('keeps only ammo levels the bowgun carries, and Rapid Fire only when that ammo is rapid', () => {
+    const bowgun = { ...LONG_SWORD, kind: 'light-bowgun', specialAmmo: null, ammo: [{ kind: 'normal', level: 2, capacity: 4, rapid: false }, { kind: 'water', level: 1, capacity: 3, rapid: false }] } as unknown as Weapon;
+    const moves = movesForWeapon(bowgun, [ammoMove, fireAmmo, plain]);
+    expect(moves.map((m) => [m.name, m.variants.map((v) => v.label)])).toEqual([
+      ['Normal Ammo', ['LV 2']],
+      ['Element Ammo', ['LV 1']],
+      ['Melee', [undefined]],
+    ]);
+    const rapid = { ...bowgun, ammo: [{ kind: 'normal', level: 2, capacity: 4, rapid: true }] } as unknown as Weapon;
+    expect(movesForWeapon(rapid, [ammoMove])[0].variants.map((v) => v.label)).toEqual(['LV 2', 'LV 2, Rapid Fire']);
+  });
+
+  it('matches gunlance shell type and level, and charge blade phial type', () => {
+    const shell: Move = {
+      section: 'Shelling',
+      name: 'Shell',
+      variants: [
+        { label: 'LV 1', hits: [7], requires: { shell: ['normal', 'wide'], level: 1 } },
+        { label: 'LV 2', hits: [8], requires: { shell: ['normal', 'wide'], level: 2 } },
+      ],
+    };
+    const gunlance = { ...LONG_SWORD, kind: 'gunlance', shell: 'wide', shellLevel: 2 } as unknown as Weapon;
+    expect(movesForWeapon(gunlance, [shell])[0].variants.map((v) => v.label)).toEqual(['LV 2']);
+    expect(movesForWeapon({ ...gunlance, shell: 'long' } as Weapon, [shell])).toEqual([]);
+
+    const phial = (p: 'impact' | 'element'): Move => ({ section: 'Phial Bursts', name: 'Phial Burst', variants: [{ hits: [5], requires: { phial: p } }] });
+    const cb = { ...LONG_SWORD, kind: 'charge-blade', phial: 'element' } as unknown as Weapon;
+    expect(movesForWeapon(cb, [phial('impact'), phial('element')]).map((m) => m.variants[0].requires?.phial)).toEqual(['element']);
+  });
+});
+
+describe('moves.json', () => {
+  const data = movesJson as unknown as MoveData;
+
+  it('has motion values for every weapon type', () => {
+    expect(Object.keys(data.weapons).sort()).toEqual([...WEAPON_KINDS].sort());
+  });
+
+  it('leaves every weapon in the game data with moves to calculate', () => {
+    for (const weapon of weaponsJson as unknown as Weapon[]) {
+      const moves = movesForWeapon(weapon, data.weapons[weapon.kind]!.moves);
+      expect(averageHit(calculateMoves({ weapon, skills: [] }, moves)), weapon.id).not.toBeNull();
+    }
+  });
+
+  it('gives every bowgun at least one ammo it can fire', () => {
+    for (const weapon of (weaponsJson as unknown as Weapon[]).filter((w) => w.kind.endsWith('bowgun'))) {
+      const ammo = movesForWeapon(weapon, data.weapons[weapon.kind]!.moves).filter((m) => m.section === 'Ammo');
+      expect(ammo.length, weapon.id).toBeGreaterThan(0);
+    }
   });
 });

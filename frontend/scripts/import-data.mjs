@@ -408,18 +408,23 @@ const artian = {
 };
 
 // ---------------------------------------------------------------- moves (supplement)
-// Motion values from scripts/supplements/moves.json (see scripts/extract-wiki-moves.mjs).
+// Motion values from scripts/supplements/moves.json (see scripts/import-motion-values.mjs and
+// scripts/extract-wiki-moves.mjs).
 
 const movesSource = JSON.parse(readFileSync(join(here, 'supplements/moves.json'), 'utf8'));
 const moves = { extracted: movesSource.extracted, weapons: {} };
 for (const [kind, entry] of Object.entries(movesSource.weapons)) {
   if (!kinds.includes(kind)) errors.push(`moves.json: unknown weapon type ${kind}`);
   for (const move of entry.moves) {
+    if (move.fixedSharpness && !SHARPNESS_COLORS.includes(move.fixedSharpness)) errors.push(`moves.json: ${kind} / ${move.name}: unknown sharpness ${move.fixedSharpness}`);
     for (const v of move.variants) {
       const where = `moves.json: ${kind} / ${move.name}${v.label ? ` [${v.label}]` : ''}`;
       if (!v.hits.length || v.hits.some((h) => !(h >= 0))) errors.push(`${where}: bad motion values ${JSON.stringify(v.hits)}`);
       for (const key of ['elementModifiers', 'statusModifiers']) {
         if (v[key] && v[key].length !== v.hits.length) errors.push(`${where}: ${key} length does not match hits`);
+      }
+      for (const ammo of v.requires?.ammo ?? []) {
+        if (!weapons.some((w) => w.ammo?.some((a) => a.kind === ammo))) errors.push(`${where}: no weapon has ammo "${ammo}"`);
       }
     }
   }

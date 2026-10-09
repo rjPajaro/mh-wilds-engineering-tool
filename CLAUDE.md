@@ -14,7 +14,8 @@ rankable by calculated DPS.
   (`npm run import-data`). English (`en`) only. See `docs/DATA.md`.
 - Values missing from the game data (Artian crafting) are researched and
   kept in `frontend/scripts/supplements/` with sources. See `docs/ARTIAN.md`
-  and `docs/CALC.md` (motion values: `frontend/scripts/extract-wiki-moves.mjs`).
+  and `docs/CALC.md` (motion values: `frontend/scripts/import-motion-values.mjs` from the
+  motion value spreadsheet .xlsx, and `extract-wiki-moves.mjs` for GS/SnS/Hammer).
 - Weapon/armor thumbnails are hotlinked, never bundled: Kiranico first, then
   Fextralife, monsterhunterwiki.org and gamertw for gaps. URLs come from
   `frontend/scripts/extract-thumbnails.mjs` -> `supplements/thumbnails.json`

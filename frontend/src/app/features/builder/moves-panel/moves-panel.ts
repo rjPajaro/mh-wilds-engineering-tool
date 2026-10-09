@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { calculateMoves, MoveResult, MoveVariantResult } from '../../../core/calc/moves';
+import { calculateMoves, MoveResult, movesForWeapon, MoveVariantResult } from '../../../core/calc/moves';
 import { MonsterPart, Weapon } from '../../../core/models/game-data';
 import { ActiveSkill } from '../../../core/skills/skill-resolver';
 import { DamageSettingsService } from '../../../data/damage-settings.service';
@@ -39,10 +39,14 @@ export class MovesPanel {
     return weapon ? weaponKindLabel(weapon.kind) : '';
   });
 
+  /** The weapon type's motion values, limited to the ammo, shells and phial this weapon has. */
   protected readonly source = computed(() => {
     const weapon = this.weapon();
-    return weapon ? (this.data.index()?.files.moves.weapons[weapon.kind] ?? null) : null;
+    const entry = weapon ? this.data.index()?.files.moves.weapons[weapon.kind] : undefined;
+    return weapon && entry ? { ...entry, moves: movesForWeapon(weapon, entry.moves) } : null;
   });
+
+  protected readonly fromWiki = computed(() => this.source()?.source.startsWith('https://monsterhunterwiki.org/') ?? false);
 
   protected readonly targetLabel = computed(() => {
     const monster = this.settings.monster();
@@ -118,6 +122,7 @@ export class MovesPanel {
   protected detail(row: Row): string {
     const v = row.variant;
     const lines = [`MV ${this.mvText(v.hits)}`, `Total ${v.total.toFixed(1)}`];
+    if (v.fixed) lines.push(`Includes ${v.fixed} fixed damage`);
     if (v.perHit.length > 1) lines.push(`Per hit: ${v.perHit.map((d) => d.toFixed(1)).join(', ')}`);
     return [...lines, ...row.move.notes].join('\n');
   }

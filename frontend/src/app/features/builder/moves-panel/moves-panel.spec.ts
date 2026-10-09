@@ -88,8 +88,16 @@ describe('MovesPanel', () => {
     expect([...el.querySelectorAll('.name')].map((n) => n.textContent)).toEqual(['Tackle', 'Tackle', 'Tackle', 'Tackle']);
   });
 
-  it('says when a weapon type has no motion values', async () => {
-    const fixture = await render(index.weaponsByKind.get('long-sword')![0]);
-    expect(fixture.nativeElement.textContent).toContain('No motion values for Long Sword yet');
+  it('lists only the ammo a bowgun carries, and credits the spreadsheet', async () => {
+    const bowgun = index.weaponsByKind.get('light-bowgun')![0];
+    const fixture = await render(bowgun);
+    const el = fixture.nativeElement as HTMLElement;
+    const ammoNames = new Set(rows(el).map((r) => r.querySelector('.name')?.textContent).filter((n) => n?.endsWith(' Ammo')));
+    const carried = 'ammo' in bowgun ? bowgun.ammo.map((a) => a.kind) : [];
+    expect(ammoNames.size).toBeGreaterThan(0);
+    expect(ammoNames.has('Normal Ammo')).toBe(carried.includes('normal'));
+    expect(ammoNames.has('Spread Ammo')).toBe(carried.includes('spread'));
+    expect(el.textContent).toContain('motion value spreadsheet');
+    expect(el.textContent).toContain('bowgun numbers are rough');
   });
 });

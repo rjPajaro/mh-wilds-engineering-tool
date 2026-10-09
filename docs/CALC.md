@@ -121,30 +121,77 @@ move damage = sum over all hits (one row per charge level / state)
 - A move with its own damage type (e.g. Great Sword's blunt Tackle) uses that hitzone, and
   Weakness Exploit is checked against it.
 - Without a target, both hitzones count as 100.
+- Per-move flags from the spreadsheet: `canCrit: false` takes the crit factors out (affinity shows 0);
+  `fixedSharpness` uses that color's multipliers instead of the weapon's (e.g. Bow Arc Shot "as if
+  green", Charge Blade phial bursts yellow); `ignoresHitzone` counts the raw hitzone as 100 (element
+  still uses its hitzone; Weakness Exploit is still checked against the part).
+- `fixedDamage` (Gunlance shell fire) is added to the total as is: no attack, skills, crits or hitzones.
+  Artillery isn't modeled.
+- `movesForWeapon` drops variants the equipped weapon can't use (`requires`): bowgun ammo kinds and
+  levels it doesn't carry (Rapid Fire only when that ammo is rapid), Gunlance shells and Wyrmstake
+  ticks of another shell type or level, and Charge Blade phial bursts of the other phial type. Both
+  Builder panels filter before calculating.
 - Values are expected averages. The game rounds each hit down, so in-game numbers can be slightly lower.
 
 The Damage panel's default headline is the **light combo** (`combos.ts`): the combo from pressing
 only light attack without charging (GS Overhead Slash → Strong Charged Slash → True Charged Slash at
 charge level 0; SnS Chop → Side Slash → Diagonal Rising Slash → Diagonal Chop; Hammer Overhead Smash
 I → II → Upswing; sources in the file). It shows the combo total and its average per hit. A test
-checks every step against `moves.json`. Weapon types are added as their motion values arrive.
+checks every step against `moves.json`. The other 11 weapon types have no light combo yet, so their
+headline defaults to "All moves".
 
 "All moves" is the **average hit** (`averageHit` in `moves.ts`): the mean damage of
-every hit of every move and charge level/state in the weapon's move list, leaving out riding,
-mounting and sneak attacks. Every hit counts once, so it is a typical hit, not a combo or DPS
-figure. "Per 100 MV" switches back to the reference hit above. Weapon types without motion values
-only have the 100 MV view.
+every hit of every move and charge level/state in the weapon's move list (after `movesForWeapon`),
+leaving out riding, mounting, sneak attacks and power clashes. Every hit counts once, so it is a
+typical hit, not a combo or DPS figure. "Per 100 MV" switches back to the reference hit above.
 
 ## Motion values
 
-Source: the Monster Hunter Wiki's `MHWilds/<Weapon> Mechanics` pages. Only **Great Sword, Sword &
-Shield and Hammer** have complete tables so far; the other pages say "Work in Progress". Other sites
-checked (game8, fextralife, Kiranico) don't publish per-move values for Wilds.
+All 14 weapon types. Each entry in `moves.json` names its `source`:
 
-`node scripts/extract-wiki-moves.mjs` (from `frontend/`) re-reads the wiki and rewrites `moves.json`.
-It handles charge levels, multi-hit moves (`10x3`), per-hit modifiers and footnotes (kept as notes,
-e.g. variable hit counts), and it reports anything it can't parse. Review the diff, then run
-`npm run import-data`. When the wiki finishes another weapon, re-running the script adds it.
+- **Great Sword, Sword & Shield, Hammer**: the Monster Hunter Wiki's `MHWilds/<Weapon> Mechanics`
+  pages. The wiki works out hit counts the spreadsheet leaves open (Perforate's 11 follow-up hits,
+  Spinning Bludgeon's spins), so these three stay on the wiki.
+- **The other 11**: the "Monster Hunter Wilds Motion Values (1.04.0)" spreadsheet (one tab per weapon,
+  datamined by dtlnor, https://github.com/dtlnor/mhws-rcol-record). Bowgun entries are marked
+  `approximate`: the sheet says its bowgun numbers are rough.
+
+`node scripts/import-motion-values.mjs "<path>/Monster Hunter Wilds Motion Values (1.04.0).xlsx"`
+(from `frontend/`) reads the spreadsheet directly (download the Google Sheet as **.xlsx**; a CSV
+export only holds one tab) and rewrites the spreadsheet weapons in `moves.json`, keeping the wiki
+ones (`--all` replaces those too; `--out=file` writes elsewhere for comparing). How it reads a tab:
+
+- Columns are found by header name (Attack, Motion Value, Element, Status, Sharpness, Can Crit,
+  Notes), so tabs with different column orders work.
+- Names: `Lv2` is a charge/ammo/shell level (variant `LV 2`); a trailing `1`, `2` is a hit of one
+  attack (`1/2`: both hits); `(x3)` (and Bow's `x3`) repeats a hit; other parentheses are states
+  (`(Red)`, `(No Gauge)`); `Power X` is a variant of X, taking hits it doesn't list from X. Roman
+  numerals are separate inputs. Hunting Horn's `Echo Wave … x2` is a different wave, not 2 hits.
+- Skipped: rows marked unavailable/unused/"Not available", values with `?`, rows with no damage
+  (Melody of Life), status ammo, and the Insect Glaive Kinsect table (scales with the Kinsect).
+- Notes: "Blunt" / "Sever" / "Slicing" set the damage type; "Hitzone-ignoring" sets `ignoresHitzone`.
+  Hits of one attack with a different damage type become their own row ("Descending Thrust (blunt)").
+  A fixed element value (`60 Dragon`, "Elemental Value is fixed") gives element modifier 0 and a note.
+- Charge Blade phial bursts are listed twice: impact phial (motion values) and element phial
+  (element modifier, MV 0); each needs its phial type.
+- Bowguns: ammo rows become `<Kind> Ammo` with a variant per level (Light Bowgun: plus Rapid Fire).
+  "Shoots N bullets" counts N hits; pierce ("hits up to N times", with falloff) counts one. Only the
+  raw part is calculated: ammo element is a fixed value, and bowguns have no weapon element.
+- Gunlance shelling (`GL Shelling` tab): raw part as hitzone-ignoring MV, fire as `fixedDamage`, per
+  shell type and level. Shells are **assumed** not to crit or scale with sharpness (as in earlier
+  games), modeled as `canCrit: false` + yellow sharpness (×1.0).
+
+It reports every row it skips. Review the diff, then run `npm run import-data` (which checks hit
+counts, modifier lengths, sharpness colors and that every required ammo kind exists).
+
+`node scripts/extract-wiki-moves.mjs` re-reads the wiki for the wiki weapons; it keeps the
+spreadsheet weapons as they are. It handles charge levels, multi-hit moves (`10x3`), per-hit
+modifiers and footnotes (kept as notes, e.g. variable hit counts), and it reports anything it can't
+parse.
+
+Wiki vs spreadsheet (checked with `--all --out`): values agree except Hammer Upswing (wiki 96, sheet
+95) and a few element modifiers (sheet: GS Tackle and Flood of Shadow 0, Hammer Side Smash 1.0, SnS
+sneak attacks 1.0; wiki: 1 / 1 / 1.3 / 1.3).
 
 Known source quirks: the wiki lists Sword & Shield shield bashes as "Sever" (cutting) damage; we keep
 that. Great Sword Focus Strike: Perforate's 11 small hits do less than listed (the wiki notes a falloff
@@ -152,6 +199,8 @@ curve), so its total is an upper bound.
 
 ## Not yet modeled
 
-Motion values for the other 11 weapon types, element caps, Burst, Coalescence, Convert Element, Elemental Absorption, Mind's
+Light combos for the 11 spreadsheet weapon types, Kinsect damage, Hunting Horn echo wave choice
+(all four wave types are listed), Artillery, bowgun ammo element and chaser shots, Bow coatings,
+falloff on multi-hit moves (pierce, Resounding Melody), element caps, Burst, Coalescence, Convert Element, Elemental Absorption, Mind's
 Eye, Partbreaker, Flayer, ranged ammo/shot skills, set and group bonuses,
 food skills, Hunting Horn songs, and wound hitzone changes.

@@ -5,7 +5,9 @@
 //   node scripts/extract-wiki-moves.mjs            fetch pages, write moves.json
 //   node scripts/extract-wiki-moves.mjs --offline  reuse .cache/wiki/*.wiki
 //
-// Weapons whose page is still "Work in Progress" are reported and skipped.
+// Weapons whose page is still "Work in Progress" are reported and skipped, and so are weapon
+// types whose motion values come from the spreadsheet (scripts/import-motion-values.mjs): their
+// entries in moves.json are kept as they are.
 // Review the diff of moves.json after running; the wiki is community-edited.
 
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -208,15 +210,20 @@ function parseMoves(wikitext) {
   return { moves, skipped };
 }
 
+const existing = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : { weapons: {} };
 const result = {
-  $comment:
-    'Motion values per weapon type, extracted by scripts/extract-wiki-moves.mjs from the Monster Hunter Wiki. ' +
-    'hits = MV of each hit; elementModifier/statusModifier default to 1. Do not edit by hand; re-run the script.',
+  $comment: existing.$comment,
   extracted: new Date().toISOString().slice(0, 10),
   weapons: {},
 };
 
 for (const [kind, page] of Object.entries(PAGES)) {
+  const kept = existing.weapons[kind];
+  if (kept && !kept.source.startsWith('https://monsterhunterwiki.org/')) {
+    result.weapons[kind] = kept;
+    console.log(`${kind.padEnd(14)} kept (${kept.source.slice(0, 40)}...)`);
+    continue;
+  }
   try {
     const text = await source(page);
     const { moves, skipped } = parseMoves(text);
