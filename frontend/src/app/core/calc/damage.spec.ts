@@ -138,6 +138,26 @@ describe('calculateDamage', () => {
     expect(calculateDamage({ weapon: RAW_SWORD, skills }).base.rawDamagePct).toBe(0);
   });
 
+  it('applies Coalescence to element damage after the cap, by weapon type, when toggled', () => {
+    const skills = [active('Coalescence', 3, 'element', 'armor')];
+    const off = calculateDamage({ weapon: FIRE_SWORD, skills });
+    expect(off.conditions).toEqual([
+      { key: 'Coalescence', skill: 'Coalescence', label: 'After recovering from a blight or ailment', on: false, excludes: [] },
+    ]);
+    expect(off.base.elementDamagePct).toBe(0);
+
+    const on = calculateDamage({ weapon: FIRE_SWORD, skills, toggles: { Coalescence: true } });
+    expect(on.base.elementDamagePct).toBe(15);
+    expect(on.base.elementDamageParts).toEqual([{ label: 'Coalescence', value: 15 }]);
+    expect(on.base.element).toBe(off.base.element);
+    expect(on.base.efe).toBeCloseTo(off.base.efe * 1.15, 5);
+    expect(on.base.efr).toBe(off.base.efr);
+
+    const hammer = calculateDamage({ weapon: { ...FIRE_SWORD, kind: 'hammer' }, skills, toggles: { Coalescence: true } });
+    expect(hammer.base.elementDamagePct).toBe(30);
+    expect(calculateDamage({ weapon: RAW_SWORD, skills, toggles: { Coalescence: true } }).base.efe).toBe(0);
+  });
+
   it('reports assumed and unmodeled skills', () => {
     const result = calculateDamage({
       weapon: FIRE_SWORD,

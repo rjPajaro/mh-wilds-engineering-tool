@@ -66,6 +66,9 @@ export interface Stats {
   /** Skills would push element past the cap, so it was cut to the cap. */
   elementCapped: boolean;
   rawDamagePct: number;
+  /** Multiplies element damage after the cap, so not part of `element` (Coalescence). */
+  elementDamagePct: number;
+  elementDamageParts: Contribution[];
   /** Expected crit factors folded into efr / efe (1 = no crit effect). */
   rawCrit: number;
   elementCrit: number;
@@ -146,7 +149,9 @@ export function calculateDamage(input: DamageInput): DamageResult {
   for (const active of skills) {
     if (active.level <= 0) continue;
     const name = active.skill.name;
-    const effect = SKILL_EFFECTS[name] ?? SET_EFFECTS[name];
+    const listed = SKILL_EFFECTS[name] ?? SET_EFFECTS[name];
+    const forWeapon = listed?.byWeapon?.find((g) => g.weapons.includes(weapon.kind));
+    const effect = forWeapon ? { ...listed, levels: forWeapon.levels } : listed;
     if (!effect) {
       const relevant = DAMAGE_ICONS.has(active.skill.icon) || active.skill.kind === 'set' || active.skill.kind === 'group';
       if (relevant && !SPECIAL_SKILLS.has(name)) notModeled.push(name);
@@ -255,6 +260,7 @@ function computeStats(
   const attackParts: Contribution[] = [];
   const affinityParts: Contribution[] = [];
   const elementParts: Contribution[] = [];
+  const elementDamageParts: Contribution[] = [];
   let attackPct = 0;
   let attackFlat = 0;
   let affinity = weapon.affinity;
@@ -263,6 +269,7 @@ function computeStats(
   let elementPct = 0;
   let elementFlat = 0;
   let rawDamagePct = 0;
+  let elementDamagePct = 0;
 
   for (const { label, values: v } of parts) {
     if (v.attackPct || v.attackFlat) {
@@ -283,6 +290,10 @@ function computeStats(
       elementFlat += v.elementFlat ?? 0;
     }
     rawDamagePct += v.rawDamagePct ?? 0;
+    if (baseElement !== null && v.elementDamagePct) {
+      elementDamageParts.push({ label, value: v.elementDamagePct });
+      elementDamagePct += v.elementDamagePct;
+    }
   }
 
   // Percentages scale the weapon's base value; flat bonuses are added after.
@@ -307,9 +318,11 @@ function computeStats(
     elementCap: cap,
     elementCapped: uncapped !== null && cap !== null && uncapped > cap + 1e-9,
     rawDamagePct,
+    elementDamagePct,
+    elementDamageParts,
     rawCrit,
     elementCrit,
     efr: attack * (sharpness?.raw ?? 1) * rawCrit * (1 + rawDamagePct / 100),
-    efe: (element ?? 0) * (sharpness?.element ?? 1) * elementCrit,
+    efe: (element ?? 0) * (sharpness?.element ?? 1) * elementCrit * (1 + elementDamagePct / 100),
   };
 }

@@ -42,6 +42,7 @@ const FIELDS: readonly [keyof EffectValues, string, (v: number) => string][] = [
   ['elementFlat', 'Element', (v) => `+${v * 10}`],
   ['elementPct', 'Element %', (v) => `+${v}%`],
   ['rawDamagePct', 'Raw damage', (v) => `+${v}%`],
+  ['elementDamagePct', 'Element damage', (v) => `+${v}%`],
 ];
 
 /** "Weapon sharpness +10", "Fire attack +40", "Attack +5%". */
