@@ -16,7 +16,7 @@ crit (raw)  = 1 + p × (critMult − 1)    if p ≥ 0   (p = affinity / 100)
 crit (elem) = 1 + p × (critElement − 1) if p > 0, else 1
 
 effective raw     = attack × sharpness raw × crit (raw) × (1 + Bludgeoner%)
-effective element = element × sharpness elem × crit (elem)
+effective element = element × sharpness elem × crit (elem) × (1 + Coalescence%)
 
 per hit = effective raw × raw hitzone + effective element × element hitzone
 ```
@@ -37,7 +37,7 @@ per hit = effective raw × raw hitzone + effective element × element hitzone
 
 ## Skill effects
 
-`skill-effects.ts` lists 27 damage skills by English name. A test checks that every name exists in
+`skill-effects.ts` lists 28 damage skills by English name. A test checks that every name exists in
 `skills.json` and has the right number of levels. Unless a skill is marked `verified: false`, its
 numbers come from the skill rank descriptions in the game data.
 
@@ -46,7 +46,10 @@ Conditions:
   element matches the weapon's), Critical Element.
 - **toggle** (the user switches these on or off; the default is shown in brackets): Agitator (on),
   Maximum Might (on), Peak Performance (on), Resentment (on), Antivirus (on), Latent Power, Counterstrike, Adrenaline Rush, Foray, Heroics,
-  Offensive Guard, Ambush, Slicked Blade, Critical Draw, Punishing Draw (off).
+  Offensive Guard, Ambush, Slicked Blade, Critical Draw, Punishing Draw, Coalescence (off).
+  Coalescence multiplies element damage after the element cap: ×1.05 / 1.1 / 1.15, or ×1.1 / 1.2 / 1.3
+  for Great Sword, Hammer, Hunting Horn, Gunlance, Switch Axe and Charge Blade (`byWeapon`). Its status
+  buildup boost is not modeled.
   Peak Performance (full health) excludes Resentment and Heroics (`excludes` on the toggle): the
   calculator never applies both, an explicitly checked toggle beats a default, and checking one in
   the panel unchecks the other. Resentment and Heroics can stack.
@@ -99,6 +102,7 @@ defense). Options in one group don't stack, so the UI allows one per group. Sour
 | Sharpness element multipliers | 0.25 / 0.5 / 0.75 / 1.0 / 1.0625 / 1.15 / 1.25 | Earlier games |
 | Base crit / negative crit | 1.25 / 0.75 | Earlier games |
 | Critical Element | ×1.05 / 1.10 / 1.15 | Skill text gives no numbers |
+| Coalescence | element damage ×1.05–1.15 (heavy weapons ×1.1–1.3), after the cap | Game8 (one source) |
 | Weak point threshold | raw hitzone ≥ 45 | Earlier games |
 | Attack % stacking | percentages summed, applied to base attack | Common convention |
 | Handicraft fill order | starts at the bar's top color | Inferred from data (DATA.md) |

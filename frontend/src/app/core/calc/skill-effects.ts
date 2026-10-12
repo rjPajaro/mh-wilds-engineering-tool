@@ -14,6 +14,8 @@ export interface EffectValues {
   elementPct?: number;
   /** Multiplies final raw damage (Bludgeoner). */
   rawDamagePct?: number;
+  /** Multiplies final element damage, after the element cap (Coalescence). */
+  elementDamagePct?: number;
 }
 
 /**
@@ -46,6 +48,8 @@ export interface SkillEffect {
   element?: ElementKind;
   /** Only applies to these weapon types. */
   weapons?: readonly WeaponKind[];
+  /** Levels for these weapon types instead of `levels`; first match wins. */
+  byWeapon?: readonly { weapons: readonly WeaponKind[]; levels: readonly EffectValues[] }[];
   /** Extra values when the target is wounded (Weakness Exploit). */
   wound?: readonly EffectValues[];
   extra?: readonly ExtraToggle[];
@@ -60,6 +64,10 @@ const toggle = (label: string, defaultOn = true, excludes?: readonly string[]) =
 const atk = (...v: number[]) => v.map((attackFlat) => ({ attackFlat }));
 const aff = (...v: number[]) => v.map((affinity) => ({ affinity }));
 const pct = (...v: number[]) => v.map((attackPct) => ({ attackPct }));
+
+/** Weapons with bigger Coalescence values (Game8). */
+const HEAVY_WEAPONS: readonly WeaponKind[] = ['great-sword', 'hammer', 'hunting-horn', 'gunlance', 'switch-axe', 'charge-blade'];
+const elementDamage = (...v: number[]) => v.map((elementDamagePct) => ({ elementDamagePct }));
 
 /** Weapons that can perfect guard. */
 const GUARD_WEAPONS: readonly WeaponKind[] = ['great-sword', 'sword-shield', 'lance', 'gunlance', 'charge-blade'];
@@ -93,6 +101,13 @@ export const SKILL_EFFECTS: Readonly<Record<string, SkillEffect>> = {
     condition: always,
     // Skill text only says "slightly / greatly increases".
     levels: [1.05, 1.1, 1.15].map((critElement) => ({ critElement })),
+    verified: false,
+  },
+  Coalescence: {
+    // Game8 (archive 501948): element x1.05 / 1.1 / 1.15, heavy weapons x1.1 / 1.2 / 1.3. Status buildup not modeled.
+    condition: toggle('After recovering from a blight or ailment', false),
+    levels: elementDamage(5, 10, 15),
+    byWeapon: [{ weapons: HEAVY_WEAPONS, levels: elementDamage(10, 20, 30) }],
     verified: false,
   },
   'Weakness Exploit': {
