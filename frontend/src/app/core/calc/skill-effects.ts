@@ -1,6 +1,6 @@
-import { ElementKind, WeaponKind } from '../models/game-data';
+import { ElementKind, StatusKind, WeaponKind } from '../models/game-data';
 
-/** Per-level stat changes. Element values are in true units (in-game display ÷ 10). */
+/** Per-level stat changes. Element and status values are in true units (in-game display ÷ 10). */
 export interface EffectValues {
   attackFlat?: number;
   /** Percent of the weapon's base attack. */
@@ -14,8 +14,12 @@ export interface EffectValues {
   elementPct?: number;
   /** Multiplies final raw damage (Bludgeoner). */
   rawDamagePct?: number;
-  /** Multiplies final element damage, after the element cap (Coalescence). */
+  /** Multiplies element before the element cap (Coalescence). */
   elementDamagePct?: number;
+  statusFlat?: number;
+  statusPct?: number;
+  /** Multiplies status before the status cap (Coalescence). */
+  statusDamagePct?: number;
 }
 
 /**
@@ -46,6 +50,8 @@ export interface SkillEffect {
   levels: readonly EffectValues[];
   /** Only applies to weapons with this element. */
   element?: ElementKind;
+  /** Only applies to weapons with this status. */
+  status?: StatusKind;
   /** Only applies to these weapon types. */
   weapons?: readonly WeaponKind[];
   /** Levels for these weapon types instead of `levels`; first match wins. */
@@ -67,7 +73,8 @@ const pct = (...v: number[]) => v.map((attackPct) => ({ attackPct }));
 
 /** Weapons with bigger Coalescence values (Game8). */
 const HEAVY_WEAPONS: readonly WeaponKind[] = ['great-sword', 'hammer', 'hunting-horn', 'gunlance', 'switch-axe', 'charge-blade'];
-const elementDamage = (...v: number[]) => v.map((elementDamagePct) => ({ elementDamagePct }));
+/** Coalescence: element % by level (bigger on heavy weapons); status is +5 / 10 / 15% on every weapon. */
+const coalescence = (...v: number[]) => v.map((elementDamagePct, i) => ({ elementDamagePct, statusDamagePct: [5, 10, 15][i] }));
 
 /** Burst levels from attack and display element (÷10 to true units). */
 const burst = (attack: number[], element: number[]) => attack.map((attackFlat, i) => ({ attackFlat, elementFlat: element[i] / 10 }));
@@ -80,6 +87,14 @@ const elementAttack = (element: ElementKind): SkillEffect => ({
   element,
   // Skill text: +40 / +10% +50 / +20% +60 (display units).
   levels: [{ elementFlat: 4 }, { elementPct: 10, elementFlat: 5 }, { elementPct: 20, elementFlat: 6 }],
+  verified: true,
+});
+
+const statusAttack = (status: StatusKind): SkillEffect => ({
+  condition: always,
+  status,
+  // Skill text: +5% +10 / +10% +20 / +20% +50 (display units).
+  levels: [{ statusPct: 5, statusFlat: 1 }, { statusPct: 10, statusFlat: 2 }, { statusPct: 20, statusFlat: 5 }],
   verified: true,
 });
 
@@ -107,10 +122,10 @@ export const SKILL_EFFECTS: Readonly<Record<string, SkillEffect>> = {
     verified: false,
   },
   Coalescence: {
-    // Game8 (archive 501948): element x1.05 / 1.1 / 1.15, heavy weapons x1.1 / 1.2 / 1.3. Status buildup not modeled.
+    // Game8 (archive 501948): element x1.05 / 1.1 / 1.15, heavy weapons x1.1 / 1.2 / 1.3; status x1.05 / 1.1 / 1.15.
     condition: toggle('After recovering from a blight or ailment', false),
-    levels: elementDamage(5, 10, 15),
-    byWeapon: [{ weapons: HEAVY_WEAPONS, levels: elementDamage(10, 20, 30) }],
+    levels: coalescence(5, 10, 15),
+    byWeapon: [{ weapons: HEAVY_WEAPONS, levels: coalescence(10, 20, 30) }],
     verified: false,
   },
   Burst: {
@@ -135,6 +150,10 @@ export const SKILL_EFFECTS: Readonly<Record<string, SkillEffect>> = {
   'Thunder Attack': elementAttack('thunder'),
   'Ice Attack': elementAttack('ice'),
   'Dragon Attack': elementAttack('dragon'),
+  'Poison Attack': statusAttack('poison'),
+  'Paralysis Attack': statusAttack('paralysis'),
+  'Sleep Attack': statusAttack('sleep'),
+  'Blast Attack': statusAttack('blastblight'),
   Agitator: {
     condition: toggle('Monster enraged'),
     levels: [

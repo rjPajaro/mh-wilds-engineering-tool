@@ -40,18 +40,23 @@
           [class.capped]="s.elementCapped"
           [attr.title]="s.elementCapped ? 'Element cap reached (' + (s.elementCap! * displayScale | number: '1.0-0') + '): more element skills add nothing' : null"
         >
-          {{ s.element * (1 + s.elementDamagePct / 100) * displayScale | number: '1.0-0' }}
+          {{ s.element * displayScale | number: '1.0-0' }}
         </dd>
       </div>
-    } @else if (r.status) {
+    } @else if (r.status && s.status !== null) {
       <div>
         <dt class="cap">{{ r.status.kind }}</dt>
-        <dd>{{ r.status.value * displayScale }}</dd>
+        <dd
+          [class.capped]="s.statusCapped"
+          [attr.title]="s.statusCapped ? 'Status cap reached (' + (s.statusCap! * displayScale | number: '1.0-0') + '): more status skills add nothing' : null"
+        >
+          {{ s.status * displayScale | number: '1.0-0' }}
+        </dd>
       </div>
     }
   </dl>
 
-  @if (s.attackParts.length || s.affinityParts.length || s.elementParts.length || s.elementDamageParts.length) {
+  @if (s.attackParts.length || s.affinityParts.length || s.elementParts.length || s.elementDamageParts.length || s.statusParts.length || s.statusDamageParts.length) {
     <p class="breakdown">
       @for (p of s.attackParts; track p.label) {
         <span>+{{ p.value | number: '1.0-1' }} atk {{ p.label }}</span>
@@ -67,6 +72,15 @@
       }
       @if (s.elementCapped) {
         <span class="capped">capped at {{ s.elementCap! * displayScale | number: '1.0-0' }} {{ r.elementKind }}</span>
+      }
+      @for (p of s.statusParts; track p.label) {
+        <span>+{{ p.value * displayScale | number: '1.0-0' }} {{ r.status?.kind }} {{ p.label }}</span>
+      }
+      @for (p of s.statusDamageParts; track p.label) {
+        <span>×{{ 1 + p.value / 100 | number: '1.0-2' }} {{ r.status?.kind }} {{ p.label }}</span>
+      }
+      @if (s.statusCapped) {
+        <span class="capped">capped at {{ s.statusCap! * displayScale | number: '1.0-0' }} {{ r.status?.kind }}</span>
       }
     </p>
   }

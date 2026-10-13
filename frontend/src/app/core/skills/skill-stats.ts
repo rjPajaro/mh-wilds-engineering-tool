@@ -43,6 +43,9 @@ const FIELDS: readonly [keyof EffectValues, string, (v: number) => string][] = [
   ['elementPct', 'Element %', (v) => `+${v}%`],
   ['rawDamagePct', 'Raw damage', (v) => `+${v}%`],
   ['elementDamagePct', 'Element damage', (v) => `+${v}%`],
+  ['statusFlat', 'Status', (v) => `+${v * 10}`],
+  ['statusPct', 'Status %', (v) => `+${v}%`],
+  ['statusDamagePct', 'Status boost', (v) => `+${v}%`],
 ];
 
 /** "Weapon sharpness +10", "Fire attack +40", "Attack +5%". */
@@ -105,7 +108,8 @@ function effectRows(effect: SkillEffect, count: number): StatRow[] {
 
 function effectCondition(effect: SkillEffect): string | undefined {
   const c = effect.condition;
-  const element = effect.element ? `${effect.element[0].toUpperCase()}${effect.element.slice(1)} weapons only` : undefined;
+  const only = effect.element ?? (effect.status === 'blastblight' ? 'blast' : effect.status);
+  const element = only ? `${only[0].toUpperCase()}${only.slice(1)} weapons only` : undefined;
   const when =
     c.kind === 'toggle'
       ? c.label

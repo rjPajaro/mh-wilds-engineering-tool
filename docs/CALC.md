@@ -16,7 +16,8 @@ crit (raw)  = 1 + p × (critMult − 1)    if p ≥ 0   (p = affinity / 100)
 crit (elem) = 1 + p × (critElement − 1) if p > 0, else 1
 
 effective raw     = attack × sharpness raw × crit (raw) × (1 + Bludgeoner%)
-effective element = element × sharpness elem × crit (elem) × (1 + Coalescence%)
+element           = min(cap, (base × (1 + element%) + flat element) × (1 + Coalescence%))
+effective element = element × sharpness elem × crit (elem)
 
 per hit = effective raw × raw hitzone + effective element × element hitzone
 ```
@@ -26,10 +27,14 @@ per hit = effective raw × raw hitzone + effective element × element hitzone
   handled.
 - Element: the data holds true values. The game shows them ×10, so the UI does too. Element skill
   text uses the displayed units, so "Fire attack +40" is +4 true element.
-- Element cap (`elementCap`): element after skills is at most the larger of base + 400 and base × 2.3
-  (display units), every weapon type, since Title Update 4 (before: +350 / ×1.9). The Damage panel
-  shows a capped element in red (`--error`). Modeled skills alone rarely reach it.
-- Weapon status (poison etc.) is shown, but status buildup isn't calculated.
+- Element cap (`elementCap`): element after skills and Coalescence is at most the larger of base + 400
+  and base × 2.3 (display units), every weapon type, since Title Update 4 (before: +350 / ×1.9). The
+  Damage panel shows a capped element in red (`--error`) and a "capped at" note in the breakdown.
+  Stacked sources reach it, e.g. base 430 with Dragon Attack 3, Burst 5, Gogmapocalypse and
+  Coalescence 2 on a Charge Blade: 885 × 1.2 = 1062, capped at 989 (matches mathhunter.ca).
+- Weapon status (poison etc.): status skills and Coalescence raise the shown value, capped like
+  element (`statusCap`, red when reached). The skill text says status has a limit, but no source
+  gives its formula, so the element formula is assumed. Status buildup on the monster isn't calculated.
 - Weakness indicator (`weakness.ts`): the monster's 1–3 weakness stars per element and status from
   the game data, "resists" when listed as a resistance, "—" otherwise. Shown as a strip under the
   target (the weapon's own element/status outlined) and in the monster picker's hints.
@@ -37,19 +42,23 @@ per hit = effective raw × raw hitzone + effective element × element hitzone
 
 ## Skill effects
 
-`skill-effects.ts` lists 28 damage skills by English name. A test checks that every name exists in
+`skill-effects.ts` lists 33 damage skills by English name. A test checks that every name exists in
 `skills.json` and has the right number of levels. Unless a skill is marked `verified: false`, its
 numbers come from the skill rank descriptions in the game data.
 
 Conditions:
 - **always**: Attack Boost, Critical Eye, Critical Boost, element attack skills (only when the
-  element matches the weapon's), Critical Element.
+  element matches the weapon's), status attack skills (only when the status matches; +5% +10 /
+  +10% +20 / +20% +50 display, from the skill text), Critical Element.
 - **toggle** (the user switches these on or off; the default is shown in brackets): Agitator (on),
-  Maximum Might (on), Peak Performance (on), Resentment (on), Antivirus (on), Latent Power, Counterstrike, Adrenaline Rush, Foray, Heroics,
+  Maximum Might (on), Peak Performance (on), Resentment (on), Antivirus (on), Burst (on), Latent Power, Counterstrike, Adrenaline Rush, Foray, Heroics,
   Offensive Guard, Ambush, Slicked Blade, Critical Draw, Punishing Draw, Coalescence (off).
-  Coalescence multiplies element damage after the element cap: ×1.05 / 1.1 / 1.15, or ×1.1 / 1.2 / 1.3
-  for Great Sword, Hammer, Hunting Horn, Gunlance, Switch Axe and Charge Blade (`byWeapon`). Its status
-  buildup boost is not modeled.
+  Coalescence multiplies element before the element cap: ×1.05 / 1.1 / 1.15, or ×1.1 / 1.2 / 1.3
+  for Great Sword, Hammer, Hunting Horn, Gunlance, Switch Axe and Charge Blade (`byWeapon`). Status is
+  ×1.05 / 1.1 / 1.15 on every weapon, also before the cap.
+  Burst (after 5 hits in a row) adds attack and element by weapon group (`byWeapon`): Great Sword and
+  Hunting Horn; Dual Blades; Bow and bowguns; everything else (values in `docs/SKILL-VALUES.md`). Its
+  element is a flat bonus, so it counts toward the element cap. The smaller first-hit boost is not modeled.
   Peak Performance (full health) excludes Resentment and Heroics (`excludes` on the toggle): the
   calculator never applies both, an explicitly checked toggle beats a default, and checking one in
   the panel unchecks the other. Resentment and Heroics can stack.
@@ -102,7 +111,9 @@ defense). Options in one group don't stack, so the UI allows one per group. Sour
 | Sharpness element multipliers | 0.25 / 0.5 / 0.75 / 1.0 / 1.0625 / 1.15 / 1.25 | Earlier games |
 | Base crit / negative crit | 1.25 / 0.75 | Earlier games |
 | Critical Element | ×1.05 / 1.10 / 1.15 | Skill text gives no numbers |
-| Coalescence | element damage ×1.05–1.15 (heavy weapons ×1.1–1.3), after the cap | Game8 (one source) |
+| Coalescence | element ×1.05–1.15 (heavy weapons ×1.1–1.3), status ×1.05–1.15, before the cap | Game8; cap order from mathhunter.ca |
+| Status cap | same as element: max(base + 400, base × 2.3) display | Skill text confirms a cap; formula assumed |
+| Burst | attack +6–18, element +40–200 by weapon group, after 5 hits | Game8 + Fextralife (agree) |
 | Weak point threshold | raw hitzone ≥ 45 | Earlier games |
 | Attack % stacking | percentages summed, applied to base attack | Common convention |
 | Handicraft fill order | starts at the bar's top color | Inferred from data (DATA.md) |
@@ -205,6 +216,6 @@ curve), so its total is an upper bound.
 
 Light combos for the 11 spreadsheet weapon types, Kinsect damage, Hunting Horn echo wave choice
 (all four wave types are listed), Artillery, bowgun ammo element and chaser shots, Bow coatings,
-falloff on multi-hit moves (pierce, Resounding Melody), element caps, Burst, Coalescence, Convert Element, Elemental Absorption, Mind's
+falloff on multi-hit moves (pierce, Resounding Melody), Convert Element, Elemental Absorption, Mind's
 Eye, Partbreaker, Flayer, ranged ammo/shot skills, set and group bonuses,
 food skills, Hunting Horn songs, and wound hitzone changes.

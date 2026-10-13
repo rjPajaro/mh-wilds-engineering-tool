@@ -88,6 +88,26 @@ describe('calculateDamage', () => {
     expect(calculateDamage({ weapon: RAW_SWORD, skills: [] }).base).toMatchObject({ elementCap: null, elementCapped: false });
   });
 
+  it('applies status skills only to the matching status, capped like element after Coalescence', () => {
+    const PARA_SWORD: Weapon = { ...RAW_SWORD, specials: [{ kind: 'status', status: 'paralysis', value: 20, hidden: false }] };
+    const skills = [active('Paralysis Attack', 3, 'element'), active('Poison Attack', 3, 'element')];
+    const { base } = calculateDamage({ weapon: PARA_SWORD, skills });
+    expect(base.status).toBeCloseTo(20 * 1.2 + 5, 9); // 200 -> 290 display (Game8 test)
+    expect(base.statusParts.map((p) => p.label)).toEqual(['Paralysis Attack']);
+    expect(base.statusCap).toBeCloseTo(60, 9);
+    expect(base.statusCapped).toBe(false);
+    expect(base.element).toBeNull();
+    expect(calculateDamage({ weapon: FIRE_SWORD, skills }).base).toMatchObject({ status: null, statusParts: [], elementParts: [] });
+
+    const withCoalescence = calculateDamage({ weapon: PARA_SWORD, skills: [...skills, active('Coalescence', 3, 'element', 'armor')], toggles: { Coalescence: true } }).base;
+    expect(withCoalescence.statusDamagePct).toBe(15);
+    expect(withCoalescence.status).toBeCloseTo(29 * 1.15, 9);
+
+    const capped = calculateDamage({ weapon: PARA_SWORD, skills, buffs: [{ label: 'Test', values: { statusFlat: 40 } }] }).base;
+    expect(capped.status).toBeCloseTo(60, 9);
+    expect(capped.statusCapped).toBe(true);
+  });
+
   it('applies guard skills only to weapons that can guard', () => {
     const skills = [active('Offensive Guard', 3)];
     const toggles = { 'Offensive Guard': true };
@@ -138,7 +158,7 @@ describe('calculateDamage', () => {
     expect(calculateDamage({ weapon: RAW_SWORD, skills }).base.rawDamagePct).toBe(0);
   });
 
-  it('applies Coalescence to element damage after the cap, by weapon type, when toggled', () => {
+  it('applies Coalescence to element before the cap, by weapon type, when toggled', () => {
     const skills = [active('Coalescence', 3, 'element', 'armor')];
     const off = calculateDamage({ weapon: FIRE_SWORD, skills });
     expect(off.conditions).toEqual([
@@ -149,13 +169,31 @@ describe('calculateDamage', () => {
     const on = calculateDamage({ weapon: FIRE_SWORD, skills, toggles: { Coalescence: true } });
     expect(on.base.elementDamagePct).toBe(15);
     expect(on.base.elementDamageParts).toEqual([{ label: 'Coalescence', value: 15 }]);
-    expect(on.base.element).toBe(off.base.element);
+    expect(on.base.element).toBeCloseTo(off.base.element! * 1.15, 9);
     expect(on.base.efe).toBeCloseTo(off.base.efe * 1.15, 5);
     expect(on.base.efr).toBe(off.base.efr);
 
     const hammer = calculateDamage({ weapon: { ...FIRE_SWORD, kind: 'hammer' }, skills, toggles: { Coalescence: true } });
     expect(hammer.base.elementDamagePct).toBe(30);
     expect(calculateDamage({ weapon: RAW_SWORD, skills, toggles: { Coalescence: true } }).base.efe).toBe(0);
+  });
+
+  it('caps element after Coalescence when several element sources stack', () => {
+    // Base 430 (display): cap 430 x 2.3 = 989. Dragon Attack 3, Burst 5, Gogmapocalypse 2 = 885, x1.2 Coalescence = 1062.
+    const weapon: Weapon = { ...FIRE_SWORD, kind: 'charge-blade', phial: 'impact', specials: [{ kind: 'element' as const, element: 'fire' as const, value: 43, hidden: false }] };
+    const skills = [
+      active('Fire Attack', 3, 'element'),
+      active('Burst', 5, 'offense', 'armor'),
+      active('Gogmapocalypse', 2, 'element', 'set'),
+      active('Coalescence', 2, 'element', 'armor'),
+    ];
+    const { base } = calculateDamage({ weapon, skills, toggles: { Coalescence: true } });
+    expect(base.elementCap).toBeCloseTo(98.9, 9);
+    expect(base.element).toBeCloseTo(98.9, 9);
+    expect(base.elementCapped).toBe(true);
+    const noCoalescence = calculateDamage({ weapon, skills }).base;
+    expect(noCoalescence.element).toBeCloseTo(88.5, 9);
+    expect(noCoalescence.elementCapped).toBe(false);
   });
 
   it('applies Burst attack and element by weapon type, on by default', () => {

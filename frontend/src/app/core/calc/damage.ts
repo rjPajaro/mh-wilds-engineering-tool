@@ -14,6 +14,7 @@ export type HitzoneKind = 'slash' | 'blunt' | 'pierce';
 /**
  * Most element a weapon reaches with skills, in true units: the larger of base + 400 and base x 2.3
  * (display units), all weapon types, since Title Update 4. Game8 (archives 500260) and Switchblade Gaming.
+ * Also used for status: the skill text says status has a limit too, but no source gives its formula.
  */
 export function elementCap(baseElement: number): number {
   return Math.max(baseElement + 40, baseElement * 2.3);
@@ -58,17 +59,26 @@ export interface Stats {
   affinityParts: Contribution[];
   critMultiplier: number;
   critElement: number;
-  /** Element in true units after skills, at most `elementCap`; null for raw/status weapons. */
+  /** Element in true units after skills and Coalescence, at most `elementCap`; null for raw/status weapons. */
   element: number | null;
   elementParts: Contribution[];
   /** Highest element skills can reach (see elementCap); null for raw/status weapons. */
   elementCap: number | null;
-  /** Skills would push element past the cap, so it was cut to the cap. */
+  /** Skills (Coalescence included) would push element past the cap, so it was cut to the cap. */
   elementCapped: boolean;
   rawDamagePct: number;
-  /** Multiplies element damage after the cap, so not part of `element` (Coalescence). */
+  /** Element multiplier from Coalescence, already folded into `element` before the cap. */
   elementDamagePct: number;
   elementDamageParts: Contribution[];
+  /** Status in true units after skills and Coalescence, at most `statusCap`; null without a status. */
+  status: number | null;
+  statusParts: Contribution[];
+  /** Highest status skills can reach (elementCap formula, assumed); null without a status. */
+  statusCap: number | null;
+  statusCapped: boolean;
+  /** Status multiplier from Coalescence, already folded into `status` before the cap. */
+  statusDamagePct: number;
+  statusDamageParts: Contribution[];
   /** Expected crit factors folded into efr / efe (1 = no crit effect). */
   rawCrit: number;
   elementCrit: number;
@@ -138,6 +148,7 @@ export function calculateDamage(input: DamageInput): DamageResult {
   const elementSpecial = weapon.specials.find((s) => s.kind === 'element');
   const statusSpecial = weapon.specials.find((s) => s.kind === 'status');
   const elementKind = elementSpecial?.kind === 'element' ? elementSpecial.element : null;
+  const statusKind = statusSpecial?.kind === 'status' ? statusSpecial.status : null;
 
   const conditions: ConditionState[] = [];
   const assumed: string[] = [];
@@ -158,6 +169,7 @@ export function calculateDamage(input: DamageInput): DamageResult {
       continue;
     }
     if (effect.element && effect.element !== elementKind) continue;
+    if (effect.status && effect.status !== statusKind) continue;
     if (effect.weapons && !effect.weapons.includes(weapon.kind)) continue;
     if (effect.needsFrenzy && !frenzy) {
       noEffect.push({ skill: name, reason: 'nothing infects you with Frenzy' });
@@ -202,7 +214,7 @@ export function calculateDamage(input: DamageInput): DamageResult {
         parts.push({ label: `${name} (wound)`, values: effect.wound[Math.min(lv, effect.wound.length) - 1] });
       }
     }
-    return computeStats(weapon, elementSpecial?.value ?? null, sharpness, parts);
+    return computeStats(weapon, elementSpecial?.value ?? null, statusSpecial?.value ?? null, sharpness, parts);
   };
 
   const base = statsFor(true, false);
@@ -254,6 +266,7 @@ function resolveExclusions(conditions: ConditionState[], toggles: Readonly<Recor
 function computeStats(
   weapon: Weapon,
   baseElement: number | null,
+  baseStatus: number | null,
   sharpness: SharpnessState | null,
   parts: readonly { label: string; values: EffectValues }[],
 ): Stats {
@@ -261,6 +274,8 @@ function computeStats(
   const affinityParts: Contribution[] = [];
   const elementParts: Contribution[] = [];
   const elementDamageParts: Contribution[] = [];
+  const statusParts: Contribution[] = [];
+  const statusDamageParts: Contribution[] = [];
   let attackPct = 0;
   let attackFlat = 0;
   let affinity = weapon.affinity;
@@ -270,6 +285,9 @@ function computeStats(
   let elementFlat = 0;
   let rawDamagePct = 0;
   let elementDamagePct = 0;
+  let statusPct = 0;
+  let statusFlat = 0;
+  let statusDamagePct = 0;
 
   for (const { label, values: v } of parts) {
     if (v.attackPct || v.attackFlat) {
@@ -294,13 +312,25 @@ function computeStats(
       elementDamageParts.push({ label, value: v.elementDamagePct });
       elementDamagePct += v.elementDamagePct;
     }
+    if (baseStatus !== null && (v.statusPct || v.statusFlat)) {
+      statusParts.push({ label, value: (baseStatus * (v.statusPct ?? 0)) / 100 + (v.statusFlat ?? 0) });
+      statusPct += v.statusPct ?? 0;
+      statusFlat += v.statusFlat ?? 0;
+    }
+    if (baseStatus !== null && v.statusDamagePct) {
+      statusDamageParts.push({ label, value: v.statusDamagePct });
+      statusDamagePct += v.statusDamagePct;
+    }
   }
 
   // Percentages scale the weapon's base value; flat bonuses are added after.
   const attack = weapon.attack * (1 + attackPct / 100) + attackFlat;
-  const uncapped = baseElement === null ? null : baseElement * (1 + elementPct / 100) + elementFlat;
+  // Multipliers (Coalescence) apply before the cap, so the cap bounds the final element (as mathhunter.ca).
+  const uncapped = baseElement === null ? null : (baseElement * (1 + elementPct / 100) + elementFlat) * (1 + elementDamagePct / 100);
   const cap = baseElement === null ? null : elementCap(baseElement);
   const element = uncapped === null || cap === null ? null : Math.min(uncapped, cap);
+  const statusUncapped = baseStatus === null ? null : (baseStatus * (1 + statusPct / 100) + statusFlat) * (1 + statusDamagePct / 100);
+  const statusCap = baseStatus === null ? null : elementCap(baseStatus);
   const clamped = Math.max(-100, Math.min(100, affinity));
   const p = clamped / 100;
   const rawCrit = p >= 0 ? 1 + p * (critMultiplier - 1) : 1 + -p * (NEGATIVE_CRIT_MULTIPLIER - 1);
@@ -320,9 +350,15 @@ function computeStats(
     rawDamagePct,
     elementDamagePct,
     elementDamageParts,
+    status: statusUncapped === null || statusCap === null ? null : Math.min(statusUncapped, statusCap),
+    statusParts,
+    statusCap,
+    statusCapped: statusUncapped !== null && statusCap !== null && statusUncapped > statusCap + 1e-9,
+    statusDamagePct,
+    statusDamageParts,
     rawCrit,
     elementCrit,
     efr: attack * (sharpness?.raw ?? 1) * rawCrit * (1 + rawDamagePct / 100),
-    efe: (element ?? 0) * (sharpness?.element ?? 1) * elementCrit * (1 + elementDamagePct / 100),
+    efe: (element ?? 0) * (sharpness?.element ?? 1) * elementCrit,
   };
 }
