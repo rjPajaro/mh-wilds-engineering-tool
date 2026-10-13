@@ -69,6 +69,9 @@ const pct = (...v: number[]) => v.map((attackPct) => ({ attackPct }));
 const HEAVY_WEAPONS: readonly WeaponKind[] = ['great-sword', 'hammer', 'hunting-horn', 'gunlance', 'switch-axe', 'charge-blade'];
 const elementDamage = (...v: number[]) => v.map((elementDamagePct) => ({ elementDamagePct }));
 
+/** Burst levels from attack and display element (÷10 to true units). */
+const burst = (attack: number[], element: number[]) => attack.map((attackFlat, i) => ({ attackFlat, elementFlat: element[i] / 10 }));
+
 /** Weapons that can perfect guard. */
 const GUARD_WEAPONS: readonly WeaponKind[] = ['great-sword', 'sword-shield', 'lance', 'gunlance', 'charge-blade'];
 
@@ -108,6 +111,17 @@ export const SKILL_EFFECTS: Readonly<Record<string, SkillEffect>> = {
     condition: toggle('After recovering from a blight or ailment', false),
     levels: elementDamage(5, 10, 15),
     byWeapon: [{ weapons: HEAVY_WEAPONS, levels: elementDamage(10, 20, 30) }],
+    verified: false,
+  },
+  Burst: {
+    // Game8 (archive 501644) + Fextralife, both agree: after 5 hits in a row. The first-hit boost is not modeled.
+    condition: toggle('After 5 hits in a row'),
+    levels: burst([8, 10, 12, 15, 18], [60, 80, 100, 120, 140]),
+    byWeapon: [
+      { weapons: ['great-sword', 'hunting-horn'], levels: burst([10, 12, 14, 16, 18], [80, 100, 120, 160, 200]) },
+      { weapons: ['dual-blades'], levels: burst([8, 10, 12, 15, 18], [40, 60, 80, 100, 120]) },
+      { weapons: ['bow', 'light-bowgun', 'heavy-bowgun'], levels: burst([6, 7, 8, 9, 10], [40, 60, 80, 100, 120]) },
+    ],
     verified: false,
   },
   'Weakness Exploit': {

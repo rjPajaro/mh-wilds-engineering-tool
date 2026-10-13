@@ -158,13 +158,30 @@ describe('calculateDamage', () => {
     expect(calculateDamage({ weapon: RAW_SWORD, skills, toggles: { Coalescence: true } }).base.efe).toBe(0);
   });
 
+  it('applies Burst attack and element by weapon type, on by default', () => {
+    const skills = [active('Burst', 5, 'offense', 'armor')];
+    const plain = calculateDamage({ weapon: FIRE_SWORD, skills: [] });
+    const on = calculateDamage({ weapon: FIRE_SWORD, skills });
+    expect(on.conditions).toEqual([{ key: 'Burst', skill: 'Burst', label: 'After 5 hits in a row', on: true, excludes: [] }]);
+    expect(on.base.attackParts).toContainEqual({ label: 'Burst', value: 18 });
+    expect(on.base.elementParts).toContainEqual({ label: 'Burst', value: 14 });
+
+    const off = calculateDamage({ weapon: FIRE_SWORD, skills, toggles: { Burst: false } });
+    expect(off.base.attack).toBe(plain.base.attack);
+
+    const greatSword = calculateDamage({ weapon: { ...FIRE_SWORD, kind: 'great-sword' }, skills });
+    expect(greatSword.base.elementParts).toContainEqual({ label: 'Burst', value: 20 });
+    const bow = calculateDamage({ weapon: { ...FIRE_SWORD, kind: 'bow', coatings: [] }, skills });
+    expect(bow.base.attackParts).toContainEqual({ label: 'Burst', value: 10 });
+  });
+
   it('reports assumed and unmodeled skills', () => {
     const result = calculateDamage({
       weapon: FIRE_SWORD,
-      skills: [active('Critical Element', 1), active('Burst', 3, 'offense', 'armor'), active('Evade Window', 5, 'utility', 'armor')],
+      skills: [active('Critical Element', 1), active('Flayer', 3, 'offense', 'armor'), active('Evade Window', 5, 'utility', 'armor')],
     });
     expect(result.assumed).toEqual(['Critical Element']);
-    expect(result.notModeled).toEqual(['Burst']); // Evade Window is not damage-related
+    expect(result.notModeled).toEqual(['Flayer']); // Evade Window is not damage-related
   });
 
   it('never applies Peak Performance together with Resentment or Heroics', () => {

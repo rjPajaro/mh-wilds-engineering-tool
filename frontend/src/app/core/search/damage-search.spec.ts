@@ -61,7 +61,7 @@ describe('searchDamageSets', () => {
 
   it("raises Antivirus when Gore Magala's Tyranny is required", () => {
     const goreId = skillId("Gore Magala's Tyranny");
-    const withGore = searchDamageSets(input({ requirements: [{ skillId: goreId, level: 1 }], maxResults: 1, timeLimitMs: 20_000 }));
+    const withGore = searchDamageSets(input({ requirements: [{ skillId: goreId, level: 1 }], toggles: { Burst: false }, maxResults: 1, timeLimitMs: 20_000 }));
     const best = activeSkills(withGore.results[0]);
     expect(skillLevel(best, goreId)).toBeGreaterThanOrEqual(1);
     expect(skillLevel(best, skillId('Antivirus'))).toBeGreaterThan(0);
