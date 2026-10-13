@@ -46,5 +46,5 @@ Not found anywhere: Convert Element and Critical Status (Game8 only lists hits n
 
 ## Not used by the damage calculator yet
 
-These numbers are for display. The calculator (`docs/CALC.md`) still does not model Burst, Coalescence
-or the others, and uses ×1.05 / 1.1 / 1.15 Critical Element for every weapon type.
+These numbers are for display. The calculator (`docs/CALC.md`) also uses the Burst and Coalescence
+numbers, but not the others, and uses ×1.05 / 1.1 / 1.15 Critical Element for every weapon type.
