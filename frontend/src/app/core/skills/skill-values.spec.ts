@@ -17,7 +17,10 @@ describe('RESEARCHED_SKILL_VALUES', () => {
   });
 
   it('only covers skills whose game text has no numbers', () => {
+    // Its text gives resistance numbers only; the element bonus is researched.
+    const partlyNumeric = new Set(['Elemental Absorption']);
     for (const name of Object.keys(RESEARCHED_SKILL_VALUES)) {
+      if (partlyNumeric.has(name)) continue;
       expect(skill(name).ranks.every((r) => /\d/.test(r.description)), name).toBe(false);
     }
   });
@@ -65,6 +68,6 @@ describe('skillLevelValues', () => {
   });
 
   it('flags skills without numbers anywhere', () => {
-    expect(skillLevelValues(skill('Convert Element'), 'long-sword').numeric).toBe(false);
+    expect(skillLevelValues(skill('Critical Status'), 'long-sword').numeric).toBe(false);
   });
 });

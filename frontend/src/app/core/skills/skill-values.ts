@@ -68,7 +68,10 @@ const all = (...rows: [string, ...string[]][]): WeaponGroup[] => [byStat('other'
 /** For effects that do not split into stats: one line per level. */
 const allText = (...levels: string[]): WeaponGroup[] => [{ kinds: 'other', label: 'All weapons', levels }];
 
-export const RESEARCHED_SKILL_VALUES: Readonly<Record<string, ResearchedValues>> = {
+/** Elemental Absorption's resistance, from its skill text. */
+const ABSORPTION_RES: [string, ...string[]] = ['Resistance', '+4', '+6', '+8'];
+
+export const RESEARCHED_SKILL_VALUES:Readonly<Record<string, ResearchedValues>> = {
   Burst: {
     groups: [
       byStat(['great-sword', 'hunting-horn'], 'Great Sword, Hunting Horn', ['Attack', '+10', '+12', '+14', '+16', '+18'], ['Element', '+80', '+100', '+120', '+160', '+200']),
@@ -96,6 +99,22 @@ export const RESEARCHED_SKILL_VALUES: Readonly<Record<string, ResearchedValues>>
     ],
     note: 'For 30 s after recovering from a blight or status ailment.',
     sources: [GAME8(501948)],
+    confirmed: false,
+  },
+  'Elemental Absorption': {
+    groups: [
+      byStat(['great-sword', 'hunting-horn'], 'Great Sword, Hunting Horn', ['Element', '+50', '+80', '+100'], ABSORPTION_RES),
+      byStat(['dual-blades', 'bow'], 'Dual Blades, Bow', ['Element', '+30', '+40', '+50'], ABSORPTION_RES),
+      byStat('other', 'Other weapons', ['Element', '+40', '+50', '+60'], ABSORPTION_RES),
+    ],
+    note: "For 2 min after taking elemental damage (1 min cooldown since Title Update 4). Raises the weapon's own element; the resistance is to the element taken.",
+    sources: [GAME8(502021)],
+    confirmed: false,
+  },
+  'Convert Element': {
+    groups: all(['Dragon', '+80', '+120', '+180'], ['Extra dragon damage', '168', '224', '310']),
+    note: 'For 2 min after taking elemental damage (1.5 min cooldown). The extra dragon damage triggers after dealing enough elemental damage (training area numbers; varies by monster). The calculator adds the dragon bonus to dragon weapons only.',
+    sources: [GAME8(502022)],
     confirmed: false,
   },
   'Charge Master': {

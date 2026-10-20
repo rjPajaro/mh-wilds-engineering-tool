@@ -53,13 +53,19 @@ Conditions:
   +10% +20 / +20% +50 display, from the skill text), Critical Element.
 - **toggle** (the user switches these on or off; the default is shown in brackets): Agitator (on),
   Maximum Might (on), Peak Performance (on), Resentment (on), Antivirus (on), Burst (on), Latent Power, Counterstrike, Adrenaline Rush, Foray, Heroics,
-  Offensive Guard, Ambush, Slicked Blade, Critical Draw, Punishing Draw, Coalescence (off).
+  Offensive Guard, Ambush, Slicked Blade, Critical Draw, Punishing Draw, Coalescence, Elemental Absorption,
+  Convert Element (off).
   Coalescence multiplies element before the element cap: ×1.05 / 1.1 / 1.15, or ×1.1 / 1.2 / 1.3
   for Great Sword, Hammer, Hunting Horn, Gunlance, Switch Axe and Charge Blade (`byWeapon`). Status is
   ×1.05 / 1.1 / 1.15 on every weapon, also before the cap.
   Burst (after 5 hits in a row) adds attack and element by weapon group (`byWeapon`): Great Sword and
   Hunting Horn; Dual Blades; Bow and bowguns; everything else (values in `docs/SKILL-VALUES.md`). Its
   element is a flat bonus, so it counts toward the element cap. The smaller first-hit boost is not modeled.
+  Elemental Absorption and Convert Element (after taking elemental damage, 2 min) add flat element, so
+  they count toward the cap too. Elemental Absorption raises any weapon element: +40 / 50 / 60 display,
+  Great Sword and Hunting Horn +50 / 80 / 100, Dual Blades and Bow +30 / 40 / 50 (`byWeapon`). Convert
+  Element adds dragon +80 / 120 / 180 display, on dragon weapons only; its extra dragon damage procs are
+  not modeled.
   Peak Performance (full health) excludes Resentment and Heroics (`excludes` on the toggle): the
   calculator never applies both, an explicitly checked toggle beats a default, and checking one in
   the panel unchecks the other. Resentment and Heroics can stack.
@@ -159,6 +165,8 @@ and the damage-ranked armor search like item buffs. The values are the user's; n
 | Coalescence | element ×1.05–1.15 (heavy weapons ×1.1–1.3), status ×1.05–1.15, before the cap | Game8; cap order from mathhunter.ca |
 | Status cap | same as element: max(base + 400, base × 2.3) display | Skill text confirms a cap; formula assumed |
 | Burst | attack +6–18, element +40–200 by weapon group, after 5 hits | Game8 + Fextralife (agree) |
+| Elemental Absorption | flat element +30–100 display by weapon group, counts toward the cap | Game8 (one source) |
+| Convert Element | dragon +80 / 120 / 180 display, dragon weapons only, counts toward the cap | Game8 (one source); dragon-only is assumed |
 | Weak point threshold | raw hitzone ≥ 45 | Earlier games |
 | Attack % stacking | percentages summed, applied to base attack | Common convention |
 | Handicraft fill order | starts at the bar's top color | Inferred from data (DATA.md) |
@@ -261,6 +269,6 @@ curve), so its total is an upper bound.
 
 Light combos for the 11 spreadsheet weapon types, Kinsect damage, Hunting Horn echo wave choice
 (all four wave types are listed), Artillery, bowgun ammo element and chaser shots, Bow coatings,
-falloff on multi-hit moves (pierce, Resounding Melody), Convert Element, Elemental Absorption, Mind's
+falloff on multi-hit moves (pierce, Resounding Melody), Convert Element's extra dragon damage, Mind's
 Eye, Partbreaker, Flayer, ranged ammo/shot skills, set and group bonuses,
 food skills, Hunting Horn songs, and wound hitzone changes.

@@ -224,6 +224,30 @@ describe('calculateDamage', () => {
     expect(noCoalescence.elementCapped).toBe(false);
   });
 
+  it('adds Elemental Absorption by weapon type and Convert Element to dragon weapons, when toggled', () => {
+    const skills = [active('Elemental Absorption', 3, 'offense', 'armor'), active('Convert Element', 3, 'attack', 'armor')];
+    const off = calculateDamage({ weapon: FIRE_SWORD, skills });
+    expect(off.conditions.map((c) => [c.key, c.on])).toEqual([['Elemental Absorption', false]]);
+    expect(off.base.element).toBeCloseTo(30, 9);
+
+    const toggles = { 'Elemental Absorption': true, 'Convert Element': true };
+    expect(calculateDamage({ weapon: FIRE_SWORD, skills, toggles }).base.elementParts).toEqual([{ label: 'Elemental Absorption', value: 6 }]);
+    expect(calculateDamage({ weapon: { ...FIRE_SWORD, kind: 'great-sword' }, skills, toggles }).base.element).toBeCloseTo(40, 9);
+    expect(calculateDamage({ weapon: { ...FIRE_SWORD, kind: 'bow', coatings: [] }, skills, toggles }).base.element).toBeCloseTo(35, 9);
+    expect(calculateDamage({ weapon: RAW_SWORD, skills, toggles }).base.element).toBeNull();
+
+    // The issue's build: base 430 dragon on a Charge Blade at 885 (Dragon Attack 3, Burst 5, Gogmapocalypse 2);
+    // +60 Absorption and +180 Convert Element pass the 989 cap (matches mathhunter.ca).
+    const weapon: Weapon = { ...FIRE_SWORD, kind: 'charge-blade', phial: 'impact', specials: [{ kind: 'element' as const, element: 'dragon' as const, value: 43, hidden: false }] };
+    const build = [active('Dragon Attack', 3, 'element'), active('Burst', 5, 'offense', 'armor'), active('Gogmapocalypse', 2, 'element', 'set'), ...skills];
+    const dragon = calculateDamage({ weapon, skills: build, toggles });
+    expect(dragon.conditions.map((c) => c.key)).toContain('Convert Element');
+    expect(dragon.base.elementParts).toContainEqual({ label: 'Convert Element', value: 18 });
+    expect(dragon.base.element).toBeCloseTo(98.9, 9);
+    expect(dragon.base.elementCapped).toBe(true);
+    expect(calculateDamage({ weapon, skills: build }).base.element).toBeCloseTo(88.5, 9);
+  });
+
   it('applies Burst attack and element by weapon type, on by default', () => {
     const skills = [active('Burst', 5, 'offense', 'armor')];
     const plain = calculateDamage({ weapon: FIRE_SWORD, skills: [] });
