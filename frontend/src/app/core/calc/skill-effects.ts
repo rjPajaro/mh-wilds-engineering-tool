@@ -80,6 +80,9 @@ const HEAVY_WEAPONS: readonly WeaponKind[] = ['great-sword', 'hammer', 'hunting-
 /** Coalescence: element % by level (bigger on heavy weapons); status is +5 / 10 / 15% on every weapon. */
 const coalescence = (...v: number[]) => v.map((elementDamagePct, i) => ({ elementDamagePct, statusDamagePct: [5, 10, 15][i] }));
 
+/** Flat element levels from display element (÷10 to true units). */
+const flatElement = (...v: number[]) => v.map((display) => ({ elementFlat: display / 10 }));
+
 /** Burst levels from attack and display element (÷10 to true units). */
 const burst = (attack: number[], element: number[]) => attack.map((attackFlat, i) => ({ attackFlat, elementFlat: element[i] / 10 }));
 
@@ -130,6 +133,25 @@ export const SKILL_EFFECTS: Readonly<Record<string, SkillEffect>> = {
     condition: toggle('After recovering from a blight or ailment', false),
     levels: coalescence(5, 10, 15),
     byWeapon: [{ weapons: HEAVY_WEAPONS, levels: coalescence(10, 20, 30) }],
+    verified: false,
+  },
+  'Elemental Absorption': {
+    // Game8 (archive 502021): flat element +40 / 50 / 60 display, Great Sword and Hunting Horn +50 / 80 / 100,
+    // Dual Blades and Bow +30 / 40 / 50. For 2 min after taking elemental damage; counts toward the cap.
+    condition: toggle('After taking elemental damage', false),
+    levels: flatElement(40, 50, 60),
+    byWeapon: [
+      { weapons: ['great-sword', 'hunting-horn'], levels: flatElement(50, 80, 100) },
+      { weapons: ['dual-blades', 'bow'], levels: flatElement(30, 40, 50) },
+    ],
+    verified: false,
+  },
+  'Convert Element': {
+    // Game8 (archive 502022): dragon +80 / 120 / 180 display for 2 min after taking elemental damage.
+    // The extra dragon damage it deals after enough elemental damage is not modeled.
+    condition: toggle('After taking elemental damage', false),
+    element: 'dragon',
+    levels: flatElement(80, 120, 180),
     verified: false,
   },
   Burst: {

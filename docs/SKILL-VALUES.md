@@ -33,6 +33,8 @@ Code: `frontend/src/app/core/skills/skill-values.ts` (`skillLevelValues`, `level
 | Burst | Attack and element per level, 4 weapon groups | Game8, Fextralife | Both agree |
 | Critical Element | Element crit ×1.05 / 1.1 / 1.15; heavy weapons ~×1.07 / ~1.13 / 1.2 | Game8 | One source; the source marks the heavy values approximate and its prose contradicts its table |
 | Coalescence | Element ×1.05–1.15 (×1.1–1.3 heavy), status ×1.05–1.15, 30 s | Game8 | One source |
+| Elemental Absorption | Element +40 / 50 / 60 (GS, HH +50 / 80 / 100; DB, Bow +30 / 40 / 50), 2 min; resistance from the skill text | Game8 | One source |
+| Convert Element | Dragon +80 / 120 / 180, extra dragon damage 168 / 224 / 310, 2 min | Game8 | One source |
 | Charge Master | Element modifier per weapon type | Game8, Fextralife | Sources differ (Fextralife: +15/20/25% GS, Hammer, IG; +5/10/15% Bow). Game8 shown |
 | Flayer | 140 / 160 / 220 / 300 / 400 fixed damage (Title Update 4) | Game8 | One source |
 | Tetrad Shot, Opening Shot, Special Ammo Boost, Normal / Piercing / Spread Shots, Ballistics | Attack, affinity or damage % | Game8 | One source |
@@ -42,9 +44,10 @@ Pages: Game8 `https://game8.co/games/Monster-Hunter-Wilds/archives/<id>` (ids in
 Fextralife `https://monsterhunterwilds.wiki.fextralife.com/<Skill>`. The Monster Hunter Wiki and
 Kiranico pages were checked too and list no numbers for these skills.
 
-Not found anywhere: Convert Element and Critical Status (Game8 only lists hits needed to proc).
+Not found anywhere: Critical Status (Game8 only lists hits needed to proc).
 
 ## Not used by the damage calculator yet
 
-These numbers are for display. The calculator (`docs/CALC.md`) also uses the Burst and Coalescence
-numbers, but not the others, and uses ×1.05 / 1.1 / 1.15 Critical Element for every weapon type.
+These numbers are for display. The calculator (`docs/CALC.md`) also uses the Burst, Coalescence,
+Elemental Absorption and Convert Element (dragon bonus only) numbers, but not the others, and uses
+×1.05 / 1.1 / 1.15 Critical Element for every weapon type.
