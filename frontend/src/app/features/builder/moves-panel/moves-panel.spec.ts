@@ -19,6 +19,7 @@ const index = buildGameIndex({
   monsters: monsters as unknown as Monster[],
   artian: {} as ArtianData,
   moves: moves as unknown as MoveData,
+  talismanRolls: { sheetUpdated: '', rarities: {}, rarity8SlotChances: [], groups: {} },
 });
 
 const arkveld = index.files.monsters.find((m) => m.name === 'Arkveld')!;

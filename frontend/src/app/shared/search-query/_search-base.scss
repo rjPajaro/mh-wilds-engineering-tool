@@ -1,0 +1,75 @@
+// Shared by the search tabs and the search query panel: headings, buttons, hints, notices.
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+}
+
+h3 {
+  margin: 1.1rem 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+button,
+select {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  &:hover:not(:disabled) {
+    background: var(--hover);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  &.primary:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+}
+
+button.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.issue {
+  margin: 0 0 0.6rem;
+  padding: 0.35rem 0.55rem;
+  border-left: 3px solid var(--muted);
+  background: var(--surface);
+  font-size: 0.85rem;
+  &.error {
+    border-color: var(--error);
+    color: var(--error);
+  }
+  &.warning {
+    border-color: var(--warn);
+  }
+}

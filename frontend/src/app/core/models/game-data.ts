@@ -348,6 +348,28 @@ export interface MoveData {
   weapons: Partial<Record<WeaponKind, { source: string; approximate?: boolean; moves: Move[] }>>;
 }
 
+// ---------------------------------------------------------------- talisman rolls
+// From scripts/supplements/talisman-rolls.json (data mined by dtlnor; see import-talisman-rolls.mjs).
+
+/** One way a rarity rolls: a skill from each group in order, and one of the free slot layouts. */
+export interface TalismanRollPattern {
+  /** Skill group per skill (2 or 3 skills). */
+  groups: number[];
+  /** Possible slot layouts; an empty layout means no slots. */
+  slots: TalismanSlot[][];
+}
+
+export interface TalismanRolls {
+  /** Date of the source sheet. */
+  sheetUpdated: string;
+  /** By rarity: chance an appraisal gives this rarity, and its patterns. */
+  rarities: Record<string, { chance: number; patterns: TalismanRollPattern[] }>;
+  /** Rarity 8 slot layouts with their chances (the other rarities' are unknown). */
+  rarity8SlotChances: { slots: TalismanSlot[]; chance: number }[];
+  /** Skill group -> the skills (at fixed levels) it can roll. */
+  groups: Record<string, SkillLevel[]>;
+}
+
 // ---------------------------------------------------------------- bundle
 
 export interface GameDataFiles {
@@ -360,4 +382,5 @@ export interface GameDataFiles {
   monsters: Monster[];
   artian: ArtianData;
   moves: MoveData;
+  talismanRolls: TalismanRolls;
 }

@@ -7,19 +7,19 @@ import {
   ArmorSearchOutput,
   ArmorSetRanking,
   ArmorSetResult,
-  DEFAULT_TIME_LIMIT_MS,
   searchArmorSets,
-  SearchProgress,
   SkillRequirement,
 } from '../core/search/armor-search';
 import { DamageSearchOutput, searchDamageSets } from '../core/search/damage-search';
-import type { ArmorSearchMessage, ArmorSearchRequest } from '../features/armor-search/armor-search.worker';
+import { GameIndex } from '../core/data/game-index';
+import type { ArmorSearchRequest } from '../features/armor-search/armor-search.worker';
 import { isBoolean, isObject, persistedSignal } from '../shared/persisted-signal';
 import { CurrentBuildService } from './current-build.service';
 import { CustomWeaponsService } from './custom-weapons.service';
 import { CustomTalismansService } from './custom-talismans.service';
 import { DamageSettingsService } from './damage-settings.service';
 import { GameDataService } from './game-data.service';
+import { SearchRunner } from './search-runner';
 
 /** Which talismans the search may use: none, the user's own, or theirs plus every craftable one. */
 export type TalismanPool = 'none' | 'mine' | 'all';
@@ -46,28 +46,8 @@ export const MAX_RESULTS = 200;
 export const TOP_DAMAGE_RESULTS = 5;
 /** The highest-damage search runs many armor searches; it gets more time than one. */
 const DAMAGE_TIME_LIMIT_MS = 60_000;
-
 /** Which search the shown results come from: skill levels (ranked by rankBy) or highest damage. */
 export type SearchMode = 'sets' | 'damage';
-
-/** A running search's progress, for the progress bar. */
-export interface SearchProgressView {
-  kind: SearchMode;
-  /** 0 to 1; an estimate. */
-  fraction: number;
-  phase: string;
-  elapsedMs: number;
-  /**
-   * Estimated time left: elapsed time scaled by the share still to do, capped by the
-   * time limit. Null until there is enough to go on.
-   */
-  remainingMs: number | null;
-}
-
-/** The time-left estimate waits for this much progress and time. */
-const ESTIMATE_AFTER_FRACTION = 0.05;
-const ESTIMATE_AFTER_MS = 1_000;
-const TICK_MS = 250;
 
 function isSettings(v: unknown): v is ArmorSearchSettings {
   return (
@@ -82,8 +62,17 @@ function isSettings(v: unknown): v is ArmorSearchSettings {
   );
 }
 
-function isSearchWeapon(v: unknown): v is SearchWeapon {
+export function isSearchWeapon(v: unknown): v is SearchWeapon {
   return isObject(v) && WEAPON_KINDS.includes(v['kind'] as WeaponKind) && (v['id'] === null || typeof v['id'] === 'string');
+}
+
+/** Armor pieces to search per kind; rarity 5+ pieces are swapped for their transcended version when asked. */
+export function searchArmor(index: GameIndex, transcended: boolean): Record<ArmorKind, ArmorPiece[]> {
+  const armor = {} as Record<ArmorKind, ArmorPiece[]>;
+  for (const kind of ARMOR_KINDS) {
+    armor[kind] = index.armorByKind[kind].map((p) => (transcended ? (index.armorPieces.get(transcendedId(p.id)) ?? p) : p));
+  }
+  return armor;
 }
 
 /**
@@ -103,8 +92,11 @@ export class ArmorSearchService {
   readonly output = signal<ArmorSearchOutput | DamageSearchOutput | null>(null);
   /** Search the shown results come from. */
   readonly mode = signal<SearchMode>('sets');
-  readonly running = signal(false);
-  readonly error = signal<string | null>(null);
+  private readonly runner = new SearchRunner<SearchMode>();
+  readonly running = this.runner.running;
+  readonly error = this.runner.error;
+  /** Progress of the running search; null when none runs. */
+  readonly progress = this.runner.progress;
   /** Settings the shown results were found with. */
   private readonly searched = signal<ArmorSearchSettings | null>(null);
   /** Weapon the shown results were found with. */
@@ -115,32 +107,6 @@ export class ArmorSearchService {
   readonly stale = computed(() => {
     const searched = this.searched();
     return searched !== null && JSON.stringify(searched) !== JSON.stringify(this.settings());
-  });
-
-  private worker: Worker | null = null;
-  private runId = 0;
-  private ticker: ReturnType<typeof setInterval> | null = null;
-  private readonly runInfo = signal<{ kind: SearchMode; startedAt: number; timeLimitMs: number } | null>(null);
-  private readonly latest = signal<SearchProgress | null>(null);
-  /** Ticks while a search runs so elapsed time and the estimate stay current between messages. */
-  private readonly now = signal(Date.now());
-
-  /** Progress of the running search; null when none runs. */
-  readonly progress = computed<SearchProgressView | null>(() => {
-    const info = this.runInfo();
-    if (!this.running() || !info) return null;
-    const latest = this.latest();
-    const fraction = latest?.fraction ?? 0;
-    const elapsedMs = Math.max(0, this.now() - info.startedAt);
-    const estimate =
-      fraction >= ESTIMATE_AFTER_FRACTION && elapsedMs >= ESTIMATE_AFTER_MS ? (elapsedMs * (1 - fraction)) / fraction : null;
-    return {
-      kind: info.kind,
-      fraction,
-      phase: latest?.phase ?? 'Starting',
-      elapsedMs,
-      remainingMs: estimate === null ? null : Math.max(0, Math.min(estimate, info.timeLimitMs - elapsedMs)),
-    };
   });
 
   /** The weapon the search uses; null when none is picked or the id no longer exists. */
@@ -202,63 +168,26 @@ export class ArmorSearchService {
     });
   }
 
-  private run(request: ArmorSearchRequest): void {
-    const input = request.input;
-    this.cancel();
-    const id = ++this.runId;
-    const settings = this.settings();
-    this.running.set(true);
-    this.error.set(null);
-    this.latest.set(null);
-    this.now.set(Date.now());
-    this.runInfo.set({ kind: request.kind, startedAt: Date.now(), timeLimitMs: input.timeLimitMs ?? DEFAULT_TIME_LIMIT_MS });
-    this.ticker = setInterval(() => this.now.set(Date.now()), TICK_MS);
-    const done = (output: ArmorSearchOutput | null, error?: string) => {
-      if (id !== this.runId) return;
-      this.stop();
-      if (output) {
-        this.output.set(output);
-        this.mode.set(request.kind);
-        this.searched.set(settings);
-        this.searchedWeapon.set(input.weapon);
-      } else {
-        this.error.set(error ?? 'The search failed.');
-      }
-    };
+  /** Searches sets with only this talisman (e.g. a charm saved from the Charm Search tab). */
+  searchWithTalisman(talismanId: string): void {
+    const input = this.buildInput();
+    const talisman = this.customTalismans.talismans().get(talismanId);
+    if (input && talisman) this.run({ kind: 'sets', input: { ...input, talismans: [talisman] } });
+  }
 
-    if (typeof Worker === 'undefined') {
-      setTimeout(() => {
-        try {
-          done(request.kind === 'damage' ? searchDamageSets(request.input) : searchArmorSets(request.input));
-        } catch (e) {
-          done(null, String(e));
-        }
-      });
-      return;
-    }
-    this.worker = new Worker(new URL('../features/armor-search/armor-search.worker', import.meta.url), { type: 'module' });
-    this.worker.onmessage = ({ data }: MessageEvent<ArmorSearchMessage>) => {
-      if (data.type === 'done') done(data.output);
-      else if (id === this.runId) {
-        this.latest.set(data.progress);
-        this.now.set(Date.now());
-      }
-    };
-    this.worker.onerror = (event) => done(null, event.message);
-    this.worker.postMessage(request);
+  private run(request: ArmorSearchRequest & { kind: SearchMode }): void {
+    const settings = this.settings();
+    const inline = () => (request.kind === 'damage' ? searchDamageSets(request.input) : searchArmorSets(request.input as ArmorSearchInput));
+    this.runner.run(request, inline, (output) => {
+      this.output.set(output as ArmorSearchOutput);
+      this.mode.set(request.kind);
+      this.searched.set(settings);
+      this.searchedWeapon.set(request.input.weapon);
+    });
   }
 
   cancel(): void {
-    this.runId++;
-    this.stop();
-  }
-
-  private stop(): void {
-    this.worker?.terminate();
-    this.worker = null;
-    if (this.ticker !== null) clearInterval(this.ticker);
-    this.ticker = null;
-    this.running.set(false);
+    this.runner.cancel();
   }
 
   /**
@@ -297,10 +226,7 @@ export class ArmorSearchService {
     const settings = this.settings();
     if (!index || (!allowEmpty && !settings.requirements.length)) return null;
 
-    const armor = {} as Record<ArmorKind, ArmorPiece[]>;
-    for (const kind of ARMOR_KINDS) {
-      armor[kind] = index.armorByKind[kind].map((p) => (settings.transcended ? (index.armorPieces.get(transcendedId(p.id)) ?? p) : p));
-    }
+    const armor = searchArmor(index, settings.transcended);
     const mine = [...this.customTalismans.talismans().values()];
     const talismans = settings.talismans === 'none' ? [] : settings.talismans === 'mine' ? mine : [...mine, ...index.files.talismans];
 

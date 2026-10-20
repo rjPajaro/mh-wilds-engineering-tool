@@ -1,0 +1,2613 @@
+{
+  "$source": "Appraised talisman roll tables: \"護石テーブル\" Google Sheet (data mined by dtlnor; grouping by Aki at Wiggler), https://docs.google.com/spreadsheets/d/1sWzcj2yZ7ZIgY8MH6CbR2pZj13bwBHlnXIkhakCsdLM, linked from https://kazuo-blog.org/mhwilds-talisman-drop-research/. Imported by scripts/import-talisman-rolls.mjs.",
+  "sheetUpdated": "2025-0813",
+  "rarities": {
+    "5": {
+      "chance": 0.59,
+      "patterns": [
+        {
+          "groups": [
+            1,
+            6,
+            6
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 3,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            1,
+            7
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 3,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            1,
+            8,
+            6
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 3,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            1,
+            8,
+            8
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 3,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            1,
+            9
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 3,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            1,
+            10
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 3,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    "6": {
+      "chance": 0.27,
+      "patterns": [
+        {
+          "groups": [
+            1,
+            1,
+            7
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            1,
+            1,
+            10
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            6,
+            6
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            8,
+            6
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            8,
+            8
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            9
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            10
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    "7": {
+      "chance": 0.11,
+      "patterns": [
+        {
+          "groups": [
+            2,
+            1,
+            7
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            1,
+            8
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 3,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            1,
+            10
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            3,
+            6,
+            5
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            3,
+            7
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            3,
+            8,
+            5
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            3,
+            10
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            4,
+            1,
+            1
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 2,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    "8": {
+      "chance": 0.03,
+      "patterns": [
+        {
+          "groups": [
+            2,
+            1,
+            7
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            1,
+            8
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            2,
+            1,
+            10
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            3,
+            6,
+            5
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            3,
+            7
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            3,
+            8,
+            5
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            3,
+            10
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        },
+        {
+          "groups": [
+            4,
+            1,
+            1
+          ],
+          "slots": [
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ],
+            [
+              {
+                "level": 1,
+                "accepts": "weapon"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              },
+              {
+                "level": 1,
+                "accepts": "armor"
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "rarity8SlotChances": [
+    {
+      "slots": [
+        {
+          "level": 1,
+          "accepts": "weapon"
+        }
+      ],
+      "chance": 0.5
+    },
+    {
+      "slots": [
+        {
+          "level": 1,
+          "accepts": "weapon"
+        },
+        {
+          "level": 1,
+          "accepts": "armor"
+        }
+      ],
+      "chance": 0.33
+    },
+    {
+      "slots": [
+        {
+          "level": 1,
+          "accepts": "weapon"
+        },
+        {
+          "level": 1,
+          "accepts": "armor"
+        },
+        {
+          "level": 1,
+          "accepts": "armor"
+        }
+      ],
+      "chance": 0.17
+    }
+  ],
+  "groups": {
+    "1": [
+      {
+        "skillId": -596764096,
+        "level": 1,
+        "name": "Artillery"
+      },
+      {
+        "skillId": 1,
+        "level": 1,
+        "name": "Attack Boost"
+      },
+      {
+        "skillId": -420608864,
+        "level": 1,
+        "name": "Ballistics"
+      },
+      {
+        "skillId": -844978880,
+        "level": 1,
+        "name": "Blast Attack"
+      },
+      {
+        "skillId": 397306144,
+        "level": 1,
+        "name": "Bludgeoner"
+      },
+      {
+        "skillId": -1475134080,
+        "level": 1,
+        "name": "Charge Master"
+      },
+      {
+        "skillId": -1946345856,
+        "level": 1,
+        "name": "Punishing Draw"
+      },
+      {
+        "skillId": 313598432,
+        "level": 1,
+        "name": "Critical Element"
+      },
+      {
+        "skillId": -2096489472,
+        "level": 1,
+        "name": "Critical Eye"
+      },
+      {
+        "skillId": -168922880,
+        "level": 1,
+        "name": "Critical Status"
+      },
+      {
+        "skillId": -776946176,
+        "level": 1,
+        "name": "Dragon Attack"
+      },
+      {
+        "skillId": -562534336,
+        "level": 1,
+        "name": "Fire Attack"
+      },
+      {
+        "skillId": -283334048,
+        "level": 1,
+        "name": "Focus"
+      },
+      {
+        "skillId": -307644128,
+        "level": 1,
+        "name": "Guard"
+      },
+      {
+        "skillId": -1674114176,
+        "level": 1,
+        "name": "Guard Up"
+      },
+      {
+        "skillId": 1160639488,
+        "level": 1,
+        "name": "Handicraft"
+      },
+      {
+        "skillId": -1237438336,
+        "level": 1,
+        "name": "Horn Maestro"
+      },
+      {
+        "skillId": 1268070400,
+        "level": 1,
+        "name": "Ice Attack"
+      },
+      {
+        "skillId": 802725120,
+        "level": 1,
+        "name": "Load Shells"
+      },
+      {
+        "skillId": 1594792704,
+        "level": 1,
+        "name": "Mind's Eye"
+      },
+      {
+        "skillId": -181127504,
+        "level": 1,
+        "name": "Offensive Guard"
+      },
+      {
+        "skillId": 1711950720,
+        "level": 1,
+        "name": "Opening Shot"
+      },
+      {
+        "skillId": -1863702144,
+        "level": 1,
+        "name": "Paralysis Attack"
+      },
+      {
+        "skillId": -1716324608,
+        "level": 1,
+        "name": "Poison Attack"
+      },
+      {
+        "skillId": 691199232,
+        "level": 1,
+        "name": "Power Prolonger"
+      },
+      {
+        "skillId": 1500129152,
+        "level": 1,
+        "name": "Protective Polish"
+      },
+      {
+        "skillId": 686533440,
+        "level": 1,
+        "name": "Critical Draw"
+      },
+      {
+        "skillId": -1961116288,
+        "level": 1,
+        "name": "Rapid Morph"
+      },
+      {
+        "skillId": 1050520384,
+        "level": 1,
+        "name": "Razor Sharp"
+      },
+      {
+        "skillId": 166057120,
+        "level": 1,
+        "name": "Sleep Attack"
+      },
+      {
+        "skillId": -893407296,
+        "level": 1,
+        "name": "Slugger"
+      },
+      {
+        "skillId": -160562336,
+        "level": 1,
+        "name": "Special Ammo Boost"
+      },
+      {
+        "skillId": 1444935552,
+        "level": 1,
+        "name": "Speed Sharpening"
+      },
+      {
+        "skillId": 1758661504,
+        "level": 1,
+        "name": "Stamina Thief"
+      },
+      {
+        "skillId": 1613139840,
+        "level": 1,
+        "name": "Tetrad Shot"
+      },
+      {
+        "skillId": 1452140672,
+        "level": 1,
+        "name": "Thunder Attack"
+      },
+      {
+        "skillId": 508916704,
+        "level": 1,
+        "name": "Water Attack"
+      }
+    ],
+    "2": [
+      {
+        "skillId": 402237312,
+        "level": 1,
+        "name": "Airborne"
+      },
+      {
+        "skillId": -596764096,
+        "level": 2,
+        "name": "Artillery"
+      },
+      {
+        "skillId": 1,
+        "level": 2,
+        "name": "Attack Boost"
+      },
+      {
+        "skillId": -420608864,
+        "level": 2,
+        "name": "Ballistics"
+      },
+      {
+        "skillId": -844978880,
+        "level": 2,
+        "name": "Blast Attack"
+      },
+      {
+        "skillId": -2022542848,
+        "level": 1,
+        "name": "Blast Functionality"
+      },
+      {
+        "skillId": 397306144,
+        "level": 2,
+        "name": "Bludgeoner"
+      },
+      {
+        "skillId": -1475134080,
+        "level": 2,
+        "name": "Charge Master"
+      },
+      {
+        "skillId": 353114912,
+        "level": 1,
+        "name": "Charge Up"
+      },
+      {
+        "skillId": -1946345856,
+        "level": 2,
+        "name": "Punishing Draw"
+      },
+      {
+        "skillId": 313598432,
+        "level": 2,
+        "name": "Critical Element"
+      },
+      {
+        "skillId": -2096489472,
+        "level": 2,
+        "name": "Critical Eye"
+      },
+      {
+        "skillId": -168922880,
+        "level": 2,
+        "name": "Critical Status"
+      },
+      {
+        "skillId": -776946176,
+        "level": 2,
+        "name": "Dragon Attack"
+      },
+      {
+        "skillId": -181774400,
+        "level": 1,
+        "name": "Exhaust Functionality"
+      },
+      {
+        "skillId": -562534336,
+        "level": 2,
+        "name": "Fire Attack"
+      },
+      {
+        "skillId": -283334048,
+        "level": 2,
+        "name": "Focus"
+      },
+      {
+        "skillId": -307644128,
+        "level": 2,
+        "name": "Guard"
+      },
+      {
+        "skillId": -1674114176,
+        "level": 2,
+        "name": "Guard Up"
+      },
+      {
+        "skillId": 1160639488,
+        "level": 2,
+        "name": "Handicraft"
+      },
+      {
+        "skillId": -1237438336,
+        "level": 2,
+        "name": "Horn Maestro"
+      },
+      {
+        "skillId": 1268070400,
+        "level": 2,
+        "name": "Ice Attack"
+      },
+      {
+        "skillId": 802725120,
+        "level": 2,
+        "name": "Load Shells"
+      },
+      {
+        "skillId": 1594792704,
+        "level": 2,
+        "name": "Mind's Eye"
+      },
+      {
+        "skillId": -181127504,
+        "level": 2,
+        "name": "Offensive Guard"
+      },
+      {
+        "skillId": 1711950720,
+        "level": 2,
+        "name": "Opening Shot"
+      },
+      {
+        "skillId": -1863702144,
+        "level": 2,
+        "name": "Paralysis Attack"
+      },
+      {
+        "skillId": -1716324608,
+        "level": 2,
+        "name": "Poison Attack"
+      },
+      {
+        "skillId": -1629629184,
+        "level": 1,
+        "name": "Poison Duration Up"
+      },
+      {
+        "skillId": 919683456,
+        "level": 1,
+        "name": "Poison Functionality"
+      },
+      {
+        "skillId": 691199232,
+        "level": 2,
+        "name": "Power Prolonger"
+      },
+      {
+        "skillId": 1500129152,
+        "level": 2,
+        "name": "Protective Polish"
+      },
+      {
+        "skillId": 686533440,
+        "level": 2,
+        "name": "Critical Draw"
+      },
+      {
+        "skillId": -1961116288,
+        "level": 2,
+        "name": "Rapid Morph"
+      },
+      {
+        "skillId": 1050520384,
+        "level": 2,
+        "name": "Razor Sharp"
+      },
+      {
+        "skillId": 166057120,
+        "level": 2,
+        "name": "Sleep Attack"
+      },
+      {
+        "skillId": -893407296,
+        "level": 2,
+        "name": "Slugger"
+      },
+      {
+        "skillId": -160562336,
+        "level": 2,
+        "name": "Special Ammo Boost"
+      },
+      {
+        "skillId": 1444935552,
+        "level": 2,
+        "name": "Speed Sharpening"
+      },
+      {
+        "skillId": 1758661504,
+        "level": 2,
+        "name": "Stamina Thief"
+      },
+      {
+        "skillId": 1613139840,
+        "level": 2,
+        "name": "Tetrad Shot"
+      },
+      {
+        "skillId": 1452140672,
+        "level": 2,
+        "name": "Thunder Attack"
+      },
+      {
+        "skillId": 508916704,
+        "level": 2,
+        "name": "Water Attack"
+      }
+    ],
+    "3": [
+      {
+        "skillId": -596764096,
+        "level": 3,
+        "name": "Artillery"
+      },
+      {
+        "skillId": 1,
+        "level": 3,
+        "name": "Attack Boost"
+      },
+      {
+        "skillId": -420608864,
+        "level": 3,
+        "name": "Ballistics"
+      },
+      {
+        "skillId": -844978880,
+        "level": 3,
+        "name": "Blast Attack"
+      },
+      {
+        "skillId": 397306144,
+        "level": 3,
+        "name": "Bludgeoner"
+      },
+      {
+        "skillId": -1475134080,
+        "level": 3,
+        "name": "Charge Master"
+      },
+      {
+        "skillId": -1946345856,
+        "level": 3,
+        "name": "Punishing Draw"
+      },
+      {
+        "skillId": 313598432,
+        "level": 3,
+        "name": "Critical Element"
+      },
+      {
+        "skillId": -2096489472,
+        "level": 3,
+        "name": "Critical Eye"
+      },
+      {
+        "skillId": -168922880,
+        "level": 3,
+        "name": "Critical Status"
+      },
+      {
+        "skillId": -776946176,
+        "level": 3,
+        "name": "Dragon Attack"
+      },
+      {
+        "skillId": -562534336,
+        "level": 3,
+        "name": "Fire Attack"
+      },
+      {
+        "skillId": -283334048,
+        "level": 3,
+        "name": "Focus"
+      },
+      {
+        "skillId": -307644128,
+        "level": 3,
+        "name": "Guard"
+      },
+      {
+        "skillId": -1674114176,
+        "level": 3,
+        "name": "Guard Up"
+      },
+      {
+        "skillId": 1160639488,
+        "level": 3,
+        "name": "Handicraft"
+      },
+      {
+        "skillId": 1268070400,
+        "level": 3,
+        "name": "Ice Attack"
+      },
+      {
+        "skillId": 1389859584,
+        "level": 1,
+        "name": "Master's Touch"
+      },
+      {
+        "skillId": 1594792704,
+        "level": 3,
+        "name": "Mind's Eye"
+      },
+      {
+        "skillId": -1961297152,
+        "level": 1,
+        "name": "Normal Shots"
+      },
+      {
+        "skillId": -181127504,
+        "level": 3,
+        "name": "Offensive Guard"
+      },
+      {
+        "skillId": 1711950720,
+        "level": 3,
+        "name": "Opening Shot"
+      },
+      {
+        "skillId": -676967744,
+        "level": 1,
+        "name": "Para Functionality"
+      },
+      {
+        "skillId": -1863702144,
+        "level": 3,
+        "name": "Paralysis Attack"
+      },
+      {
+        "skillId": 552982656,
+        "level": 1,
+        "name": "Piercing Shots"
+      },
+      {
+        "skillId": -1716324608,
+        "level": 3,
+        "name": "Poison Attack"
+      },
+      {
+        "skillId": 691199232,
+        "level": 3,
+        "name": "Power Prolonger"
+      },
+      {
+        "skillId": 1500129152,
+        "level": 3,
+        "name": "Protective Polish"
+      },
+      {
+        "skillId": 686533440,
+        "level": 3,
+        "name": "Critical Draw"
+      },
+      {
+        "skillId": -1507579776,
+        "level": 1,
+        "name": "Rapid Fire Up"
+      },
+      {
+        "skillId": -1961116288,
+        "level": 3,
+        "name": "Rapid Morph"
+      },
+      {
+        "skillId": 1050520384,
+        "level": 3,
+        "name": "Razor Sharp"
+      },
+      {
+        "skillId": 166057120,
+        "level": 3,
+        "name": "Sleep Attack"
+      },
+      {
+        "skillId": 169998480,
+        "level": 1,
+        "name": "Sleep Functionality"
+      },
+      {
+        "skillId": -893407296,
+        "level": 3,
+        "name": "Slugger"
+      },
+      {
+        "skillId": -2123993856,
+        "level": 1,
+        "name": "Spread/Power Shots"
+      },
+      {
+        "skillId": 1758661504,
+        "level": 3,
+        "name": "Stamina Thief"
+      },
+      {
+        "skillId": 1613139840,
+        "level": 3,
+        "name": "Tetrad Shot"
+      },
+      {
+        "skillId": 1452140672,
+        "level": 3,
+        "name": "Thunder Attack"
+      },
+      {
+        "skillId": 508916704,
+        "level": 3,
+        "name": "Water Attack"
+      }
+    ],
+    "4": [
+      {
+        "skillId": 1,
+        "level": 2,
+        "name": "Attack Boost"
+      },
+      {
+        "skillId": -420608864,
+        "level": 2,
+        "name": "Ballistics"
+      },
+      {
+        "skillId": -844978880,
+        "level": 2,
+        "name": "Blast Attack"
+      },
+      {
+        "skillId": -1607763456,
+        "level": 1,
+        "name": "Critical Boost"
+      },
+      {
+        "skillId": 313598432,
+        "level": 2,
+        "name": "Critical Element"
+      },
+      {
+        "skillId": -2096489472,
+        "level": 2,
+        "name": "Critical Eye"
+      },
+      {
+        "skillId": -776946176,
+        "level": 2,
+        "name": "Dragon Attack"
+      },
+      {
+        "skillId": -562534336,
+        "level": 2,
+        "name": "Fire Attack"
+      },
+      {
+        "skillId": -307644128,
+        "level": 2,
+        "name": "Guard"
+      },
+      {
+        "skillId": -1674114176,
+        "level": 2,
+        "name": "Guard Up"
+      },
+      {
+        "skillId": 1160639488,
+        "level": 2,
+        "name": "Handicraft"
+      },
+      {
+        "skillId": 1268070400,
+        "level": 2,
+        "name": "Ice Attack"
+      },
+      {
+        "skillId": 1711950720,
+        "level": 2,
+        "name": "Opening Shot"
+      },
+      {
+        "skillId": -1863702144,
+        "level": 2,
+        "name": "Paralysis Attack"
+      },
+      {
+        "skillId": -1716324608,
+        "level": 2,
+        "name": "Poison Attack"
+      },
+      {
+        "skillId": 1500129152,
+        "level": 2,
+        "name": "Protective Polish"
+      },
+      {
+        "skillId": 1050520384,
+        "level": 2,
+        "name": "Razor Sharp"
+      },
+      {
+        "skillId": 166057120,
+        "level": 2,
+        "name": "Sleep Attack"
+      },
+      {
+        "skillId": 1613139840,
+        "level": 2,
+        "name": "Tetrad Shot"
+      },
+      {
+        "skillId": 1452140672,
+        "level": 2,
+        "name": "Thunder Attack"
+      },
+      {
+        "skillId": 508916704,
+        "level": 2,
+        "name": "Water Attack"
+      }
+    ],
+    "5": [
+      {
+        "skillId": 424768352,
+        "level": 1,
+        "name": "Adaptability"
+      },
+      {
+        "skillId": -1662120192,
+        "level": 1,
+        "name": "Antivirus"
+      },
+      {
+        "skillId": -201445760,
+        "level": 1,
+        "name": "Aquatic/Oilsilt Mobility"
+      },
+      {
+        "skillId": 1966172160,
+        "level": 1,
+        "name": "Bind Resistance"
+      },
+      {
+        "skillId": 820385792,
+        "level": 1,
+        "name": "Blast Resistance"
+      },
+      {
+        "skillId": 1940820864,
+        "level": 1,
+        "name": "Bleeding Resistance"
+      },
+      {
+        "skillId": -857543744,
+        "level": 1,
+        "name": "Bombardier"
+      },
+      {
+        "skillId": 860517760,
+        "level": 2,
+        "name": "Botanist"
+      },
+      {
+        "skillId": -1689391744,
+        "level": 2,
+        "name": "Constitution"
+      },
+      {
+        "skillId": 1077686656,
+        "level": 2,
+        "name": "Defense Boost"
+      },
+      {
+        "skillId": 1346775424,
+        "level": 1,
+        "name": "Divine Blessing"
+      },
+      {
+        "skillId": -2125233152,
+        "level": 1,
+        "name": "Dragon Resistance"
+      },
+      {
+        "skillId": 1425756032,
+        "level": 1,
+        "name": "Fire Resistance"
+      },
+      {
+        "skillId": 742695104,
+        "level": 1,
+        "name": "Flinch Free"
+      },
+      {
+        "skillId": 850626240,
+        "level": 1,
+        "name": "Free Meal"
+      },
+      {
+        "skillId": 595870656,
+        "level": 1,
+        "name": "Geologist"
+      },
+      {
+        "skillId": 2045149568,
+        "level": 1,
+        "name": "Hunger Resistance"
+      },
+      {
+        "skillId": 652161472,
+        "level": 1,
+        "name": "Ice Resistance"
+      },
+      {
+        "skillId": 1472632704,
+        "level": 1,
+        "name": "Intimidator"
+      },
+      {
+        "skillId": 1522518528,
+        "level": 1,
+        "name": "Iron Skin"
+      },
+      {
+        "skillId": -1684613760,
+        "level": 1,
+        "name": "Item Prolonger"
+      },
+      {
+        "skillId": -682586176,
+        "level": 1,
+        "name": "Marathon Runner"
+      },
+      {
+        "skillId": 522288832,
+        "level": 1,
+        "name": "Paralysis Resistance"
+      },
+      {
+        "skillId": 1459579264,
+        "level": 1,
+        "name": "Poison Resistance"
+      },
+      {
+        "skillId": -1073401280,
+        "level": 1,
+        "name": "Quick Sheathe"
+      },
+      {
+        "skillId": -1121468544,
+        "level": 1,
+        "name": "Recovery Speed"
+      },
+      {
+        "skillId": -1235658624,
+        "level": 1,
+        "name": "Recovery Up"
+      },
+      {
+        "skillId": -193031552,
+        "level": 1,
+        "name": "Sleep Resistance"
+      },
+      {
+        "skillId": 634068352,
+        "level": 1,
+        "name": "Speed Eating"
+      },
+      {
+        "skillId": -411441344,
+        "level": 1,
+        "name": "Stench Resistance"
+      },
+      {
+        "skillId": 705317568,
+        "level": 1,
+        "name": "Stun Resistance"
+      },
+      {
+        "skillId": -593005376,
+        "level": 1,
+        "name": "Survival Expert"
+      },
+      {
+        "skillId": 2143068800,
+        "level": 1,
+        "name": "Thunder Resistance"
+      },
+      {
+        "skillId": -609509888,
+        "level": 1,
+        "name": "Tremor Resistance"
+      },
+      {
+        "skillId": 383104832,
+        "level": 1,
+        "name": "Water Resistance"
+      },
+      {
+        "skillId": 894530496,
+        "level": 2,
+        "name": "Wide-Range"
+      },
+      {
+        "skillId": -895828480,
+        "level": 1,
+        "name": "Windproof"
+      }
+    ],
+    "6": [
+      {
+        "skillId": 424768352,
+        "level": 2,
+        "name": "Adaptability"
+      },
+      {
+        "skillId": -1662120192,
+        "level": 2,
+        "name": "Antivirus"
+      },
+      {
+        "skillId": -201445760,
+        "level": 2,
+        "name": "Aquatic/Oilsilt Mobility"
+      },
+      {
+        "skillId": 1966172160,
+        "level": 2,
+        "name": "Bind Resistance"
+      },
+      {
+        "skillId": 820385792,
+        "level": 2,
+        "name": "Blast Resistance"
+      },
+      {
+        "skillId": 1940820864,
+        "level": 2,
+        "name": "Bleeding Resistance"
+      },
+      {
+        "skillId": -857543744,
+        "level": 2,
+        "name": "Bombardier"
+      },
+      {
+        "skillId": 860517760,
+        "level": 3,
+        "name": "Botanist"
+      },
+      {
+        "skillId": -1689391744,
+        "level": 3,
+        "name": "Constitution"
+      },
+      {
+        "skillId": 1077686656,
+        "level": 3,
+        "name": "Defense Boost"
+      },
+      {
+        "skillId": 1346775424,
+        "level": 2,
+        "name": "Divine Blessing"
+      },
+      {
+        "skillId": -2125233152,
+        "level": 2,
+        "name": "Dragon Resistance"
+      },
+      {
+        "skillId": 1425756032,
+        "level": 2,
+        "name": "Fire Resistance"
+      },
+      {
+        "skillId": 742695104,
+        "level": 2,
+        "name": "Flinch Free"
+      },
+      {
+        "skillId": 850626240,
+        "level": 2,
+        "name": "Free Meal"
+      },
+      {
+        "skillId": 595870656,
+        "level": 2,
+        "name": "Geologist"
+      },
+      {
+        "skillId": 2045149568,
+        "level": 2,
+        "name": "Hunger Resistance"
+      },
+      {
+        "skillId": 652161472,
+        "level": 2,
+        "name": "Ice Resistance"
+      },
+      {
+        "skillId": 1472632704,
+        "level": 2,
+        "name": "Intimidator"
+      },
+      {
+        "skillId": 1522518528,
+        "level": 2,
+        "name": "Iron Skin"
+      },
+      {
+        "skillId": -1684613760,
+        "level": 2,
+        "name": "Item Prolonger"
+      },
+      {
+        "skillId": -682586176,
+        "level": 2,
+        "name": "Marathon Runner"
+      },
+      {
+        "skillId": 522288832,
+        "level": 2,
+        "name": "Paralysis Resistance"
+      },
+      {
+        "skillId": 1459579264,
+        "level": 2,
+        "name": "Poison Resistance"
+      },
+      {
+        "skillId": -1073401280,
+        "level": 2,
+        "name": "Quick Sheathe"
+      },
+      {
+        "skillId": -1121468544,
+        "level": 2,
+        "name": "Recovery Speed"
+      },
+      {
+        "skillId": -1235658624,
+        "level": 2,
+        "name": "Recovery Up"
+      },
+      {
+        "skillId": -193031552,
+        "level": 2,
+        "name": "Sleep Resistance"
+      },
+      {
+        "skillId": 634068352,
+        "level": 2,
+        "name": "Speed Eating"
+      },
+      {
+        "skillId": -411441344,
+        "level": 2,
+        "name": "Stench Resistance"
+      },
+      {
+        "skillId": 705317568,
+        "level": 2,
+        "name": "Stun Resistance"
+      },
+      {
+        "skillId": -593005376,
+        "level": 2,
+        "name": "Survival Expert"
+      },
+      {
+        "skillId": 2143068800,
+        "level": 2,
+        "name": "Thunder Resistance"
+      },
+      {
+        "skillId": -609509888,
+        "level": 2,
+        "name": "Tremor Resistance"
+      },
+      {
+        "skillId": 383104832,
+        "level": 2,
+        "name": "Water Resistance"
+      },
+      {
+        "skillId": 894530496,
+        "level": 3,
+        "name": "Wide-Range"
+      },
+      {
+        "skillId": -895828480,
+        "level": 2,
+        "name": "Windproof"
+      }
+    ],
+    "7": [
+      {
+        "skillId": -1662120192,
+        "level": 3,
+        "name": "Antivirus"
+      },
+      {
+        "skillId": 1966172160,
+        "level": 3,
+        "name": "Bind Resistance"
+      },
+      {
+        "skillId": 820385792,
+        "level": 3,
+        "name": "Blast Resistance"
+      },
+      {
+        "skillId": 1940820864,
+        "level": 3,
+        "name": "Bleeding Resistance"
+      },
+      {
+        "skillId": -857543744,
+        "level": 3,
+        "name": "Bombardier"
+      },
+      {
+        "skillId": 860517760,
+        "level": 4,
+        "name": "Botanist"
+      },
+      {
+        "skillId": -1689391744,
+        "level": 4,
+        "name": "Constitution"
+      },
+      {
+        "skillId": 1077686656,
+        "level": 4,
+        "name": "Defense Boost"
+      },
+      {
+        "skillId": 1346775424,
+        "level": 3,
+        "name": "Divine Blessing"
+      },
+      {
+        "skillId": -2125233152,
+        "level": 3,
+        "name": "Dragon Resistance"
+      },
+      {
+        "skillId": 1425756032,
+        "level": 3,
+        "name": "Fire Resistance"
+      },
+      {
+        "skillId": 742695104,
+        "level": 3,
+        "name": "Flinch Free"
+      },
+      {
+        "skillId": 850626240,
+        "level": 3,
+        "name": "Free Meal"
+      },
+      {
+        "skillId": 595870656,
+        "level": 3,
+        "name": "Geologist"
+      },
+      {
+        "skillId": 2045149568,
+        "level": 3,
+        "name": "Hunger Resistance"
+      },
+      {
+        "skillId": 652161472,
+        "level": 3,
+        "name": "Ice Resistance"
+      },
+      {
+        "skillId": 1472632704,
+        "level": 3,
+        "name": "Intimidator"
+      },
+      {
+        "skillId": 1522518528,
+        "level": 3,
+        "name": "Iron Skin"
+      },
+      {
+        "skillId": -1684613760,
+        "level": 3,
+        "name": "Item Prolonger"
+      },
+      {
+        "skillId": -682586176,
+        "level": 3,
+        "name": "Marathon Runner"
+      },
+      {
+        "skillId": 522288832,
+        "level": 3,
+        "name": "Paralysis Resistance"
+      },
+      {
+        "skillId": 1459579264,
+        "level": 3,
+        "name": "Poison Resistance"
+      },
+      {
+        "skillId": -1073401280,
+        "level": 3,
+        "name": "Quick Sheathe"
+      },
+      {
+        "skillId": -1121468544,
+        "level": 3,
+        "name": "Recovery Speed"
+      },
+      {
+        "skillId": -1235658624,
+        "level": 3,
+        "name": "Recovery Up"
+      },
+      {
+        "skillId": -193031552,
+        "level": 3,
+        "name": "Sleep Resistance"
+      },
+      {
+        "skillId": 634068352,
+        "level": 3,
+        "name": "Speed Eating"
+      },
+      {
+        "skillId": 705317568,
+        "level": 3,
+        "name": "Stun Resistance"
+      },
+      {
+        "skillId": -593005376,
+        "level": 3,
+        "name": "Survival Expert"
+      },
+      {
+        "skillId": 2143068800,
+        "level": 3,
+        "name": "Thunder Resistance"
+      },
+      {
+        "skillId": -609509888,
+        "level": 3,
+        "name": "Tremor Resistance"
+      },
+      {
+        "skillId": 383104832,
+        "level": 3,
+        "name": "Water Resistance"
+      },
+      {
+        "skillId": 894530496,
+        "level": 4,
+        "name": "Wide-Range"
+      },
+      {
+        "skillId": -895828480,
+        "level": 3,
+        "name": "Windproof"
+      }
+    ],
+    "8": [
+      {
+        "skillId": -171796848,
+        "level": 1,
+        "name": "Ambush"
+      },
+      {
+        "skillId": -568838336,
+        "level": 1,
+        "name": "Blight Resistance"
+      },
+      {
+        "skillId": -1700743296,
+        "level": 1,
+        "name": "Coalescence"
+      },
+      {
+        "skillId": 280489184,
+        "level": 1,
+        "name": "Counterstrike"
+      },
+      {
+        "skillId": 192746944,
+        "level": 1,
+        "name": "Earplugs"
+      },
+      {
+        "skillId": 673822976,
+        "level": 1,
+        "name": "Evade Extender"
+      },
+      {
+        "skillId": 144660544,
+        "level": 2,
+        "name": "Evade Window"
+      },
+      {
+        "skillId": 422666624,
+        "level": 2,
+        "name": "Heroics"
+      },
+      {
+        "skillId": 632127488,
+        "level": 1,
+        "name": "Maximum Might"
+      },
+      {
+        "skillId": -481419552,
+        "level": 1,
+        "name": "Mushroomancer"
+      },
+      {
+        "skillId": 1470960256,
+        "level": 1,
+        "name": "Partbreaker"
+      },
+      {
+        "skillId": 2106877312,
+        "level": 1,
+        "name": "Peak Performance"
+      },
+      {
+        "skillId": 1359821952,
+        "level": 1,
+        "name": "Resentment"
+      },
+      {
+        "skillId": -315492576,
+        "level": 1,
+        "name": "Stamina Surge"
+      },
+      {
+        "skillId": 469540352,
+        "level": 2,
+        "name": "Tool Specialist"
+      }
+    ],
+    "9": [
+      {
+        "skillId": -171796848,
+        "level": 2,
+        "name": "Ambush"
+      },
+      {
+        "skillId": -568838336,
+        "level": 2,
+        "name": "Blight Resistance"
+      },
+      {
+        "skillId": -1700743296,
+        "level": 2,
+        "name": "Coalescence"
+      },
+      {
+        "skillId": 280489184,
+        "level": 2,
+        "name": "Counterstrike"
+      },
+      {
+        "skillId": 192746944,
+        "level": 2,
+        "name": "Earplugs"
+      },
+      {
+        "skillId": 673822976,
+        "level": 2,
+        "name": "Evade Extender"
+      },
+      {
+        "skillId": 144660544,
+        "level": 3,
+        "name": "Evade Window"
+      },
+      {
+        "skillId": 422666624,
+        "level": 3,
+        "name": "Heroics"
+      },
+      {
+        "skillId": 632127488,
+        "level": 2,
+        "name": "Maximum Might"
+      },
+      {
+        "skillId": -481419552,
+        "level": 2,
+        "name": "Mushroomancer"
+      },
+      {
+        "skillId": 1470960256,
+        "level": 2,
+        "name": "Partbreaker"
+      },
+      {
+        "skillId": 2106877312,
+        "level": 2,
+        "name": "Peak Performance"
+      },
+      {
+        "skillId": 1359821952,
+        "level": 2,
+        "name": "Resentment"
+      },
+      {
+        "skillId": -315492576,
+        "level": 2,
+        "name": "Stamina Surge"
+      },
+      {
+        "skillId": 469540352,
+        "level": 3,
+        "name": "Tool Specialist"
+      }
+    ],
+    "10": [
+      {
+        "skillId": 1174975744,
+        "level": 1,
+        "name": "Adrenaline Rush"
+      },
+      {
+        "skillId": 1865909632,
+        "level": 1,
+        "name": "Agitator"
+      },
+      {
+        "skillId": 565867136,
+        "level": 1,
+        "name": "Burst"
+      },
+      {
+        "skillId": 2083363072,
+        "level": 1,
+        "name": "Convert Element"
+      },
+      {
+        "skillId": 1489568384,
+        "level": 1,
+        "name": "Elemental Absorption"
+      },
+      {
+        "skillId": -856322816,
+        "level": 1,
+        "name": "Flayer"
+      },
+      {
+        "skillId": 27684744,
+        "level": 1,
+        "name": "Foray"
+      },
+      {
+        "skillId": 1763191040,
+        "level": 1,
+        "name": "Latent Power"
+      },
+      {
+        "skillId": -397570464,
+        "level": 1,
+        "name": "Weakness Exploit"
+      }
+    ]
+  }
+}

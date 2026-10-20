@@ -431,6 +431,34 @@ for (const [kind, entry] of Object.entries(movesSource.weapons)) {
   moves.weapons[kind] = entry;
 }
 
+// ---------------------------------------------------------------- talisman rolls (supplement)
+// Appraised talisman roll tables from scripts/supplements/talisman-rolls.json (see
+// scripts/import-talisman-rolls.mjs). Display names are dropped; skills are game ids.
+
+const rollSource = JSON.parse(readFileSync(join(here, 'supplements/talisman-rolls.json'), 'utf8'));
+const talismanRolls = {
+  sheetUpdated: rollSource.sheetUpdated,
+  rarities: rollSource.rarities,
+  rarity8SlotChances: rollSource.rarity8SlotChances,
+  groups: Object.fromEntries(
+    Object.entries(rollSource.groups).map(([group, entries]) => [
+      group,
+      entries.map((e) => {
+        const skill = skillById.get(e.skillId);
+        if (!skill) errors.push(`talisman-rolls.json: group ${group}: unknown skill ${e.skillId} (${e.name})`);
+        else if (e.level > skill.maxLevel) errors.push(`talisman-rolls.json: group ${group}: ${skill.name} ${e.level} is above its max level`);
+        return { skillId: e.skillId, level: e.level };
+      }),
+    ]),
+  ),
+};
+for (const [rarity, entry] of Object.entries(talismanRolls.rarities)) {
+  if (!talismans.some((t) => t.rarity === Number(rarity))) errors.push(`talisman-rolls.json: no charm of rarity ${rarity}`);
+  for (const p of entry.patterns) {
+    for (const g of p.groups) if (!talismanRolls.groups[g]) errors.push(`talisman-rolls.json: rarity ${rarity} uses unknown group ${g}`);
+  }
+}
+
 // ---------------------------------------------------------------- thumbnails (supplement)
 // Image URLs per weapon / armor piece id from scripts/supplements/thumbnails.json
 // (see scripts/extract-thumbnails.mjs). The app hotlinks them; items without one
@@ -460,7 +488,7 @@ if (thumbnailMisses.length) warnings.push(`no thumbnail for ${thumbnailMisses.le
 
 // ---------------------------------------------------------------- write
 
-const outputs = { skills, armorSets, decorations, talismans, weapons, huntingHorn, monsters, artian, moves };
+const outputs = { skills, armorSets, decorations, talismans, weapons, huntingHorn, monsters, artian, moves, talismanRolls };
 
 /** Every display name must be a non-empty string; a missing translation yields `{}`. */
 function checkNames(value, path) {
@@ -494,6 +522,7 @@ const files = {
   'monsters.json': monsters,
   'artian.json': artian,
   'moves.json': moves,
+  'talisman-rolls.json': talismanRolls,
   // Equipment type icons per rarity, empty slot and charm icons; imported by the app directly.
   'icons.json': { ...thumbnailSource.icons, charms: thumbnailSource.charmsByRarity },
 };

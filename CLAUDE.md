@@ -15,7 +15,9 @@ rankable by calculated DPS.
 - Values missing from the game data (Artian crafting) are researched and
   kept in `frontend/scripts/supplements/` with sources. See `docs/ARTIAN.md`
   and `docs/CALC.md` (motion values: `frontend/scripts/import-motion-values.mjs` from the
-  motion value spreadsheet .xlsx, and `extract-wiki-moves.mjs` for GS/SnS/Hammer).
+  motion value spreadsheet .xlsx, and `extract-wiki-moves.mjs` for GS/SnS/Hammer;
+  random talisman roll tables: `import-talisman-rolls.mjs`, used by the Charm Search tab,
+  `core/search/charm-search.ts` + `features/charm-search/`, see `docs/SEARCH.md`).
 - Weapon/armor thumbnails are hotlinked, never bundled: Kiranico first, then
   Fextralife, monsterhunterwiki.org and gamertw for gaps. URLs come from
   `frontend/scripts/extract-thumbnails.mjs` -> `supplements/thumbnails.json`

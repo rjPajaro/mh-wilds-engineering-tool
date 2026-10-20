@@ -21,6 +21,7 @@ const index = buildGameIndex({
   monsters: [],
   artian: artian as unknown as ArtianData,
   moves: { extracted: '', weapons: {} },
+  talismanRolls: { sheetUpdated: '', rarities: {}, rarity8SlotChances: [], groups: {} },
 });
 
 function button(el: HTMLElement, text: string): HTMLButtonElement {

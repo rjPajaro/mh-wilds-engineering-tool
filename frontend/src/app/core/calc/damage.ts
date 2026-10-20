@@ -58,6 +58,8 @@ export interface Stats {
   affinity: number;
   affinityParts: Contribution[];
   critMultiplier: number;
+  /** Additions to the crit multiplier (in percent), already in `critMultiplier`. */
+  critParts: Contribution[];
   critElement: number;
   /** Element in true units after skills and Coalescence, at most `elementCap`; null for raw/status weapons. */
   element: number | null;
@@ -66,10 +68,15 @@ export interface Stats {
   elementCap: number | null;
   /** Skills (Coalescence included) would push element past the cap, so it was cut to the cap. */
   elementCapped: boolean;
+  /** Final raw multiplier as a percent (sources multiply: +10% and +20% give 32). */
   rawDamagePct: number;
+  rawDamageParts: Contribution[];
   /** Element multiplier from Coalescence, already folded into `element` before the cap. */
   elementDamagePct: number;
   elementDamageParts: Contribution[];
+  /** Final element multiplier after the cap as a percent (sources multiply), folded into `efe` only. */
+  elementFinalPct: number;
+  elementFinalParts: Contribution[];
   /** Status in true units after skills and Coalescence, at most `statusCap`; null without a status. */
   status: number | null;
   statusParts: Contribution[];
@@ -276,15 +283,20 @@ function computeStats(
   const elementDamageParts: Contribution[] = [];
   const statusParts: Contribution[] = [];
   const statusDamageParts: Contribution[] = [];
+  const critParts: Contribution[] = [];
+  const rawDamageParts: Contribution[] = [];
+  const elementFinalParts: Contribution[] = [];
   let attackPct = 0;
   let attackFlat = 0;
   let affinity = weapon.affinity;
   let critMultiplier = BASE_CRIT_MULTIPLIER;
+  let critBonus = 0;
   let critElement = 1;
   let elementPct = 0;
   let elementFlat = 0;
-  let rawDamagePct = 0;
+  let rawMultiplier = 1;
   let elementDamagePct = 0;
+  let elementFinal = 1;
   let statusPct = 0;
   let statusFlat = 0;
   let statusDamagePct = 0;
@@ -301,16 +313,27 @@ function computeStats(
       affinity += v.affinity;
     }
     if (v.critMultiplier) critMultiplier = Math.max(critMultiplier, v.critMultiplier);
+    if (v.critBonus) {
+      critParts.push({ label, value: v.critBonus });
+      critBonus += v.critBonus;
+    }
     if (v.critElement) critElement = Math.max(critElement, v.critElement);
     if (baseElement !== null && (v.elementPct || v.elementFlat)) {
       elementParts.push({ label, value: (baseElement * (v.elementPct ?? 0)) / 100 + (v.elementFlat ?? 0) });
       elementPct += v.elementPct ?? 0;
       elementFlat += v.elementFlat ?? 0;
     }
-    rawDamagePct += v.rawDamagePct ?? 0;
+    if (v.rawDamagePct) {
+      rawDamageParts.push({ label, value: v.rawDamagePct });
+      rawMultiplier *= 1 + v.rawDamagePct / 100;
+    }
     if (baseElement !== null && v.elementDamagePct) {
       elementDamageParts.push({ label, value: v.elementDamagePct });
       elementDamagePct += v.elementDamagePct;
+    }
+    if (baseElement !== null && v.elementFinalPct) {
+      elementFinalParts.push({ label, value: v.elementFinalPct });
+      elementFinal *= 1 + v.elementFinalPct / 100;
     }
     if (baseStatus !== null && (v.statusPct || v.statusFlat)) {
       statusParts.push({ label, value: (baseStatus * (v.statusPct ?? 0)) / 100 + (v.statusFlat ?? 0) });
@@ -331,6 +354,7 @@ function computeStats(
   const element = uncapped === null || cap === null ? null : Math.min(uncapped, cap);
   const statusUncapped = baseStatus === null ? null : (baseStatus * (1 + statusPct / 100) + statusFlat) * (1 + statusDamagePct / 100);
   const statusCap = baseStatus === null ? null : elementCap(baseStatus);
+  critMultiplier += critBonus / 100;
   const clamped = Math.max(-100, Math.min(100, affinity));
   const p = clamped / 100;
   const rawCrit = p >= 0 ? 1 + p * (critMultiplier - 1) : 1 + -p * (NEGATIVE_CRIT_MULTIPLIER - 1);
@@ -342,14 +366,18 @@ function computeStats(
     affinity: clamped,
     affinityParts,
     critMultiplier,
+    critParts,
     critElement,
     element,
     elementParts,
     elementCap: cap,
     elementCapped: uncapped !== null && cap !== null && uncapped > cap + 1e-9,
-    rawDamagePct,
+    rawDamagePct: (rawMultiplier - 1) * 100,
+    rawDamageParts,
     elementDamagePct,
     elementDamageParts,
+    elementFinalPct: (elementFinal - 1) * 100,
+    elementFinalParts,
     status: statusUncapped === null || statusCap === null ? null : Math.min(statusUncapped, statusCap),
     statusParts,
     statusCap,
@@ -358,7 +386,7 @@ function computeStats(
     statusDamageParts,
     rawCrit,
     elementCrit,
-    efr: attack * (sharpness?.raw ?? 1) * rawCrit * (1 + rawDamagePct / 100),
-    efe: (element ?? 0) * (sharpness?.element ?? 1) * elementCrit,
+    efr: attack * (sharpness?.raw ?? 1) * rawCrit * rawMultiplier,
+    efe: (element ?? 0) * (sharpness?.element ?? 1) * elementCrit * elementFinal,
   };
 }

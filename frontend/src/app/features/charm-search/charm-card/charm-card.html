@@ -1,0 +1,58 @@
+<header class="charm-head">
+  <span class="rank">#{{ rank() }}</span>
+  <span class="needs">
+    @for (s of view().skills; track s.skill.id) {
+      <span class="skill" [appSkillTip]="{ skill: s.skill, level: s.level, weaponKind: view().weaponKind }">
+        {{ s.skill.name }} {{ s.level }}@if (s.orHigher) {+}
+      </span>
+    } @empty {
+      <span class="skill">No skills needed</span>
+    }
+    @for (s of view().slots; track $index) {
+      <span class="slot" [title]="slotLabel(s) + ' or larger'">
+        <img class="slot-icon" [src]="emptySlotIcons[s.target][s.level]" alt="" referrerpolicy="no-referrer" />
+        {{ slotLabel(s) }}
+      </span>
+    }
+  </span>
+  <span class="stat" title="Chance that one appraised charm has at least these skills and slots. Rough: see the note above the list.">
+    <strong>{{ percent(view().charm.chance) }}</strong> <span class="muted">· about 1 in {{ oneIn(view().charm.chance) }}</span>
+  </span>
+</header>
+
+<p class="rarities">
+  @for (r of view().rarities; track r.rarity) {
+    <span class="rarity">
+      @if (charmIcons[r.rarity]) {
+        <img class="charm-icon" [src]="charmIcons[r.rarity]" alt="" referrerpolicy="no-referrer" />
+      }
+      {{ r.name }} <span class="muted">{{ (r.share * 100).toFixed(0) }}%</span>
+    </span>
+  }
+</p>
+
+@if (view().jewels.length) {
+  <p class="jewels">
+    <span class="muted">{{ view().skills.length ? 'Its slots take:' : 'Any charm like this works: its slots take' }}</span>
+    {{ view().jewels.join(' · ') }}
+  </p>
+}
+
+<p class="example">
+  <span class="muted">Example set:</span> {{ view().armor.join(' · ') }}
+</p>
+
+<footer class="actions">
+  <span class="muted" [title]="'Saved as: ' + view().example.name + ' — ' + view().example.skills">
+    Saves as {{ view().example.name }}{{ view().example.skills ? ' · ' + view().example.skills : '' }}
+    @for (s of view().example.slots; track $index) {
+      <img class="slot-icon" [src]="emptySlotIcons[s.target][s.level]" [alt]="(s.target === 'weapon' ? 'Weapon' : 'Armor') + ' slot ' + s.level" referrerpolicy="no-referrer" />
+    }
+  </span>
+  @if (view().saved) {
+    <span class="saved">Saved</span>
+  } @else {
+    <button type="button" (click)="save.emit()">Save to Talismans</button>
+  }
+  <button type="button" class="primary find" (click)="findSets.emit()" title="Save the charm, then search sets with it">Save &amp; find sets</button>
+</footer>
