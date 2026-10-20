@@ -151,10 +151,38 @@ describe('calculateDamage', () => {
     expect(vsTarget?.hit.total).toBeCloseTo(raw + element, 5);
   });
 
+  it('adds crit bonus on top of the best crit multiplier, and multiplies final raw damage', () => {
+    const buffs = [
+      { label: 'Song', values: { critBonus: 5 } },
+      { label: 'Mode', values: { rawDamagePct: 10 } },
+      { label: 'Coating', values: { rawDamagePct: 20 } },
+    ];
+    const base = calculateDamage({ weapon: RAW_SWORD, skills: [active('Critical Boost', 5)], buffs }).base;
+    expect(base.critMultiplier).toBeCloseTo(1.45, 9); // Critical Boost 5 (1.40) + 0.05
+    expect(base.critParts).toEqual([{ label: 'Song', value: 5 }]);
+    expect(base.rawDamagePct).toBeCloseTo(32, 9); // 1.1 x 1.2
+    // 200 * 1.32 * (1 + 0.10 * 0.45) * 1.32
+    expect(base.efr).toBeCloseTo(200 * 1.32 * 1.045 * 1.32, 9);
+  });
+
+  it('multiplies element after the cap with elementFinalPct', () => {
+    const buffs = [
+      { label: 'Flat', values: { elementFlat: 100 } },
+      { label: 'Ammo', values: { elementFinalPct: 20 } },
+    ];
+    const base = calculateDamage({ weapon: FIRE_SWORD, skills: [], buffs }).base;
+    expect(base.element).toBeCloseTo(70, 9); // still capped
+    expect(base.elementFinalPct).toBeCloseTo(20, 9);
+    expect(base.efe).toBeCloseTo(70 * 1.15 * 1.2, 9);
+    const raw = calculateDamage({ weapon: RAW_SWORD, skills: [], buffs }).base;
+    expect(raw.elementFinalParts).toEqual([]);
+    expect(raw.efe).toBe(0);
+  });
+
   it('applies Bludgeoner only at low sharpness', () => {
     const skills = [active('Bludgeoner', 3, 'handicraft')];
     const green = { ...RAW_SWORD, sharpness: [50, 50, 50, 50, 0, 0, 0] };
-    expect(calculateDamage({ weapon: green, skills }).base.rawDamagePct).toBe(10);
+    expect(calculateDamage({ weapon: green, skills }).base.rawDamagePct).toBeCloseTo(10, 9);
     expect(calculateDamage({ weapon: RAW_SWORD, skills }).base.rawDamagePct).toBe(0);
   });
 

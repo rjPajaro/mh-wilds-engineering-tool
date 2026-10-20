@@ -26,6 +26,7 @@ function files(weapons: Weapon[]): GameDataFiles {
     monsters: [],
     artian: {} as GameDataFiles['artian'],
     moves: { extracted: '', weapons: {} },
+    talismanRolls: { sheetUpdated: '', rarities: {}, rarity8SlotChances: [], groups: {} },
   };
 }
 

@@ -14,6 +14,7 @@ const FILES: Record<keyof GameDataFiles, string> = {
   monsters: 'monsters.json',
   artian: 'artian.json',
   moves: 'moves.json',
+  talismanRolls: 'talisman-rolls.json',
 };
 
 /** Loads the static game data once and exposes it as indexed lookups. */

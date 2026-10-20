@@ -1,0 +1,95 @@
+@if (loadError()) {
+  <p class="error">Could not load the game data. Check your connection and reload the page.</p>
+} @else if (loading() || !index()) {
+  <p class="muted">Loading game data…</p>
+} @else {
+  <div class="layout">
+    <app-search-query
+      [requirements]="settings().requirements"
+      (requirementsChange)="patch({ requirements: $event })"
+      [searchWeapon]="settings().weapon"
+      (searchWeaponChange)="patch({ weapon: $event })"
+      emptyText="The search finds the appraised charms that would let armor and jewels reach every level."
+    >
+      @if (armorSearchSkills()) {
+        <button type="button" class="copy" (click)="copyFromArmorSearch()" title="Copy the skills, weapon and options from the Armor Search tab">
+          Use Armor Search's {{ armorSearchSkills() }} {{ armorSearchSkills() === 1 ? 'skill' : 'skills' }}
+        </button>
+      }
+
+      <h3>Options</h3>
+      <label class="check">
+        <input type="checkbox" [checked]="settings().transcended" (change)="patch({ transcended: $any($event.target).checked })" />
+        <span>
+          Transcended armor
+          <span class="hint">Rarity 5+ pieces with transcended slots (HR 100+)</span>
+        </span>
+      </label>
+      <p class="hint">
+        Every armor piece and unlimited jewels; the charm takes the talisman slot, so your own and craftable talismans are not used.
+      </p>
+
+      <div class="search-actions">
+        @if (running()) {
+          <button type="button" class="primary" disabled>Searching… {{ percent(progress()?.fraction ?? 0) }}%</button>
+          <button type="button" (click)="cancel()">Cancel</button>
+        } @else {
+          <button type="button" class="primary" [disabled]="!settings().requirements.length" (click)="search()">Find charms</button>
+        }
+      </div>
+    </app-search-query>
+
+    <section class="results">
+      <header class="section-head">
+        <h2>Charms to hunt</h2>
+      </header>
+
+      @if (progress(); as p) {
+        <app-search-progress [progress]="p" />
+      }
+
+      @if (error(); as e) {
+        <p class="issue error">{{ e }}</p>
+      }
+
+      @if (output(); as out) {
+        <p class="status">
+          @if (out.withoutCharm) {
+            No charm needed: the armor and jewels reach these skills on their own, so any talisman works.
+          } @else if (out.results.length) {
+            {{ out.results.length }} {{ out.results.length === 1 ? 'charm' : 'charms' }} would complete a set, most likely first.
+            Checked {{ out.checks.toLocaleString() }} in {{ seconds(out.elapsedMs) }} s.
+          } @else {
+            No appraised charm makes these skills reachable. Try lower levels or transcended armor.
+          }
+        </p>
+        @if (out.results.length) {
+          <p class="hint about">
+            Chance: of one appraisal giving a charm with at least these skills and slots; its other skills don't matter.
+            Rough: rarity chances and Golden Age Charm slots come from the data mine (sheet of {{ sheetUpdated() }}),
+            the rest is assumed equally likely.
+          </p>
+        }
+        @if (out.timedOut) {
+          <p class="issue warning">The search stopped at its time limit, so these are the charms found so far.</p>
+        }
+        @if (stale()) {
+          <p class="issue">The skills or options changed since this search. Search again to update.</p>
+        }
+
+        <ol class="sets" [class.dimmed]="running()">
+          @for (v of views(); track $index; let n = $index) {
+            <li>
+              <app-charm-card [view]="v" [rank]="n + 1" (save)="save(v.charm)" (findSets)="findSets(v.charm)" />
+            </li>
+          }
+        </ol>
+      } @else if (!running()) {
+        <p class="muted">
+          Pick skills on the left and press Find charms. It lists the appraised charms (random talismans from Glowing Stones)
+          that would let armor and jewels reach them, with the chance of rolling each.
+        </p>
+      }
+    </section>
+  </div>
+}

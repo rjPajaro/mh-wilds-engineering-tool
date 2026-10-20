@@ -4,91 +4,13 @@
   <p class="muted">Loading game data…</p>
 } @else {
   <div class="layout">
-    <aside class="query">
-      <header class="section-head">
-        <h2>Weapon</h2>
-        @if (canCopyBuilderWeapon()) {
-          <button type="button" (click)="copyBuilderWeapon()" [title]="'Use ' + builderWeapon()!.name">Use Builder's</button>
-        }
-      </header>
-      <div class="weapon-pick">
-        <app-search-select
-          inputId="search-weapon-kind"
-          ariaLabel="Weapon type"
-          [options]="weaponKindOptions"
-          [clearable]="false"
-          [value]="settings().weapon.kind"
-          (valueChange)="setWeaponKind($event)"
-        />
-        <app-search-select
-          inputId="search-weapon"
-          ariaLabel="Weapon"
-          placeholder="No weapon"
-          [options]="weaponOptions()"
-          [value]="weaponValue()"
-          (valueChange)="setWeapon($event)"
-        />
-      </div>
-      @if (gogmaGroup(); as group) {
-        <div class="segmented small" role="radiogroup" aria-label="Production device">
-          @for (d of gogmaDevices; track d) {
-            <button type="button" role="radio" [attr.aria-checked]="weapon()?.id === group[d].id" [class.on]="weapon()?.id === group[d].id" (click)="setGogmaDevice(d)">
-              {{ deviceLabels[d] }} <span class="hint">{{ group[d].attack }} · {{ group[d].affinity > 0 ? '+' : '' }}{{ group[d].affinity }}%</span>
-            </button>
-          }
-        </div>
-      }
-      <p class="hint weapon-summary">
-        @if (weapon()) {
-          {{ weaponSummary() }}
-        } @else {
-          Without a weapon, weapon skills can only come from talismans.
-        }
-      </p>
-
-      <header class="section-head">
-        <h2>Skills</h2>
-        @if (groups().length) {
-          <button type="button" (click)="clearSkills()">Clear</button>
-        }
-      </header>
-
-      @for (k of [addKey()]; track k) {
-        <app-search-select
-          inputId="search-add-skill"
-          ariaLabel="Add a skill"
-          placeholder="+ Search all skills…"
-          [clearable]="false"
-          [options]="skillOptions()"
-          (valueChange)="pickSkill($event)"
-        />
-      }
-
-      @for (g of groups(); track g.id) {
-        <h3>{{ g.label }}</h3>
-        <ul class="skills">
-          @for (r of g.rows; track r.req.skillId) {
-            <li>
-              <span class="text" [appSkillTip]="{ skill: r.skill, level: r.req.level, weaponKind: settings().weapon.kind }">
-                <span class="name">{{ r.skill.name }}</span>
-                <span class="hint">{{ r.hint }}</span>
-                @if (r.effect) {
-                  <span class="effect">{{ r.effect }}</span>
-                }
-              </span>
-              <select [attr.aria-label]="r.skill.name + ' level'" (change)="setLevel(r.i, $any($event.target).value)">
-                @for (l of r.levels; track l.level) {
-                  <option [value]="'' + l.level" [selected]="l.level === r.req.level">{{ l.label }}</option>
-                }
-              </select>
-              <button type="button" class="remove" [attr.aria-label]="'Remove ' + r.skill.name" (click)="removeSkill(r.i)">×</button>
-            </li>
-          }
-        </ul>
-      } @empty {
-        <p class="muted">Pick the skills your set needs from a category or the search box. The search finds armor, a talisman and jewels that reach every level.</p>
-      }
-
+    <app-search-query
+      [requirements]="settings().requirements"
+      (requirementsChange)="patch({ requirements: $event })"
+      [searchWeapon]="settings().weapon"
+      (searchWeaponChange)="patch({ weapon: $event })"
+      emptyText="The search finds armor, a talisman and jewels that reach every level."
+    >
       <h3>Options</h3>
       <label class="check">
         <input type="checkbox" [checked]="settings().transcended" (change)="setTranscended($any($event.target).checked)" />
@@ -106,16 +28,12 @@
         </select>
       </div>
 
-      @if (weaponSkillsWithoutWeapon()) {
-        <p class="issue warning">Weapon skills come from the weapon, its jewels and talismans. Pick a weapon above to use its slots.</p>
-      }
-
       <div class="search-actions">
         @if (running()) {
           <button type="button" class="primary" disabled>Searching… {{ percent(progress()?.fraction ?? 0) }}%</button>
           <button type="button" (click)="cancel()">Cancel</button>
         } @else {
-          <button type="button" class="primary" [disabled]="!groups().length" (click)="search()">Search</button>
+          <button type="button" class="primary" [disabled]="!settings().requirements.length" (click)="search()">Search</button>
           <button type="button" class="damage" [disabled]="!weapon()" (click)="searchDamage()">Top {{ topDamage }} by damage</button>
         }
       </div>
@@ -127,49 +45,7 @@
           Pick a weapon to find the top {{ topDamage }} sets by damage.
         }
       </p>
-    </aside>
-
-    <section class="browser">
-      <header class="section-head">
-        <h2>Browse skills</h2>
-      </header>
-      <div class="categories" role="tablist" aria-label="Skill categories">
-        @for (c of categoryChips(); track c.id) {
-          <button type="button" role="tab" [attr.aria-selected]="browsing() === c.id" [class.on]="browsing() === c.id" (click)="browse(c.id)">
-            {{ c.label }}@if (c.picked) {{{ ' ' }}<span class="count">{{ c.picked }}</span>}
-          </button>
-        }
-      </div>
-      @if (browsing()) {
-        <div class="browse" role="tabpanel">
-          @for (b of browseSkills(); track b.skill.id) {
-            <button type="button" [class.on]="b.on" [attr.aria-pressed]="b.on" (click)="toggleSkill(b.skill)">
-              <span class="name">
-                {{ b.skill.name }}@if (b.weapon) {{{ ' ' }}<span class="tag" title="Weapon skill">W</span>}
-              </span>
-              @for (line of b.description; track $index) {
-                <span class="desc">{{ line }}</span>
-              }
-              @if (b.values; as v) {
-                <span class="levels">
-                  @for (l of v.levels; track l.level) {
-                    <span class="lv"><span class="lv-n">Lv {{ l.level }}</span>{{ l.text }}</span>
-                  }
-                </span>
-                @if (v.researched; as r) {
-                  @if (r.note) {
-                    <span class="desc">{{ r.note }}</span>
-                  }
-                  <span class="source" [title]="sourceLinks(r)">
-                    {{ r.weapons }} · {{ sourceText(r) }}
-                  </span>
-                }
-              }
-            </button>
-          }
-        </div>
-      }
-    </section>
+    </app-search-query>
 
     <section class="results">
       <header class="section-head">
@@ -188,30 +64,7 @@
       </header>
 
       @if (progress(); as p) {
-        <div class="progress">
-          <div class="progress-head">
-            <span>{{ p.phase }}…</span>
-            <strong>{{ percent(p.fraction) }}%</strong>
-          </div>
-          <div
-            class="track"
-            role="progressbar"
-            aria-label="Search progress"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            [attr.aria-valuenow]="percent(p.fraction)"
-          >
-            <div class="fill" [style.width.%]="p.fraction * 100"></div>
-          </div>
-          <p class="hint">
-            {{ duration(p.elapsedMs, 'down') }} elapsed ·
-            @if (p.remainingMs !== null) {
-              about {{ duration(p.remainingMs) }} left
-            } @else {
-              estimating time left…
-            }
-          </p>
-        </div>
+        <app-search-progress [progress]="p" />
       }
 
       @if (error(); as e) {

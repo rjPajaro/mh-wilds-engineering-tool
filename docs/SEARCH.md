@@ -8,6 +8,8 @@ The Armor Search tab (`#/search`) finds armor sets that reach chosen skill level
 - Settings persist in localStorage (`mhwet.search.settings.v1`). Results stay in memory only.
   Older settings with `useWeapon` are migrated on load to the Builder's weapon at that time.
 - Weapon pickers are shared with the Builder: `shared/weapon-options.ts`.
+- The weapon picker, requested skills and skill browser are `shared/search-query/` (also used by the
+  Charm Search tab); worker runs and progress are `data/search-runner.ts`.
 
 ## Skill categories
 
@@ -89,14 +91,48 @@ optional and act as must-haves.
 - It is a heuristic: a width of 24 matched a width of 48 on Long Sword, Great Sword, Sword & Shield and
   Hammer, while 12 missed about 1% on Hammer. It takes 0.3 to 8 s on real data; the limit is 60 s.
 
+## Charm Search tab
+
+The Charm Search tab (`#/charms`, `features/charm-search/`, state in `data/charm-search.service.ts`)
+lists appraised charms (random talismans from Glowing Stones) that would let armor and jewels reach
+the requested skills with the picked weapon. Logic: `core/search/charm-search.ts`, run in the armor
+search worker. Roll tables: `talisman-rolls.json` (see `DATA.md`). The user's own and craftable
+talismans are not used: the charm takes the talisman slot.
+
+- Same query panel as Armor Search (`shared/search-query/`), with its own persisted settings
+  (`mhwet.charms.settings.v1`: skills, weapon, transcended armor). "Use Armor Search's N skills" copies
+  that tab's skills, weapon and transcended option.
+- Every armor piece and unlimited jewels, as in the armor search.
+
+1. If the armor reaches the skills with no talisman, it says so and stops (any charm works).
+2. Every roll the tables allow (rarity → pattern of skill groups → slot layout) is reduced to its
+   points in the requested skills (capped at the need) and the slots that can hold a useful jewel
+   (types with a jewel for a requested skill, capped at the largest such jewel). A position in a
+   pattern is one of the group's requested skills or "something else"; a charm never has the same
+   skill twice. Rolls that reduce to the same profile merge and their chances add up.
+3. Each profile's chance is that of rolling it **or anything better** (more points, slots that hold its
+   jewels), in total and per rarity.
+4. Profiles are checked by that chance, highest first, with the armor search (`stopAfter: 1`). Skipped:
+   profiles no better than one already impossible, and profiles at least as good as one already
+   listed. So the list holds the least demanding charms, most likely first (up to 20).
+5. Each result has one example set (the first found, not the best). **Save to Talismans** saves the
+   charm's most likely roll on the Talismans tab (its other skills are unknown, so only the requested
+   ones are stored). **Save & find sets** saves it (once) and opens Armor Search with this search's
+   skills, weapon and armor option, searching with only that talisman, so a set can be equipped.
+
+Chances are rough: rarity chances (59 / 27 / 11 / 3%) and Golden Age slot chances (50 / 33 / 17%)
+come from the data mine; patterns, the other rarities' slot layouts and the skills within a group are
+**assumed** equally likely. On real data it runs 50–230 checks in 0.2–1.6 s; the limit is 60 s.
+
 ## Progress bar
 
-Both searches report progress from the worker (`onProgress`, at most every 100 ms). The tab shows a
+The searches report progress from the worker (`onProgress`, at most every 100 ms). The tab shows a
 bar with the phase, elapsed time and an estimate of the time left. The estimate is elapsed time scaled
 by the share still to do, shown after 5% and 1 s, and capped by the time limit.
 
 - **Armor search:** the share of the search tree covered, from the positions in its first three
   levels (talisman, head, chest). Branches differ in size, so it can speed up or slow down.
+- **Charm Search:** the share of profiles checked (or of the 20 results found, if higher).
 - **Top 5 by damage:** 90% for raising skills, then 10% for the full searches of the results. The
   first part is (levels added / most levels any set could add)², where the bound is the armor
   search's total-points bound. It is squared because later rounds are much slower: they check

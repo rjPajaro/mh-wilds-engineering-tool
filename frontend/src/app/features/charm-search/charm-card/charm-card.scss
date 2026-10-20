@@ -1,0 +1,118 @@
+:host {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+p {
+  margin: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.charm-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+
+  .rank {
+    font-weight: 700;
+  }
+
+  .stat {
+    margin-left: auto;
+  }
+}
+
+.needs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+
+  .skill {
+    font-weight: 600;
+  }
+}
+
+.slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.05rem 0.45rem 0.05rem 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+
+.slot-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+.rarities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.9rem;
+  font-size: 0.85rem;
+
+  .rarity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+}
+
+.charm-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  object-fit: contain;
+}
+
+.jewels,
+.example {
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+
+  > .muted {
+    margin-right: auto;
+  }
+
+  button {
+    padding: 0.3rem 0.6rem;
+    font: inherit;
+  }
+
+  .find {
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--hover);
+    }
+  }
+
+  .saved {
+    color: var(--accent);
+    font-weight: 600;
+  }
+}

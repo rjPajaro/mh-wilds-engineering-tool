@@ -1,5 +1,6 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { BuffSelection, buffEffects } from '../core/calc/buffs';
+import { CustomBuff, customBuffEffects, customBuffFromPreset, CustomBuffPreset, isCustomBuffList, newCustomBuff } from '../core/calc/custom-buffs';
 import { DamageTarget } from '../core/calc/damage';
 import { FRENZY_MONSTERS } from '../core/calc/skill-effects';
 import { isBoolean, isObject, isString, persistedSignal } from '../shared/persisted-signal';
@@ -17,7 +18,9 @@ export class DamageSettingsService {
 
   /** Items and meals in use (group id -> option id, '' for none). */
   readonly buffs = persistedSignal<BuffSelection>('damage.buffs.v1', {}, (v) => isObject(v) && Object.values(v).every(isString));
-  readonly buffEffects = computed(() => buffEffects(this.buffs()));
+  /** Buffs with user-entered values (songs, weapon modes, ammo); see custom-buffs.ts. */
+  readonly customBuffs = persistedSignal<CustomBuff[]>('damage.customBuffs.v1', [], isCustomBuffList);
+  readonly buffEffects = computed(() => [...buffEffects(this.buffs()), ...customBuffEffects(this.customBuffs())]);
 
   readonly monster = computed(() => this.data.index()?.monsters.get(Number(this.monsterId())) ?? null);
   readonly inflictsFrenzy = computed(() => FRENZY_MONSTERS.has(this.monster()?.name ?? ''));
@@ -34,6 +37,22 @@ export class DamageSettingsService {
 
   setBuff(group: string, option: string): void {
     this.buffs.update((b) => ({ ...b, [group]: option }));
+  }
+
+  addCustomBuff(): void {
+    this.customBuffs.update((list) => [...list, newCustomBuff(crypto.randomUUID())]);
+  }
+
+  addCustomBuffFromPreset(preset: CustomBuffPreset): void {
+    this.customBuffs.update((list) => [...list, customBuffFromPreset(crypto.randomUUID(), preset)]);
+  }
+
+  updateCustomBuff(id: string, patch: Partial<Omit<CustomBuff, 'id'>>): void {
+    this.customBuffs.update((list) => list.map((b) => (b.id === id ? { ...b, ...patch } : b)));
+  }
+
+  removeCustomBuff(id: string): void {
+    this.customBuffs.update((list) => list.filter((b) => b.id !== id));
   }
 
   setToggle(key: string, on: boolean): void {

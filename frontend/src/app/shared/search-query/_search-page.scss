@@ -1,0 +1,88 @@
+// Layout of a search tab (Armor Search, Charm Search): query | skill browser | results, with
+// the query panel's areas coming from app-search-query (display: contents).
+
+@use 'search-base';
+
+// Wide: skills | browser | results. Medium: browser under skills. Narrow: one column.
+.layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(16rem, 24rem) minmax(0, 1fr);
+  grid-template-areas: 'query browser results';
+  gap: 1.5rem;
+  align-items: start;
+
+  @media (max-width: 1300px) {
+    grid-template-columns: minmax(16rem, 1fr) minmax(0, 2.4fr);
+    // Results span both rows; the extra height goes to the second so the browser sits under the query.
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'query results'
+      'browser results';
+  }
+
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-template-areas: 'query' 'browser' 'results';
+  }
+}
+
+.results {
+  grid-area: results;
+}
+
+.check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+  > span {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.field {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  label {
+    color: var(--muted);
+  }
+  &.inline {
+    margin: 0;
+  }
+}
+
+.search-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  > * {
+    flex: 1;
+  }
+}
+
+.status {
+  margin: 0 0 0.6rem;
+}
+
+.sets.dimmed {
+  opacity: 0.5;
+}
+
+.sets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.more {
+  width: 100%;
+  margin-top: 0.75rem;
+}

@@ -56,13 +56,19 @@
     }
   </dl>
 
-  @if (s.attackParts.length || s.affinityParts.length || s.elementParts.length || s.elementDamageParts.length || s.statusParts.length || s.statusDamageParts.length) {
+  @if (s.attackParts.length || s.affinityParts.length || s.critParts.length || s.rawDamageParts.length || s.elementParts.length || s.elementDamageParts.length || s.elementFinalParts.length || s.statusParts.length || s.statusDamageParts.length) {
     <p class="breakdown">
       @for (p of s.attackParts; track p.label) {
         <span>+{{ p.value | number: '1.0-1' }} atk {{ p.label }}</span>
       }
       @for (p of s.affinityParts; track p.label) {
-        <span>+{{ p.value }}% {{ p.label }}</span>
+        <span>{{ p.value > 0 ? '+' : '' }}{{ p.value }}% {{ p.label }}</span>
+      }
+      @for (p of s.critParts; track p.label) {
+        <span>+{{ p.value / 100 | number: '1.0-3' }} crit {{ p.label }}</span>
+      }
+      @for (p of s.rawDamageParts; track p.label) {
+        <span>×{{ 1 + p.value / 100 | number: '1.0-3' }} raw damage {{ p.label }}</span>
       }
       @for (p of s.elementParts; track p.label) {
         <span>+{{ p.value * displayScale | number: '1.0-0' }} {{ r.elementKind }} {{ p.label }}</span>
@@ -72,6 +78,9 @@
       }
       @if (s.elementCapped) {
         <span class="capped">capped at {{ s.elementCap! * displayScale | number: '1.0-0' }} {{ r.elementKind }}</span>
+      }
+      @for (p of s.elementFinalParts; track p.label) {
+        <span>×{{ 1 + p.value / 100 | number: '1.0-3' }} {{ r.elementKind }} damage after cap {{ p.label }}</span>
       }
       @for (p of s.statusParts; track p.label) {
         <span>+{{ p.value * displayScale | number: '1.0-0' }} {{ r.status?.kind }} {{ p.label }}</span>

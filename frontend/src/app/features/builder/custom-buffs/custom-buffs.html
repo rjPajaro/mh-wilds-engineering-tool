@@ -1,0 +1,37 @@
+<div class="custom-head">
+  <h3>Custom buffs</h3>
+  <span class="muted">Songs, mantles, weapon modes, ammo: pick a preset or enter the values</span>
+  <div class="custom-actions">
+    <select aria-label="Add a preset buff" (change)="addPreset($any($event.target))">
+      <option value="" selected>+ Preset…</option>
+      @for (g of presetGroups; track g.group) {
+        <optgroup [label]="g.group">
+          @for (p of g.presets; track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+          }
+        </optgroup>
+      }
+    </select>
+    <button type="button" (click)="addCustomBuff()">+ Custom buff</button>
+  </div>
+</div>
+@for (b of customBuffs(); track b.id) {
+  <div class="custom-buff" [class.off]="!b.enabled">
+    <div class="custom-buff-head">
+      <input type="checkbox" [checked]="b.enabled" [attr.aria-label]="'Use ' + (b.name || 'custom buff')"
+        (change)="updateCustomBuff(b, { enabled: $any($event.target).checked })" />
+      <input type="text" class="name" placeholder="Name, e.g. Attack Up song" [value]="b.name" aria-label="Custom buff name"
+        (input)="updateCustomBuff(b, { name: $any($event.target).value })" />
+      <button type="button" class="remove" [attr.aria-label]="'Remove ' + (b.name || 'custom buff')" (click)="removeCustomBuff(b)">×</button>
+    </div>
+    <div class="custom-fields">
+      @for (f of customBuffFields; track f.key) {
+        <label [title]="f.hint">
+          <span class="muted">{{ f.label }}</span>
+          <input type="number" step="any" [value]="b.values[f.key] ?? ''" placeholder="0"
+            (change)="setCustomBuffValue(b, f.key, $any($event.target).value)" />
+        </label>
+      }
+    </div>
+  </div>
+}

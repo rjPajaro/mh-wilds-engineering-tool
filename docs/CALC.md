@@ -11,13 +11,14 @@ motion value**. To get a real attack's damage, multiply by that attack's MV / 10
 ```
 attack      = weapon attack × (1 + Σ attack% / 100) + Σ flat attack
 affinity    = clamp(weapon affinity + Σ affinity, -100, 100)
+critMult    = best crit multiplier (base 1.25, Critical Boost) + Σ crit bonus / 100
 crit (raw)  = 1 + p × (critMult − 1)    if p ≥ 0   (p = affinity / 100)
             = 1 − |p| × 0.25            if p < 0
 crit (elem) = 1 + p × (critElement − 1) if p > 0, else 1
 
-effective raw     = attack × sharpness raw × crit (raw) × (1 + Bludgeoner%)
+effective raw     = attack × sharpness raw × crit (raw) × Π(1 + raw damage%)
 element           = min(cap, (base × (1 + element%) + flat element) × (1 + Coalescence%))
-effective element = element × sharpness elem × crit (elem)
+effective element = element × sharpness elem × crit (elem) × Π(1 + element damage after cap%)
 
 per hit = effective raw × raw hitzone + effective element × element hitzone
 ```
@@ -102,6 +103,50 @@ defense). Options in one group don't stack, so the UI allows one per group. Sour
 - Food skills other than Caprice Meal (Hi) and Hunting Horn songs are not modeled. Spicy Red Meal
   (Attack) boosts Focus Strike wound destruction and part damage, but no numbers are published;
   Exploiter Meal only affects wound rewards.
+
+## Custom buffs
+
+Anything the calculator doesn't list (Hunting Horn songs, weapon modes such as Demon Mode, bow
+coatings and ammo, palico or other support buffs) can be entered by hand under **Custom buffs** in the
+Builder's Buffs section (`core/calc/custom-buffs.ts`, editor `features/builder/custom-buffs/`). Each
+buff has a name, an on/off checkbox and any of these fields (empty = 0, negatives allowed):
+
+| Field | Calculator value | Applied |
+|---|---|---|
+| Attack | `attackFlat` | added after attack percentages |
+| Attack % | `attackPct` | percent of the weapon's base attack |
+| Affinity % | `affinity` | added, total clamped to ±100 |
+| Crit dmg % | `critBonus` | added to the best crit multiplier (5: ×1.25 → ×1.30) |
+| Element | `elementFlat` (÷10) | display units; counts toward the element cap |
+| Element % | `elementPct` | percent of base element; counts toward the cap |
+| Raw dmg % | `rawDamagePct` | final raw multiplier |
+| Elem dmg % | `elementFinalPct` | final element multiplier, after the cap |
+
+**Presets** (`CUSTOM_BUFF_PRESETS`, the "+ Preset…" dropdown) add a custom buff already filled in; its
+values stay editable. Only sourced values are included:
+
+| Preset | Values | Source |
+|---|---|---|
+| Attack Up (S) / tier 2 | attack +2.7% / +4.5% | game8 Hunting Horn songs (July 2025) |
+| Attack Up (L) / tier 2 | attack +4.5% / +10% | same |
+| Attack/Defense Up / tier 2 | attack +2.7% / +4.5% (defense not modeled) | same |
+| Self-Improvement, tier 2 | attack +20% (horn user only) | same |
+| Affinity Up/Health Recovery | affinity +15 | same |
+| Elem Attack Boost / tier 2 | element +8% / +10% | same |
+| Echo Bubble: Attack & Affinity Up | attack +10%, affinity +25 | same |
+| Corrupted Mantle / after consecutive hits | affinity +5 / affinity +10, attack +4.5% | game8 Corrupted Mantle (Title Update 1) |
+
+"Raw Attack +x%" is **assumed** to be a percent of base attack (like Attack Boost) and "Element +x%" a
+percent of base element counting toward the cap; the sources don't say. Tier 2 is the song performed
+twice or with Encore. Not included, for lack of a reliable current source: Demon Mode / Demon Boost
+(a pre-patch Steam guide gives raw ×1.15 / element ×1.3, changed since), bow coatings (a fan
+datamine reports Power Coating ×1.35, unconfirmed), Evasion Mantle and Status Attack Up (status isn't a
+custom field).
+
+Raw and after-cap element multipliers from several sources multiply (+10% and +20% → ×1.32);
+Bludgeoner shares the raw multiplier. Custom buffs are stored in localStorage
+(`damage.customBuffs.v1`, not in loadouts or share links) and feed the Damage panel, the Moves table
+and the damage-ranked armor search like item buffs. The values are the user's; nothing is checked.
 
 ## Assumptions to verify in game
 

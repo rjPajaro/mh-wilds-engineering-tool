@@ -28,6 +28,7 @@ import { SkillTip } from '../../shared/skill-tip/skill-tip';
 import { DEVICE_LABELS, equipmentIcon, gogmaGroupOf, skillsText, weaponIdForOption, weaponOptions, weaponOptionValue } from '../../shared/weapon-options';
 import { DamagePanel } from './damage-panel/damage-panel';
 import { LoadoutBar } from './loadout-bar/loadout-bar';
+import { CustomBuffs } from './custom-buffs/custom-buffs';
 import { MovesPanel } from './moves-panel/moves-panel';
 import { SharedBuildBanner } from './shared-build-banner/shared-build-banner';
 import icons from '../../../assets/data/icons.json';
@@ -44,7 +45,7 @@ const SLOT_LABELS: Record<EquipSlot, string> = {
 
 @Component({
   selector: 'app-builder',
-  imports: [SearchSelect, SkillTip, DamagePanel, MovesPanel, LoadoutBar, SharedBuildBanner],
+  imports: [SearchSelect, SkillTip, DamagePanel, MovesPanel, LoadoutBar, SharedBuildBanner, CustomBuffs],
   templateUrl: './builder.html',
   styleUrl: './builder.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

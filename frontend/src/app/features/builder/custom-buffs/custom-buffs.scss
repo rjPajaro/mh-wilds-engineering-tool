@@ -1,0 +1,72 @@
+:host {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.custom-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .muted {
+    font-size: 0.8rem;
+  }
+
+  .custom-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+}
+
+.custom-buff {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+
+  &.off .custom-fields {
+    opacity: 0.55;
+  }
+}
+
+.custom-buff-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .name {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .remove {
+    padding: 0.2rem 0.5rem;
+    color: var(--muted);
+  }
+}
+
+.custom-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.35rem 0.5rem;
+
+  label {
+    display: grid;
+    gap: 0.1rem;
+    font-size: 0.8rem;
+  }
+
+  input {
+    width: 100%;
+    min-width: 0;
+  }
+}

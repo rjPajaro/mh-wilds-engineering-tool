@@ -36,6 +36,16 @@ only `en` and flattens the in-game hard line breaks (`\r\n`) into spaces. This c
   Golden Age Charm). They have no fixed skills; players enter the ones they rolled on the
   Talismans tab (`core/talismans/custom-talisman.ts`, stored like custom Artians).
   `Talisman.slots` exists for that, and each slot says whether it takes weapon or armor jewels.
+- What random talismans can roll is not in the data either. `talisman-rolls.json` holds the roll
+  tables from the "護石テーブル" sheet (data mined by dtlnor, the same source as the motion values;
+  grouped by Aki at Wiggler; linked from kazuo-blog.org), dated 2025-08-13 (Ver 1.021). Per rarity:
+  the appraisal chance and patterns (skill group of skills 1–3, possible slot layouts); rarity 8 slot
+  chances; and the 10 skill groups (1–4 weapon skills, 5–10 armor skills, each at a fixed level).
+  `node scripts/import-talisman-rolls.mjs <sheet .xlsx>` writes `scripts/supplements/talisman-rolls.json`,
+  matching the sheet's Japanese names to `Skill.json` `ja` names (aliases for its typos and
+  pre-release names). It also checks skill kinds per group and that the sheet's two group tabs agree.
+  The slot layouts agree with game8's appraisal statistics (rarity 5 never a lone 1-slot, rarity 6
+  never a 3-slot, rarity 8 always a weapon 1-slot). Later title updates may have changed the tables.
 
 ## Skill mechanics in the data
 

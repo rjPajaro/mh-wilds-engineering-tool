@@ -12,10 +12,14 @@ export interface EffectValues {
   critElement?: number;
   elementFlat?: number;
   elementPct?: number;
-  /** Multiplies final raw damage (Bludgeoner). */
+  /** Added to the crit multiplier after the highest `critMultiplier`, in percent (5 -> +0.05). Custom buffs. */
+  critBonus?: number;
+  /** Multiplies final raw damage (Bludgeoner, custom buffs); sources multiply together. */
   rawDamagePct?: number;
   /** Multiplies element before the element cap (Coalescence). */
   elementDamagePct?: number;
+  /** Multiplies final element damage after the element cap (custom buffs); sources multiply together. */
+  elementFinalPct?: number;
   statusFlat?: number;
   statusPct?: number;
   /** Multiplies status before the status cap (Coalescence). */
